@@ -1,0 +1,25 @@
+{
+  "name": "mugen_wa_bot",
+  "version": "1.0.0",
+  "description": "On s'en bat les couilles ♾♾",
+  "main": "mugen_wa_bot.js",
+  "scripts": {
+    "test": ".mugen"
+  },
+  "author": "Money Mugen♾♾",
+  "license": "ISC",
+  "keywords": [],
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.21",
+    "qrcode-terminal": "^0.12.0"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/moneythemoney999/mugen_wa_bot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/moneythemoney999/mugen_wa_bot/issues"
+  },
+  "homepage": "https://github.com/moneythemoney999/mugen_wa_bot#readme"
+}
