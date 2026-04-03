@@ -1,0 +1,27 @@
+{
+  "name": "mugen_wa_bot",
+  "version": "1.2.10",
+  "description": "On s'en bat les couilles ♾️♾️",
+  "homepage": "https://github.com/moneythemoney999/mugen_wa_bot#readme",
+  "bugs": {
+    "url": "https://github.com/moneythemoney999/mugen_wa_bot/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/moneythemoney999/mugen_wa_bot.git"
+  },
+  "license": "MIT",
+  "author": "Money Mugen♾️♾️",
+  "type": "module",
+  "main": "mugen_wa_bot.js",
+  "scripts": {
+    "test": "node mugen_wa_bot.js"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@whiskeysockets/baileys": "^7.0.0-rc.9",
+    "node-fetch": "^3.3.2",
+    "qrcode-terminal": "^0.12.0",
+    "wa-sticker-formatter": "^4.4.4"
+  }
+}
