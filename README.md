@@ -1,9 +1,10 @@
 # Mugen WA Bot ♾️♾️  
 ![Mugen WA Bot ♾️♾️ ](lis_moi/photo_menu.png)
 
-![Node.js](https://img.shields.io/badge/Node.js-20+-green?logo=node.js)
+[![Node.js](https://img.shields.io/badge/Node.js-20+-green?logo=node.js)](https://nodejs.org/fr)
+[![Baileys](https://img.shields.io/badge/Library-Baileys-blue?logo=github)](https://github.com/WhiskeySockets/Baileys)
 ![WhatsApp](https://img.shields.io/badge/WhatsApp-Multi--Device-green?logo=whatsapp)
-![License](https://img.shields.io/badge/License-MIT-blue.svg)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/moneythemoney999/mugen_wa_bot?tab=MIT-1-ov-file)
 
 * Un bot WhatsApp puissant et modulaire, très flexible et totalemnt en français (dans el bon sens du terme puisque même le code est francisé)
 
