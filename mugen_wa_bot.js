@@ -179,7 +179,7 @@ async function demarrerBot(nomSession = "mugen") {
     const { version } = await fetchLatestBaileysVersion();
     // : creation du socket
     const sock = makeWASocket({
-    //logger: pino({ level: 'silent' }),
+        logger: pino({ level: 'silent' }),
 	version,
 	auth: state,
 	browser: ["Ubuntu", "Chrome"],
