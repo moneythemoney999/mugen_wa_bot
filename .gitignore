@@ -1,2 +1,12 @@
 node_modules/
-memoires/memoires_commandes/xstatut/
+gemini/
+.secret/
+mugen_wa_bot1.js
+memoires/
+session.js
+mugen.mg
+sauvegarde/
+outils/
+exemples/
+depotoire/
+bot.js
