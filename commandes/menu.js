@@ -48,14 +48,46 @@ export default {
     nom: 'menu',
     description: "Affiche le menu du bot.",
     categorie: 'Groupes && Privé',
-    infos: `*Pour connaître toutes les commandes/outils existantes*.
-La commande a ausssi deux arguments:
+    infos: `*Pour connaître toutes les commandes/outils existantes de Mugen♾️♾️*.
+La commande a ausssi trois arguments:
 	\`.menu commandes\` : *Pour affiche seulment les commandes sans ~les outils~*
-	\`.menu outils\` : *Pour les outils sans ~les commandes~*`,
+	\`.menu outils\` : *Pour les outils sans ~les commandes~*
+        \`.menu photo\` : *Pour changer la de fond de la commande.*`,
     execute: async ({ sock, message, args, nomSession }) => {
         const dossierCommandes = __dirname;
         const dossierOutils = path.join(__dirname, '..', 'outils');
         const argument = args[0]?.toLowerCase();
+
+        const dossierMenuMemo = path.join(__dirname, '..', 'memoires', 'memoires_commandes', 'menu', nomSession);
+        const cheminPhotoConfig = path.join(dossierMenuMemo, 'photo.json');
+
+        //gestion de la sous-commande "photo"
+        if (argument === 'photo') {
+            //vérification si l'expéditeur est le bot lui-même
+            if (!message.key.fromMe) {
+                return sock.sendMessage(message.key.remoteJid, { text: "⤫Tu peux pas l'executer⤫" },
+		    { quoted: message });
+            }
+
+            await fsPromises.mkdir(dossierMenuMemo, { recursive: true });
+            let config = [{ "mon_profil": "vrai" }];
+
+            if (fs.existsSync(cheminPhotoConfig)) {
+                try {
+                    config = JSON.parse(fs.readFileSync(cheminPhotoConfig, 'utf8'));
+                } catch (e) {
+                    config = [{ "mon_profil": "vrai" }];
+                }
+            }
+
+            //basculement de la valeur
+            config[0].mon_profil = config[0].mon_profil === "vrai" ? "faux" : "vrai";
+            fs.writeFileSync(cheminPhotoConfig, JSON.stringify(config, null, 1));
+
+            const statut = config[0].mon_profil === "vrai" ? "mon profil" : "profil du chat";
+            return sock.sendMessage(message.key.remoteJid, { text: `𑁍Photo de fond changée en *${statut}*᪥.` },
+		{ quoted: message });
+        }
 
         const categoriesCommandes = {};
         const categoriesOutils = {};
@@ -157,24 +189,48 @@ La commande a ausssi deux arguments:
 
         menuTexte += `\n┗╋━━━━━━━━━━━━━━◥◣◆◢◤━━━━━━━━━━━━━━╋┛`;
 
-        const cheminProfil = path.join(__dirname, '..', 'memoires', 'memoires_sessions', nomSession, 'profil.jpg');
-
-        try {
-            if (fs.existsSync(cheminProfil)) {
-                await sock.sendMessage(message.key.remoteJid, { image: fs.readFileSync(cheminProfil), caption: menuTexte }, { quoted: message });
-                mettreAJourPhotoProfil(sock, nomSession);
-            } else {
-                const urlPhotoProfil = await sock.profilePictureUrl(sock.user.id, 'image');
-                const reponse = await fetch(urlPhotoProfil);
-                const bufferImage = Buffer.from(await reponse.arrayBuffer());
-                await fsPromises.mkdir(path.dirname(cheminProfil), { recursive: true });
-                fs.writeFileSync(cheminProfil, bufferImage);
-                await sock.sendMessage(message.key.remoteJid, { image: bufferImage, caption: menuTexte }, { quoted: message });
+        //lecture de la configuration photo
+        let mon_profil = "vrai";
+        if (fs.existsSync(cheminPhotoConfig)) {
+            try {
+                const config = JSON.parse(fs.readFileSync(cheminPhotoConfig, 'utf8'));
+                mon_profil = config[0].mon_profil;
+            } catch (e) {
+                mon_profil = "vrai";
             }
-        } catch (e) {
-	    //envoi final du menu
-            await sock.sendMessage(message.key.remoteJid, { text: menuTexte },
-		{ quoted: message });
+        }
+
+        if (mon_profil === "vrai") {
+            const cheminProfil = path.join(__dirname, '..', 'memoires', 'memoires_sessions', nomSession, 'profil.jpg');
+            try {
+                if (fs.existsSync(cheminProfil)) {
+                    await sock.sendMessage(message.key.remoteJid, { image: fs.readFileSync(cheminProfil), caption: menuTexte }, { quoted: message });
+                    mettreAJourPhotoProfil(sock, nomSession);
+                } else {
+                    const urlPhotoProfil = await sock.profilePictureUrl(sock.user.id, 'image');
+                    const reponse = await fetch(urlPhotoProfil);
+                    const bufferImage = Buffer.from(await reponse.arrayBuffer());
+                    await fsPromises.mkdir(path.dirname(cheminProfil), { recursive: true });
+                    fs.writeFileSync(cheminProfil, bufferImage);
+                    await sock.sendMessage(message.key.remoteJid, { image: bufferImage, caption: menuTexte }, { quoted: message });
+                }
+            } catch (e) {
+	        //envoi final du menu
+                await sock.sendMessage(message.key.remoteJid, { text: menuTexte },
+		    { quoted: message });
+            }
+        } else {
+            //utiliser la photo de la discussion actuelle (groupe/privé)
+            try {
+                const urlPhotoProfil = await sock.profilePictureUrl(message.key.remoteJid, 'image');
+                const reponse = await fetch(urlPhotoProfil);
+                if (!reponse.ok) throw new Error("Impossible de récupérer la photo");
+                const bufferImage = Buffer.from(await reponse.arrayBuffer());
+                await sock.sendMessage(message.key.remoteJid, { image: bufferImage, caption: menuTexte }, { quoted: message });
+            } catch (e) {
+                //envoi en texte seul si pas de photo
+                await sock.sendMessage(message.key.remoteJid, { text: menuTexte }, { quoted: message });
+            }
         }
     }
 };

@@ -11,8 +11,8 @@ import { jidNormalizedUser } from "@whiskeysockets/baileys";
 //configuration des LIMITES
 const LIMITES_UTILISATION = {
     BOT: 50,
-    ADMIN: 5,
-    MEMBRE: 3,
+    ADMIN: 7,
+    MEMBRE: 5,
 };
 
 //pour __dirname en ES modules
@@ -62,13 +62,44 @@ async function mettreAJourPhotoProfil(sock, nomSession) {
 export default {
     nom: "tag",
     description: "Tag tout le groupe",
-    categorie: "Groupes",
-    infos: `Permet de tagué les groupes tout en ayant une limite d'utilisation de \`${LIMITES_UTILISATION.ADMIN}\` pour les admin, \`${LIMITES_UTILISATION.MEMBRE}\` pour ceux qui ne le sont pas et \`${LIMITES_UTILISATION.BOT}\` pour le compte associé au bot.`,
+    categorie: "En developpement", //"Groupes",
+    infos: `Permet de taguer les membres du groupe.
+La commande a aussi un argument spécial :
+    \`.tag photo\` : *Pour changer la photo de fond de la commande.*`,
+
     execute: async ({ sock, message, args, nomSession }) => {
         const jid = message.key.remoteJid;
         const estGroupe = jid.endsWith('@g.us');
-        let limite;
-        let donneesUtilisateur;
+
+        const dossierTagMemo = path.join(cheminDossier, '..', 'memoires', 'memoires_commandes', 'tag', nomSession);
+        const cheminPhotoConfig = path.join(dossierTagMemo, 'photo.json');
+
+        //gestion de la sous-commande "photo"
+        if (args[0]?.toLowerCase() === 'photo' && args.length === 1) {
+            //si ce n'est pas le bot, on envoie le message de refus et on s'arrête là (pas de tag)
+            if (!message.key.fromMe) {
+                return sock.sendMessage(jid, { text: "⤫Tu peux pas l'executer⤫" },
+		    { quoted: message });
+            }
+
+            await fsPromises.mkdir(dossierTagMemo, { recursive: true });
+            let config = [{ "mon_profil": "vrai" }];
+
+            if (fs.existsSync(cheminPhotoConfig)) {
+                try {
+                    config = JSON.parse(fs.readFileSync(cheminPhotoConfig, 'utf8'));
+                } catch (e) {
+                    config = [{ "mon_profil": "vrai" }];
+                }
+            }
+
+            config[0].mon_profil = config[0].mon_profil === "vrai" ? "faux" : "vrai";
+            fs.writeFileSync(cheminPhotoConfig, JSON.stringify(config, null, 1));
+
+            const statut = config[0].mon_profil === "vrai" ? "mon profil" : "profil du chat";
+            return sock.sendMessage(jid, { text: `𑁍Photo de fond changée en *${statut}*᪥.` },
+		{ quoted: message });
+        }
 
         if (!estGroupe) {
 	    //s'il est executer en privé
@@ -92,11 +123,11 @@ export default {
 
 	//preparration des chemins pour lecture et sauvegarde des donees
         const nomGroupeNettoye = metadonneesGroupe.subject.replace(/[\/\\?%*:|"<>]/g, '-');
-        const cheminDossierCommande = path.join(cheminDossier, '..', 'memoires', 'memoires_commandes', 'tag', nomSession, `${nomGroupeNettoye}_${jid}`);
-        fs.mkdirSync(cheminDossierCommande, { recursive: true });
-        const cheminFichierUtilisateur = path.join(cheminDossierCommande, `${expediteurJid}.json`);
+        const cheminDossierStatut = path.join(dossierTagMemo, `${nomGroupeNettoye}_${jid}`);
+        fs.mkdirSync(cheminDossierStatut, { recursive: true });
+        const cheminFichierUtilisateur = path.join(cheminDossierStatut, `${expediteurJid}.json`);
 
-        donneesUtilisateur = { NOM: message.pushName, NUM: expediteurJid, LIMITE: 0, DATE: '' };
+        let donneesUtilisateur = { NOM: message.pushName, NUM: expediteurJid, LIMITE: 0, DATE: '' };
         if (fs.existsSync(cheminFichierUtilisateur)) {
             try {
                 donneesUtilisateur = JSON.parse(fs.readFileSync(cheminFichierUtilisateur, 'utf-8'));
@@ -110,7 +141,7 @@ export default {
         }
         donneesUtilisateur.NOM = message.pushName;
 
-        limite = LIMITES_UTILISATION.MEMBRE;
+        let limite = LIMITES_UTILISATION.MEMBRE;
         if (message.key.fromMe) {
             limite = LIMITES_UTILISATION.BOT;
         } else {
@@ -146,7 +177,7 @@ export default {
                 mentions
             }, { quoted: message });
         } else {
-	    //s'il y avait pas de texte derriere on prepare une mise en forme diferentes
+	    //s'il y avait pas de texte derriere on prepare une mise en forme d'une liste
             const SEPARATION_APRES = 5;
             const SEPARATEUR = "──────────\n";
             let texte = `╭──「Tag lancé par ${auteurTag}」\n`;
@@ -162,47 +193,68 @@ export default {
             texte += `╰`;
             texteFinal = texte;
 
-	    //recherche de la profil pour mettre les tags en legende
-            const cheminProfil = path.join(cheminDossier, '..', 'memoires', 'memoires_sessions', nomSession, 'profil.jpg');
+            //lecture de la configuration photo
+            let mon_profil = "vrai";
+            if (fs.existsSync(cheminPhotoConfig)) {
+                try {
+                    const config = JSON.parse(fs.readFileSync(cheminPhotoConfig, 'utf8'));
+                    mon_profil = config[0].mon_profil;
+                } catch (e) { mon_profil = "vrai"; }
+            }
 
-            try {
-		//envoi et mise à jour de la photo
-                if (fs.existsSync(cheminProfil)) {
+            if (mon_profil === "vrai") {
+                const cheminProfil = path.join(cheminDossier, '..', 'memoires', 'memoires_sessions', nomSession, 'profil.jpg');
+                try {
+                    if (fs.existsSync(cheminProfil)) {
+                        await sock.sendMessage(jid, {
+                            image: fs.readFileSync(cheminProfil),
+                            caption: texteFinal,
+                            mentions
+                        }, { quoted: message });
+                        mettreAJourPhotoProfil(sock, nomSession);
+                    } else {
+                        const lienPhotoProfil = await sock.profilePictureUrl(sock.user.id, 'image');
+                        const reponse = await fetch(lienPhotoProfil);
+                        const tamponImage = Buffer.from(await reponse.arrayBuffer());
+
+                        await fsPromises.mkdir(path.dirname(cheminProfil), { recursive: true });
+                        fs.writeFileSync(cheminProfil, tamponImage);
+
+                        await sock.sendMessage(jid, {
+                            image: tamponImage,
+                            caption: texteFinal,
+                            mentions
+                        }, { quoted: message });
+                    }
+                } catch (e) {
                     await sock.sendMessage(jid, {
-                        image: fs.readFileSync(cheminProfil),
-                        caption: texteFinal,
+                        text: texteFinal,
                         mentions
                     }, { quoted: message });
-                    mettreAJourPhotoProfil(sock, nomSession);
-                } else {
-                    const lienPhotoProfil = await sock.profilePictureUrl(sock.user.id, 'image');
-                    const reponse = await fetch(lienPhotoProfil);
+                }
+            } else {
+                //utiliser la photo du groupe
+                try {
+                    const urlPhotoProfil = await sock.profilePictureUrl(jid, 'image');
+                    const reponse = await fetch(urlPhotoProfil);
+                    if (!reponse.ok) throw new Error();
                     const tamponImage = Buffer.from(await reponse.arrayBuffer());
-
-                    await fsPromises.mkdir(path.dirname(cheminProfil), { recursive: true });
-                    fs.writeFileSync(cheminProfil, tamponImage);
-
                     await sock.sendMessage(jid, {
                         image: tamponImage,
                         caption: texteFinal,
                         mentions
                     }, { quoted: message });
+                } catch (e) {
+                    await sock.sendMessage(jid, {
+                        text: texteFinal,
+                        mentions
+                    }, { quoted: message });
                 }
-            } catch (e) {
-                await sock.sendMessage(jid, {
-                    text: texteFinal,
-                    mentions
-                }, { quoted: message });
             }
         }
 
         //mettre à jour le compteur et sauvegarder APRÈS l'exécution
         donneesUtilisateur.LIMITE++;
         fs.writeFileSync(cheminFichierUtilisateur, JSON.stringify(donneesUtilisateur, null, 2));
-
-	//à decomenté pour envoiye un petit avertissement de combien d'utillisation restantes
-        /*const utilisationsRestantes = limite - donneesUtilisateur.LIMITE;
-        const messageSuivi = `Il te reste ${utilisationsRestantes} utilisation(s) aujourd'hui.`;
-        await sock.sendMessage(jid, { text: messageSuivi }, { quoted: message });*/
     }
 };

@@ -47,47 +47,83 @@ export default {
     infos: `Pour l'utiliser il faut faire la commande + la commande dont tu veux plus d'infos.
 > Exemple : \`.infos infos\`
 
-Pour ne pas avoir un message d'erreur il faut que la commande que t'as mis en argument existe vraiment pour ça faut lire \`.menu\`.`, 
+La commande a aussi un argument :
+    \`.infos photo\` : *Pour changer la photo de fond de la commande.*`,
 
     execute: async ({ sock, message, args, nomSession }) => {
+        const dossierInfosMemo = path.join(__dirname, '..', 'memoires', 'memoires_commandes', 'infos', nomSession);
+        const cheminPhotoConfig = path.join(dossierInfosMemo, 'photo.json');
+
+        //gestion de la sous-commande "photo"
+        if (args[0]?.toLowerCase() === 'photo') {
+            if (!message.key.fromMe) {
+                return sock.sendMessage(message.key.remoteJid, { text: "⤫Tu peux pas l'executer⤫" },
+		    { quoted: message });
+            }
+
+            await fsPromises.mkdir(dossierInfosMemo, { recursive: true });
+            let config = [{ "mon_profil": "vrai" }];
+
+            if (fs.existsSync(cheminPhotoConfig)) {
+                try {
+                    config = JSON.parse(fs.readFileSync(cheminPhotoConfig, 'utf8'));
+                } catch (e) {
+                    config = [{ "mon_profil": "vrai" }];
+                }
+            }
+
+            config[0].mon_profil = config[0].mon_profil === "vrai" ? "faux" : "vrai";
+            fs.writeFileSync(cheminPhotoConfig, JSON.stringify(config, null, 1));
+
+            const statut = config[0].mon_profil === "vrai" ? "mon profil" : "profil du chat";
+            return sock.sendMessage(message.key.remoteJid, { text: `𑁍Photo de fond changée en *${statut}*᪥.` },
+		{ quoted: message });
+        }
 
         async function repondreAvecProfil(texte) {
-	    //recherche de la photo de profil pour constituer le message
-            const cheminProfil = path.join(__dirname, '..', 'memoires', 'memoires_sessions', nomSession, 'profil.jpg');
-            try {
-                if (fs.existsSync(cheminProfil)) {
-                    await sock.sendMessage(
-                        message.key.remoteJid,
-                        { image: fs.readFileSync(cheminProfil), caption: texte },
-                        { quoted: message }
-                    );
-                    mettreAJourPhotoProfil(sock, nomSession);
-                } else {
-                    const urlPhotoProfil = await sock.profilePictureUrl(sock.user.id, 'image');
-                    const reponse = await fetch(urlPhotoProfil);
-                    const bufferImage = Buffer.from(await reponse.arrayBuffer());
+            // Lecture de la configuration photo
+            let mon_profil = "vrai";
+            if (fs.existsSync(cheminPhotoConfig)) {
+                try {
+                    const config = JSON.parse(fs.readFileSync(cheminPhotoConfig, 'utf8'));
+                    mon_profil = config[0].mon_profil;
+                } catch (e) { mon_profil = "vrai"; }
+            }
 
-                    await fsPromises.mkdir(path.dirname(cheminProfil), { recursive: true });
-                    fs.writeFileSync(cheminProfil, bufferImage);
-
-                    await sock.sendMessage(
-                        message.key.remoteJid,
-                        { image: bufferImage, caption: texte },
-                        { quoted: message }
-                    );
+            if (mon_profil === "vrai") {
+                const cheminProfil = path.join(__dirname, '..', 'memoires', 'memoires_sessions', nomSession, 'profil.jpg');
+                try {
+                    if (fs.existsSync(cheminProfil)) {
+                        await sock.sendMessage(message.key.remoteJid, { image: fs.readFileSync(cheminProfil), caption: texte },
+			    { quoted: message });
+                        mettreAJourPhotoProfil(sock, nomSession);
+                    } else {
+                        const urlPhotoProfil = await sock.profilePictureUrl(sock.user.id, 'image');
+                        const reponse = await fetch(urlPhotoProfil);
+                        const bufferImage = Buffer.from(await reponse.arrayBuffer());
+                        await fsPromises.mkdir(path.dirname(cheminProfil), { recursive: true });
+                        fs.writeFileSync(cheminProfil, bufferImage);
+                        await sock.sendMessage(message.key.remoteJid, { image: bufferImage, caption: texte }, { quoted: message });
+                    }
+                } catch (e) {
+                    await sock.sendMessage(message.key.remoteJid, { text: texte }, { quoted: message });
                 }
-            } catch (e) {
-                await sock.sendMessage(
-                    message.key.remoteJid,
-                    { text: texte },
-                    { quoted: message }
-                );
+            } else {
+                try {
+                    const urlPhotoProfil = await sock.profilePictureUrl(message.key.remoteJid, 'image');
+                    const reponse = await fetch(urlPhotoProfil);
+                    if (!reponse.ok) throw new Error();
+                    const bufferImage = Buffer.from(await reponse.arrayBuffer());
+                    await sock.sendMessage(message.key.remoteJid, { image: bufferImage, caption: texte }, { quoted: message });
+                } catch (e) {
+                    await sock.sendMessage(message.key.remoteJid, { text: texte }, { quoted: message });
+                }
             }
         }
 
         if (!args[0]) {
 	    //si on ne detecte aucun arguemnt derriere la commande on evois ce message pour indiquer qu'il faut en mettre
-            const texteAide = `Sur quelle commande souhaites-tu avoir plus d'infos?\n> Fait par exemple : \`.infos infos\``;
+            const texteAide = `Sur quelle commande souhaites-tu avoir plus d'infos?\n> Fais par exemple : \`.infos infos\``;
             await repondreAvecProfil(texteAide);
             return;
         }

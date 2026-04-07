@@ -1,13 +1,2 @@
-.secret/
 node_modules/
-memoires/
-mugen_wa_bot1.js
-bot.js
-session.js
-depotoire/
-gemini/
-mugen.mg
-outils/
-exemples/
-sauvegarde/
-.git1/
+memoires/memoires_commandes/xstatut/
