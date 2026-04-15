@@ -22,6 +22,8 @@
     "@whiskeysockets/baileys": "^7.0.0-rc.9",
     "file-type": "^22.0.0",
     "node-fetch": "^3.3.2",
-    "qrcode-terminal": "^0.12.0"
+    "node-webpmux": "^3.2.1",
+    "qrcode-terminal": "^0.12.0",
+    "wa-sticker-formatter": "^4.4.4"
   }
 }
