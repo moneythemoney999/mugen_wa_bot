@@ -15,7 +15,7 @@ echo "Téléchargement de mugen_sharp pré-compilé..."
 destination="node_modules/sharp/src/build/Release"
 mkdir -p "$destination"
 
-if curl -L "https://github.com/moneythemoney999/mugen_sharp/raw/main/mugen-sharp-android-arm64.node" -o "$destination"/mugen-sharp-android-arm64.node"; then
+if curl -L "https://github.com/moneythemoney999/mugen_sharp/raw/main/mugen-sharp-android-arm64.node" -o "$destination/mugen-sharp-android-arm64.node"; then
 	echo "Téléchargement réussi"
 else 
 	echo "Téléchargement non-réussi"
