@@ -1,0 +1,40 @@
+#!/usr/bin/env node
+
+// Copyright 2025 Lovell Fuller
+// SPDX-License-Identifier: BSD-3-Clause
+
+const { spawnSync } = require("node:child_process");
+
+let command;
+try {
+  switch (process.platform) {
+    case "darwin":
+      ({ command } = require("@cpplint/cpplint-cpp-darwin"));
+      break;
+    case "linux":
+      if (process.arch === "x64") {
+        ({ command } = require("@cpplint/cpplint-cpp-linux-x64"));
+      } else if (process.arch === "arm64") {
+        ({ command } = require("@cpplint/cpplint-cpp-linux-arm64"));
+      }
+      break;
+    case "win32":
+      if (process.arch === "x64") {
+        ({ command } = require("@cpplint/cpplint-cpp-win32-x64"));
+      } else if (process.arch === "arm64") {
+        ({ command } = require("@cpplint/cpplint-cpp-win32-arm64"));
+      }
+      break;
+  }
+} catch (_err) {}
+
+if (!command) {
+  console.error(`Unsupported platform: ${process.platform} ${process.arch}`);
+  process.exit(1);
+}
+
+const { status } = spawnSync(command, process.argv.slice(2), {
+  stdio: "inherit",
+  shell: process.platform === "win32",
+});
+process.exit(status);
