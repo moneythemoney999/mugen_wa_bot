@@ -63,12 +63,22 @@ Suis ces étapes pour configurer et exécuter le bot :
     cd mugen_wa_bot
     ```
 
-2.  **Installe les dépendances :**
+2.  **Installe les dépendances : **
+### **Installe les dépendances : **
     ```bash
     npm install
     # ou
     yarn install
     ```
+
+### Utillistaeurs de termux sans environement linux
+**Pour les utilisateur de termux (simple sans environement linux installer dessus) il faut pas lancer utiliser `npm/yarn install`puisque l'un des paquets nécessaire n'et pas pré-compilé pour termux.**
+
+- Alors moi j'ai je l'ai fait pour vous mais il faut utiliser specifiquements node v24.14.1
+- Pour en beneficié il faut lancé deux commandes:
+  ```bash
+  chmod +x installation.sh && ./installation.sh #l'une permete de donné les autorisation d'execution au fichier et l'autre l'execute
+  ```
 
 3.  **Configuration des sessions (Optionnel, mais recommandé pour plusieurs sessions) :**
     Crées un fichier `session.js` à la racine du projet (au même niveau que `mugen_wa_bot.js`). Dans ce fichier, tu peux définir les sessions que tu souhaites lancer. Chaque appel à `demarrerBot()` lancera une nouvelle session.
