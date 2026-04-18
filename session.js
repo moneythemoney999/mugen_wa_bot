@@ -1,0 +1,1 @@
+demarrerBot("mugen");
