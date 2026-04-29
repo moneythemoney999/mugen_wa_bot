@@ -1,0 +1,17 @@
+{
+ "metadonnees": {
+  "nom": "menu",
+  "description": "Muestra el menú del bot.",
+  "categorie": "Grupos && Privado",
+  "infos": "*Para conocer todos los comandos/herramientas existentes de Mugen♾️♾️*.\nEl comando también tiene 3 argumentos:\n         `.menu commandes`: *Para muestrar solo los comandos sin ~las herramientas~*\n         `.menu outils`: *Para las herramientas sin ~los comandos~*\n         `.menu photo`: *Para cambiar la photo de fondo del comando.*"
+ },
+ "messages": {
+  "titre_commandes": "『 📋AQUÍ ESTÁN LOS COMANDOS📜 』",
+  "titre_outils": "『 🛠️AQUÍ ESTÁN LAS HERRAMIENTAS⚙️ 』",
+  "erreur_permis": "⤫No puedes ejecutar esto⤫",
+  "photo_changee": "𑁍Foto de fondo cambiada a *{statut}*᪥.",
+  "statut_mon_profil": "mi perfil",
+  "statut_profil_chat": "perfil del chat",
+  "cat_autres": "Otros"
+ }
+}
