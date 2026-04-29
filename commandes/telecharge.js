@@ -10,10 +10,9 @@ const execute = promisify(exec);
 
 export default {
     nom: 'telecharge',
-    description: "Télécharge du contenu depuis n'importe quel lien (YouTube, TikTok, FB, etc.) via yt-dlp.",
-    categorie: 'Groupes && Privé',
-    infos: `Utilisation : \`.telecharge <lien>\`
-Le bot utilisera yt-dlp pour trouver le meilleur format et te l'enverra.`,
+    description: "Télécharge du contenu depuis n'importe quel lien",
+    categorie: 'En developpement',
+    infos: `Utilisation : \`.telecharge <lien>\``,
 
     execute: async ({ sock, message, args, nomSession }) => {
         const jid = message.key.remoteJid;

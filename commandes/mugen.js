@@ -5,6 +5,7 @@ import fs from 'fs';
 import { promises as fsPromises } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { traduire } from '../outils/langue.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,7 +45,7 @@ async function mettreAJourPhotoProfil(sock, nomSession) {
 //logique principale
 export default {
     nom: 'mugen',
-    description: "Lance le bot",
+    description: "Lancer le bot",
     categorie: 'Groupes && Privé',
     infos: `> Sert plus ou moins à savoir si le bot est en ligne et aussi c'est en quelque sorte l'introd.
 La commande a aussi un argument :
@@ -54,11 +55,14 @@ La commande a aussi un argument :
         const dossierMugenMemo = path.join(__dirname, '..', 'memoires', 'memoires_commandes', 'mugen', nomSession);
         const cheminPhotoConfig = path.join(dossierMugenMemo, 'photo.json');
 
-        //gestion de la sous-commande "photo"
+        //"Raccourci" de traduction importer depui le fichier outils/langue.js
+        const trad = (cle, vars = {}) => traduire(nomSession, 'commandes', 'mugen', { [cle]: vars })[cle];
+
+        // gestion de la sous-commande "photo"
         if (args[0]?.toLowerCase() === 'photo') {
             if (!message.key.fromMe) {
-                return sock.sendMessage(message.key.remoteJid, { text: "⤫Tu peux pas l'executer⤫" },
-		    { quoted: message });
+                const msgPermis = trad('msg.erreur_permis') || "⤫Tu peux pas l'executer⤫";
+                return sock.sendMessage(message.key.remoteJid, { text: msgPermis }, { quoted: message });
             }
 
             await fsPromises.mkdir(dossierMugenMemo, { recursive: true });
@@ -75,12 +79,14 @@ La commande a aussi un argument :
             config[0].mon_profil = config[0].mon_profil === "vrai" ? "faux" : "vrai";
             fs.writeFileSync(cheminPhotoConfig, JSON.stringify(config, null, 1));
 
-            const statut = config[0].mon_profil === "vrai" ? "mon profil" : "profil du chat";
-            return sock.sendMessage(message.key.remoteJid, { text: `𑁍Photo de fond changée en *${statut}*᪥.` },
-		{ quoted: message });
+            const statutBrut = config[0].mon_profil === "vrai" ? (trad('msg.statut_mon_profil') || "mon profil.") : (trad('msg.statut_profil_chat') || "profil du chat.");
+            
+            const msgSucces = trad('msg.photo_changee', { statut: statutBrut }) || `𑁍Photo de fond changée en *${statutBrut}*᪥.`;
+
+            return sock.sendMessage(message.key.remoteJid, { text: msgSucces }, { quoted: message });
         }
 
-        const légende = `> ╔❀══◄••❀••►══❀══❀══◄••❀••►══❀╗ 𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭              Mugen Bot♾️♾️ v${pkg.version} ╚❀══◄••❀••►══❀══❀══◄••❀••►══❀╝
+        const légende = trad('msg.legende', { version: pkg.version }) || `> ╔❀══◄••❀••►══❀══❀══◄••❀••►══❀╗ 𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭              Mugen Bot♾️♾️ v${pkg.version} ╚❀══◄••❀••►══❀══❀══◄••❀••►══❀╝
 
 ⫸ Ici:
  > ⟁⃤ ♱ Mugen♾️♾️ Bot version v${pkg.version} ⟁⃤ ♱

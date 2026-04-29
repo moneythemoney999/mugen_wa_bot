@@ -7,6 +7,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import fetch from 'node-fetch';
 import { jidNormalizedUser } from "@whiskeysockets/baileys";
+import { traduire } from '../outils/langue.js';
 
 //configuration des LIMITES
 const LIMITES_UTILISATION = {
@@ -62,7 +63,7 @@ async function mettreAJourPhotoProfil(sock, nomSession) {
 export default {
     nom: "tag",
     description: "Tag tout le groupe",
-    categorie: "En developpement", //"Groupes",
+    categorie: "Groupes",
     infos: `Permet de taguer les membres du groupe.
 La commande a aussi un argument spécial :
     \`.tag photo\` : *Pour changer la photo de fond de la commande.*`,
@@ -74,11 +75,15 @@ La commande a aussi un argument spécial :
         const dossierTagMemo = path.join(cheminDossier, '..', 'memoires', 'memoires_commandes', 'tag', nomSession);
         const cheminPhotoConfig = path.join(dossierTagMemo, 'photo.json');
 
+         //"Raccourci" de traduction importer depui le fichier outils/langue.js
+        const trad = (cle, vars = {}) => traduire(nomSession, 'commandes', 'tag', { [cle]: vars })[cle];
+        
         //gestion de la sous-commande "photo"
         if (args[0]?.toLowerCase() === 'photo' && args.length === 1) {
             //si ce n'est pas le bot, on envoie le message de refus et on s'arrête là (pas de tag)
             if (!message.key.fromMe) {
-                return sock.sendMessage(jid, { text: "⤫Tu peux pas l'executer⤫" },
+                const msgPersmis = trad('msg.erreur_permis') || "⤫Tu peux pas l'executer⤫";
+                return sock.sendMessage(jid, { text: msgPersmis },
 		    { quoted: message });
             }
 
@@ -96,14 +101,16 @@ La commande a aussi un argument spécial :
             config[0].mon_profil = config[0].mon_profil === "vrai" ? "faux" : "vrai";
             fs.writeFileSync(cheminPhotoConfig, JSON.stringify(config, null, 1));
 
-            const statut = config[0].mon_profil === "vrai" ? "mon profil" : "profil du chat";
-            return sock.sendMessage(jid, { text: `𑁍Photo de fond changée en *${statut}*᪥.` },
+            const statut = config[0].mon_profil === "vrai" ? trad('msg.statut_mon_profil') || "mon profil" : trad('msg.statut_profil_chat') || "profil du chat";
+            const msgSucces = trad('msg.profil_changee', {statut: statut}) || `𑁍Photo de fond changée en *${statut}*᪥.`;
+            return sock.sendMessage(jid, { text: msgSucces },
 		{ quoted: message });
         }
 
         if (!estGroupe) {
 	    //s'il est executer en privé
-            return await sock.sendMessage(jid, { text: "Cette commande fonctionne uniquement dans les groupes." },
+            const erreur_chat = trad('msg.erreur_chat') || "Cette commande fonctionne uniquement dans les groupes.";
+            return await sock.sendMessage(jid, { text: erreur_chat },
 		{ quoted: message });
         }
 
@@ -117,7 +124,8 @@ La commande a aussi un argument spécial :
         try {
             metadonneesGroupe = await sock.groupMetadata(jid);
         } catch (e) {
-            return sock.sendMessage(jid, { text: "Erreur lors de la récupération des infos du groupe." },
+            const erreur_infos_groupe = trad('msg.erreur_infos_groupe') || "Erreur lors de la récupération des infos du groupe."
+            return sock.sendMessage(jid, { text: erreur_infos_groupe },
 		{ quoted: message });
         }
 
@@ -153,7 +161,10 @@ La commande a aussi un argument spécial :
 
 	//si quelqu'un atteint la limite on le bloque
         if (donneesUtilisateur.LIMITE >= limite) {
-            return sock.sendMessage(jid, { text: `Tu as atteint ta limite d'utilisation pour aujourd'hui: ${donneesUtilisateur.LIMITE}/${limite}.` },
+            const msgLimite = trad('msg.msg_limite', {donnees_limite 
+                : donneesUtilisateur.LIMITE, limite: limite}
+            ) || `Tu as atteint ta limite d'utilisation pour aujourd'hui: ${donneesUtilisateur.LIMITE}/${limite}.`
+            return sock.sendMessage(jid, { text: msgLimite },
 		{ quoted: message });
         }
         //fin de la gestion des limite LIMITES
@@ -171,7 +182,13 @@ La commande a aussi un argument spécial :
 
         if (auteurTexte.length > 0) {
             //applique le symbole "> " uniquement aux lignes qui contiennent du texte
-            texteFinal = auteurTexte.split('\n').map(ligne => ligne.trim() ? `> ${ligne}` : "").join('\n');
+            texteFinal = auteurTexte.split('\n')
+                .map(ligne => {
+                    if (!ligne.trim()) return "";
+                    return trad('msg.format_ligne_tag', {ligne : ligne.trim() }) || `> ${ligne.trim()}` ;
+                })
+                .join('\n');
+
             await sock.sendMessage(jid, {
                 text: texteFinal,
                 mentions
@@ -179,18 +196,18 @@ La commande a aussi un argument spécial :
         } else {
 	    //s'il y avait pas de texte derriere on prepare une mise en forme d'une liste
             const SEPARATION_APRES = 5;
-            const SEPARATEUR = "──────────\n";
-            let texte = `╭──「Tag lancé par ${auteurTag}」\n`;
+            const SEPARATEUR = trad('msg.separateur') || "──────────\n";
+            let texte = trad('msg.texte1', {auteur: auteurTag}) || `╭──「Tag lancé par ${auteurTag}」\n`;
             let compteur = 0;
             for (const p of participants) {
                 const tag = "@" + p.id.split("@")[0];
-                texte += `├─➩${tag}\n`;
+                texte += trad('msg.texte2', {tag: tag}) || `├─➩${tag}\n`;
                 compteur++;
                 if (compteur % SEPARATION_APRES === 0) {
                     texte += SEPARATEUR;
                 }
             }
-            texte += `╰`;
+            texte += trad('msg.texte3') || `╰`;
             texteFinal = texte;
 
             //lecture de la configuration photo
