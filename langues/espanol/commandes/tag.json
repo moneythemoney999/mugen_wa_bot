@@ -1,0 +1,22 @@
+{
+  "metadonnees": {
+    "nom": "tag",
+    "description": "Tag todo los del grupo.",
+    "categorie": "Grupos",
+    "infos": "Permitir de mencionar todos los mienbros de un grupo.\nEl comando también tiene un argumento espécial: \n`.tag photo`: *Para cambiar la foto de fondo del comando.*"
+  },
+  "messages": {
+    "erreur_permis": "⤫No puedes ejecutarlo⤫.",
+    "statut_mon_profil": "mi perfil.",
+    "statut_profil_chat": "perfil del chat.",
+    "profil_changee": "𑁍Foto de fondo cambió en *{statut}*᪥.",
+    "erreur_chat": "Este comando solo funciona en grupos.",
+    "erreur_infos_groupe": "Error en la recuperación de la información del grupo.",
+    "msg_limite": "Haz alcanzado tu límite de uso por hoy: {donnees_limite}/{limite}.",
+    "format_ligne_tag": "> {ligne}",
+    "separateur": "──────────\n",
+    "texte1": "╭──「Tag lancado por ${auteur}」\n",
+    "texte2": "├─➩${tag}\n",
+    "texte3": "╰"
+  }
+}
