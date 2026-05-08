@@ -3,7 +3,7 @@
   "nom": "menu",
   "description": "Afiche meni bot la",
   "categorie": "Gwoup && Prive",
-  "infos": "*Pou konnen tout kòmand/zoutil ki egziste nan Mugen♾️♾️*\nKòmand lan gen 3 agimen tou:\n         `.menu commandes` : *Pou afiche kòmand yo sèlman san ~zouti yo~*\n         `.menu outils` : *Pou zouti yo san ~kòmand yo~*\n         `.menu photo` : *Pou change foto dèyè kòmand lan.*"
+  "infos": "*Pou konnen tout kòmand/zouti ki egziste nan Mugen♾️♾️*\nKòmand lan gen 3 agimen tou:\n         `.menu commandes` : *Pou afiche kòmand yo sèlman san ~zouti yo~*\n         `.menu outils` : *Pou zouti yo san ~kòmand yo~*\n         `.menu photo` : *Pou change foto fon kòmand lan.*"
  },
  "messages": {
   "cat_autres": "Lòt",

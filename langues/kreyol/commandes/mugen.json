@@ -3,7 +3,7 @@
   "nom": "mugen",
   "description": "Lanse bot la",
   "categorie": "Gwoup && Prive",
-  "infos": "Sèvi pli ou mwens pou konnen si bot la en liy epitou se tankou se entwodiksyonl.\nKòmand lan gen 2 agimen tou :\n    `.mugen photo` : *Pou change foto dèyè kòmand lan.*"
+  "infos": "Sèvi pli ou mwens pou konnen si bot la en liy epitou se tankou se entwodiksyonl.\nKòmand lan gen 2 agimen tou :\n    `.mugen photo` : *Pou change foto fon kòmand lan.*"
  },
  "messages": {
   "erreur_permis": "⤫Ou pa ka egzekitel⤫",

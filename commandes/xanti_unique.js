@@ -5,6 +5,7 @@ import { downloadMediaMessage, jidNormalizedUser } from '@whiskeysockets/baileys
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from 'url';
+import { traduire } from '../outils/langue.js';
 
 //congiguration des LIMITES
 const LIMITES_UTILISATION = {
@@ -29,6 +30,9 @@ export default {
         const jid = message.key.remoteJid;
         const estGroupe = jid.endsWith('@g.us');
         const estPriveDemande = args[0]?.toLowerCase() === 'prive';
+        
+	//"Raccourci" de traduction importer depui le fichier outils/langue.js
+	const trad = (cle, vars = {}) => traduire(nomSession, 'commandes', 'xanti_unique', { [cle]: vars })[cle];
 
         //sous-commande 'prive' réservée au propriétaire
         if (estPriveDemande && !message.key.fromMe) {
@@ -50,7 +54,6 @@ export default {
                 metadonneesGroupe = await sock.groupMetadata(jid);
             } catch (e) {
                 console.error(`[(xanti_unique), "${nomSession}"]: Erreur métadonnées:`, e);
-                return sock.sendMessage(jid, { text: "Erreur lors de la récupération des infos du groupe." }, { quoted: message });
             }
 
             const nomGroupeNettoye = (metadonneesGroupe.subject || "groupe").replace(/[\/\\?%*:|"<>]/g, '-');
@@ -84,7 +87,8 @@ export default {
 
             if (donneesUtilisateur.LIMITE >= limite) {
 		//quand quelqu'un atteint la limite
-                return sock.sendMessage(jid, { text: `Tu as atteint ta limite d'utilisation (${limite}).` },
+		        const limite_atteint = trad('msg.limite_atteint', {limite: limite}) || `Tu as atteint ta limite d'utilisation (${limite}).`;
+                return sock.sendMessage(jid, { text: limite_atteint},
 		    { quoted: message });
             }
 
@@ -93,7 +97,8 @@ export default {
 
         } else if (!message.key.fromMe) {
 	    //en prive si c'est pas moi ou si le message vient de moi dans un groupe
-            return sock.sendMessage(jid, { text: "Tu ne peux pas utiliser cette commande." },
+	        const msg_refus = trad('msg.msg_refus') || "Tu ne peux pas utiliser cette commande.";
+            return sock.sendMessage(jid, { text: msg_refus },
 		{ quoted: message });
         }
 
@@ -103,7 +108,8 @@ export default {
 
         if (!msgRepondu) {
 	    //si le message n'est pas vraiment une vue unique
-            return sock.sendMessage(jid, { text: "Tu dois répondre à un média en vue unique." },
+	        const msgPas_de_cible = trad('msg.msgPas_de_cible') || "Tu dois répondre à un média en vue unique.";
+            return sock.sendMessage(jid, { text: msgPas_de_cible },
 		{ quoted: message });
         }
 
@@ -117,7 +123,8 @@ export default {
 
         if (!typeMedia || !media) {
 	    //si le contenue du message ne conrespond pas l'un des types
-            return sock.sendMessage(jid, { text: "Ce message n'est pas un média en vue unique reconnu." },
+	        const msgMedia_non_reconnu = trad('msg.msgMedia_non_reconnu') || "Ce message n'est pas un média en vue unique reconnu.";
+            return sock.sendMessage(jid, { text: msgMedia_non_reconnu },
 		{ quoted: message });
         }
 
@@ -155,8 +162,21 @@ export default {
 
 	//legende qu'on mets en legende s'il y en avait pas
         const legendePrive = estGroupe
-            ? `Message débloqué de ${nomAuteur}(+${numeroAuteur}) dans ${nomGroupe} à ${heure}.`
-            : `Message débloqué de ${nomAuteur}(+${numeroAuteur}) à ${heure}.`;
+            ? trad('msg.msgReussi_groupe', {
+                nom_auteur: nomAuteur,
+                num_auteur: numeroAuteur,
+                nom_groupe: nomGroupe,
+                heure: heure
+                }
+                )
+			|| `Message débloqué de ${nomAuteur}(+${numeroAuteur}) dans ${nomGroupe} à ${heure}.`
+            : trad('msg.msgReussi_prive', {
+                nom_auteur: nomAuteur,
+                num_auteur: numeroAuteur,
+                heure: heure
+                }
+                )
+			|| `Message débloqué de ${nomAuteur}(+${numeroAuteur}) à ${heure}.`;
 
 	//mais s'il y en avait on lutillise de preference
         const messageOriginal = {
@@ -182,7 +202,8 @@ export default {
 
         } /*une erreur s'est produite alors en log et on envoi ça*/ catch (e) {
             console.error(`[(xanti_unique), "${nomSession}"]; Erreur:`, e);
-            return sock.sendMessage(jid, { text: "Erreur lors du déblocage du média." }, { quoted: message });
+            const msgErreur = trad('msg.msgErreur') || "Erreur lors du déblocage du média.";
+            return sock.sendMessage(jid, { text: msgErreur }, { quoted: message });
         }
     }
 };

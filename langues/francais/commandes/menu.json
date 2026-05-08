@@ -3,11 +3,11 @@
   "nom": "menu",
   "description": "Afficher le menu du bot",
   "categorie": "Groupes && Privé",
-  "info": "*Pour connaître toutes les commandes/outils existantes de Mugen♾️♾️*.\nLa commande a ausssi trois arguments:\n        `.menu commandes` : *Pour affiche seulment les commandes sans ~les outils~*\n        `.menu outils` : *Pour les outils sans ~les commandes~*\n        `.menu photo` : *Pour changer la de fond de la commande.*"
+  "info": "*Pour connaître toutes les commandes/outils existants de Mugen♾️♾️*.\nLa commande a aussi trois arguments:\n        `.menu commandes` : *Pour afficher seulment les commandes sans ~les outils~*\n        `.menu outils` : *Pour les outils sans ~les commandes~*\n        `.menu photo` : *Pour changer la de fond de la commande.*"
  },
  "messages": {
   "cat_autres": "Autres",
-  "erreur_permis": "⤫Tu peux pas l'executer⤫",
+  "erreur_permis": "⤫Tu peux pas l'éxecuter⤫",
   "statut_mon_profil": "mon profil",
   "statut_profil_chat": "profil du chat",
   "photo_changee": "𑁍Photo de fond changée en *{statut}*᪥.",

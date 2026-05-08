@@ -1,0 +1,21 @@
+{
+ "metadonnees": {
+  "nom": "degrade",
+  "description": "Dégradé yon admin nan yon group.",
+  "categorie": "Group",
+  "infos": "Itilizasyon : `.degrade @manb` ou `.degrade <nimero>` pou dégradé yon admin.\nMen ou dwe admin tou epi ou paka dégradé moun ki kréyé group la."
+ },
+ "messages": {
+  "msgSi_prive": "Li pa itilizab an privé.",
+  "msgMoi_non_admin": "> Ou pa admin😂😂",
+  "msgAutre_non_admin": "Fòw admin.",
+  "msgBot_non_admin": "Mw dwe gen dwa administrasyon yo.",
+  "msgPas_de_cible": "> Kiyès poum dégradé a?\n*Reponn yonn nan messj li yo oubyen met nimerol la oubyen tag li dèyè komand lan* eg: `.degrade 56931437983` ou `.degrade @moun_lan`.",
+  "msgCible_moi": "```Mw paka dégradém.```",
+  "msgCible_proprio": "~Inposib pou dégradé propriyétè group la.~",
+  "msgCible_pas_admin": "_@{cible} pat admin._",
+  "msgSucces": "✓@{cible} dégradé.",
+  "msgCible_non_membre": "~Moun sa pa nan group la.~",
+  "msgErreur": "On erè rivé pandan dégradasyon an."
+ }
+}

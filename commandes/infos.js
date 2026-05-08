@@ -40,7 +40,7 @@ export default {
     nom: "infos",
     description: "Avoir plus d'infos sur les commandes que la p'tit description de `.menu`.",
     categorie: "Groupes && Privé",
-    infos: `Pour l'utiliser il faut faire la commande + la commande dont tu veux plus d'infos.
+    infos: `Pour l'utiliser il faut faire la commande + la fonctionnalité dont tu veux plus d'infos.
 > Exemple : \`.infos infos\`
 
 La commande a aussi un argument :
@@ -116,7 +116,7 @@ La commande a aussi un argument :
         }
 
         if (!args[0]) {
-            const texteAide = trad('msg.texte_aide') || `Sur quelle commande/outil souhaites-tu avoir plus d'infos?\n> Fais par exemple : \`.infos infos\``;
+            const texteAide = trad('msg.texte_aide') || `Sur quelle fonctionnalité souhaites-tu avoir plus d'infos?\n> Fais par exemple : \`.infos infos\``;
             await repondreAvecProfil(texteAide);
             return;
         }
@@ -160,14 +160,13 @@ La commande a aussi un argument :
             });
 
             const nomFinal = tradsMeta['meta.nom'] || objet.nom;
-            const infosFinal = tradsMeta['meta.infos'] || objet.infos || trad('msg.aucune_info') || "Aucune information disponible.";
+            const infosFinal = tradsMeta['meta.infos'] || objet.infos || trad('msg.aucune_infos') || "Aucune information disponible.";
 
             // Détermination du type pour le titre
             const labelType = type === 'commandes' ? (trad('msg.type_commande') || "la commande") : (trad('msg.type_outil') || "l'outil");
-            
 	    //const titreResultat = trad('msg.titre_resultat', { nom: nomFinal }) || `> Voici les infos de la commande ${nomFinal}.`;
-            const titreResultat = trad(`msg.titre_resultat_${type}`, { nom: nomFinal }) || 
-                                 trad('msg.titre_resultat', { nom: nomFinal, type: labelType }) || 
+            const titreResultat = trad(`msg.titre_resultat_${type}`, { nom: nomFinal }) ||
+                                 trad('msg.titre_resultat', { nom: nomFinal, type: labelType }) ||
                                  `> Voici les infos de ${labelType} ${nomFinal}.`;
 
             const nom_resultat = trad('msg.nom_resultat') || "Nom";
@@ -180,8 +179,8 @@ La commande a aussi un argument :
             // CAS DOUBLE RESULTAT
             const blocCmd = formaterBloc(cmdTrouvee, 'commandes');
             const blocOutil = formaterBloc(outilTrouve, 'outils');
-            const separateur = "\n\n⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜\n\n";
-            
+            const separateur = trad('msg.separateur') || "\n\n⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜\n\n";
+
             await repondreAvecProfil(`${blocCmd}${separateur}${blocOutil}`);
 
         } else if (cmdTrouvee || outilTrouve) {
@@ -192,7 +191,7 @@ La commande a aussi un argument :
 
         } else {
             // AUCUN RESULTAT
-            const reponseErreur = trad('msg.erreur_inexistant', { nom: nomRecherche }) || `La commande ~${nomRecherche} n'existe pas.~ \n> Vas lire \`.menu\` pour savoir les commandes.`;
+            const reponseErreur = trad('msg.erreur_inexistant', { nom: nomRecherche }) || `La fonctionnalité ~${nomRecherche} n'existe pas.~ \n> Va lire \`.menu\` pour savoir les commandes.`;
             await repondreAvecProfil(reponseErreur);
         }
     }

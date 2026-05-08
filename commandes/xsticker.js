@@ -6,6 +6,7 @@ import { execSync }  from "child_process";
 import fs from "fs";
 import path from "path";
 import os from "os";
+import { traduire } from '../outils/langue.js';
 
 //logique
 export default {
@@ -21,20 +22,25 @@ NB:Seul les stickers statique sont acceptées.`,
         const jid = message.key.remoteJid;
         const ctx = message.message?.extendedTextMessage?.contextInfo;
         const stickerMsg = ctx?.quotedMessage?.stickerMessage;
+        
+	//"Raccourci" de traduction importer depui le fichier outils/langue.js
+	const trad = (cle, vars = {}) => traduire(nomSession, 'commandes', 'xsticker', { [cle]: vars })[cle];
 
 	//si on trouve pas le sticker on envoi un message pour demander
         if (!stickerMsg) {
+            const pas_de_cible = trad('msg.pas_de_cible') || "Il est où le sticker🫩.";
             return sock.sendMessage(jid,
-	    { text: "Il est où le sticker🫩." },
+	    { text: pas_de_cible },
 	           { quoted: message });
         }
 
 
 //si le stickers est anime on dit que les stickers animes sont pas supporter
         if (stickerMsg.isAnimated) {
+            const stick_animes = trad('msg.stick_animes') || "> ```Les stickers animés ne sont pas supportés.```";  
             return sock.sendMessage(
                 jid,
-                { text: "> ```Les stickers animés ne sont pas supportés.```" },
+                { text: stick_animes },
                 { quoted: message }
             );
         }
@@ -59,17 +65,19 @@ NB:Seul les stickers statique sont acceptées.`,
 
 	    //envoi de l'image
             const tamponImage = fs.readFileSync(png);
+            const legende_reussite = trad('msg.legende_reussite') || "_Voilà l'image_.";
             await sock.sendMessage(
                 jid,
                 { image: tamponImage,
-	              caption: "_Voilà l'image_." }, //message en legende
+	              caption: legende_reussite }, //message en legende
                 { quoted: message }
             );
 
         } catch (e) {
 	    //si on a recontrer un probleme
+	    const msg_erreur = trad('msg.msg_erreur') || "Une erreur est survenue lors de la conversion.";
             await sock.sendMessage(jid,
-  	         { text: "Une erreur est survenue lors de la conversion." },
+  	         { text: msg_erreur },
  		 { quoted: message });
             console.error(`[(xsticker), "${nomSession}"]; Une erreur est survenue lors de la conversion :`, e);
         } finally { //finalisation et nettoiyage des fichier temporaire
@@ -78,3 +86,4 @@ NB:Seul les stickers statique sont acceptées.`,
         }
     }
 };
+		

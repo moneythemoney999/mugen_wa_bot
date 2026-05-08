@@ -1,16 +1,16 @@
 {
  "metadonnees": {
   "nom": "infos",
-  "description": "Avoir plus d'infos sur les fonctionalités que la p'tit description de `.menu`.",
+  "description": "Avoir plus d'infos sur les fonctionnalités que la p'tit description de `.menu`.",
   "categorie": "Groupes && Privé",
-  "infos": "Pour l'utiliser il faut faire la commande + la fonctionalité dont tu veux plus d'infos.\n> Exemple : `.infos infos`\n\nLa commande a aussi un argument :\n    `.infos photo` : *Pour changer la photo de fond de la commande.*"
+  "infos": "Pour l'utiliser il faut faire la commande + la fonctionnalité dont tu veux plus d'infos.\n> Exemple : `.infos infos`\n\nLa commande a aussi un argument :\n    `.infos photo` : *Pour changer la photo de fond de la commande.*"
  },
  "messages": {
-  "erreur_permis": "⤫Tu peux pas l'executer⤫",
+  "erreur_permis": "⤫Tu peux pas l'éxecuter⤫",
   "statut_mon_profil": "mon profil",
   "statut_profil_chat": "profil du chat",
   "photo_changee": "𑁍Photo de fond changée en *{statut}*᪥.",
-  "texte_aide": "Sur quelle fonctionalité veux-tu avoir plus d'infos?\n> Fais par exemple : `.infos infos`",
+  "texte_aide": "Sur quelle fonctionnalité veux-tu avoir plus d'infos?\n> Fais par exemple : `.infos infos`",
   "aucune_infos": "```Aucune information disponible.```",
   "type_commande": "la commande",
   "type_outil": "l'outil",
@@ -18,6 +18,6 @@
   "nom_resultat": "Nom",
   "info_resultat": "Infos",
   "separateur": "\n\n⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜\n\n",
-  "msg_inexistance": "La fonctionalité ~{nom} n'existe pas.~ \n> Vas lire `.menu` pour savoir les fonctionalités.",
+  "msg_inexistance": "La fonctionnalité ~{nom} n'existe pas.~ \n> Va lire `.menu` pour savoir les fonctionnalités.",
  }
 }

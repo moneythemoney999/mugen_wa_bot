@@ -49,7 +49,7 @@ Utilisation : \`.xprofil @tag1 569... @tag2 509...\` ou juste \`.xprofil\` pour 
             const estCibleGroupe = cible.endsWith('@g.us');
             const nom = estCibleGroupe
 		? trad('msg.cible_groupe') || "du groupe"
-		: trad('msg.utilisateur', {utilisateur: cible.split('@')[0]}) || `de @${cible.split('@')[0]}`;
+		: trad('msg.cibleutilisateur', {utilisateur: cible.split('@')[0]}) || `de @${cible.split('@')[0]}`;
 
             try {
                 const url = await sock.profilePictureUrl(cible, 'image');
