@@ -18,6 +18,6 @@
   "nom_resultat": "Non",
   "infos_resultat": "Infòmasyon",
   "separateur": "\n\n⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜\n\n",
-  "msg_inexistance": "Fonksyonalité ~{nom} pa existe.~\n> Al li `.menu`an pouw ka konn fonksyonalité yo."
+  "msg_inexistance": "Fonksyonalité ~{nom} pa egziste.~\n> Al li `.menu`an pouw ka konn fonksyonalité yo."
  }
 }
