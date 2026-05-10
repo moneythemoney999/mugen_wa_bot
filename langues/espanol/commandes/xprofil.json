@@ -1,14 +1,14 @@
 {
-  "metadonnees":{
-    "nom": "xprofil",
-    "description": "Obtener el perfil de la gente o grupo.",
-    "categorie": "Grupos && Privado",
-    "infos": "Recupera el perfil de uno o varias personas.\nUso: `.xprofil @tag1 569... @tag2 509...` o simplemente `.xprofil` para la foto del chat actual."
-  },
-  "message": {
-    "cible_groupe": "del grupo",
-    "cible_utilisateur": "de {utilisateur}",
-    "legende_reussis": "Aquí está el perfil {reussis}.",
-    "legende_non_reussis": "> No se puede recuperar el perfil de {echoues}. Puede que no tenga o que lo haya protegido."
-  }
+ "metadonnees": {
+  "nom": "xprofil",
+  "description": "Obtener el perfil de la gente o grupo.",
+  "categorie": "Grupos && Privado",
+  "infos": "Recupera el perfil de uno o varias personas.\nUso: `.xprofil @tag1 569... @tag2 509...` o simplemente `.xprofil` para la foto del chat actual."
+ },
+ "messages": {
+  "cible_groupe": "del grupo",
+  "cible_utilisateur": "de @{utilisateur}",
+  "legende_reussis": "Aquí está el perfil {reussis}.",
+  "legende_non_reussis": "> No se puede recuperar el perfil de @{echoues}. Puede que no tenga o que lo haya protegido."
+ }
 }

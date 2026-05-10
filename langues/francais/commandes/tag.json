@@ -15,8 +15,8 @@
     "msg_limite": "Tu as atteint ta limite d'utilisation pour aujourd'hui : {donnees_limite}/{limite}.",
     "format_ligne_tag": "> {ligne}",
     "separateur": "──────────\n",
-    "texte1": "╭──「Tag lancé par ${auteur}」\n",
-    "texte2": "├─➩${tag}\n",
+    "texte1": "╭──「Tag lancé par {auteur}」\n",
+    "texte2": "├─➩{tag}\n",
     "texte3": "╰"
   }
 }

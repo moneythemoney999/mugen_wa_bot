@@ -15,8 +15,8 @@
     "msg_limite": "Ou rive nan limite itilizasyonw lan pou jodia: {donnees_limite}/{limite}.",
     "format_ligne_tag": "> {ligne}",
     "separateur": "──────────\n",
-    "texte1": "╭──「Tag lanse pa ${auteur}」\n",
-    "texte2": "├─➩${tag}\n",
+    "texte1": "╭──「Tag lanse pa {auteur}」\n",
+    "texte2": "├─➩{tag}\n",
     "texte3": "╰"
   }
 }

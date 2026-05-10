@@ -10,7 +10,7 @@
   "statut_mon_profil": "profil mw an",
   "statut_profil_chat": "profil chat la",
   "photo_changee": "𑁍Foto fon changé an *{statut}*᪥.",
-  "texte_aide": "Sou ki fonksyonalité ou vle plis infòmasyon an?\n>Fè pas egzenp : `.infos infos`.",
+  "texte_aide": "Sou ki fonksyonalité ou vle plis infòmasyon an?\n> Fè pas egzenp : `.infos infos`.",
   "aucune_infos": "```Pyès infòmasyon disponib .```",
   "type_commande": "outi",
   "type_outil": "kòmand",
@@ -18,7 +18,6 @@
   "nom_resultat": "Non",
   "infos_resultat": "Infòmasyon",
   "separateur": "\n\n⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜\n\n",
-  "msg_inexistance": "Fonksyonalité ~{nom} pa existe.~\n> Al li `.menu`an pouw ka konn fonksyonalité yo.",
-  "titre_resultat_commandes": "",
+  "msg_inexistance": "Fonksyonalité ~{nom} pa existe.~\n> Al li `.menu`an pouw ka konn fonksyonalité yo."
  }
 }

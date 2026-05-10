@@ -77,7 +77,7 @@ La commande a aussi un argument spécial :
 
          //"Raccourci" de traduction importer depui le fichier outils/langue.js
         const trad = (cle, vars = {}) => traduire(nomSession, 'commandes', 'tag', { [cle]: vars })[cle];
-        
+
         //gestion de la sous-commande "photo"
         if (args[0]?.toLowerCase() === 'photo' && args.length === 1) {
             //si ce n'est pas le bot, on envoie le message de refus et on s'arrête là (pas de tag)
@@ -161,7 +161,7 @@ La commande a aussi un argument spécial :
 
 	//si quelqu'un atteint la limite on le bloque
         if (donneesUtilisateur.LIMITE >= limite) {
-            const msgLimite = trad('msg.msg_limite', {donnees_limite 
+            const msgLimite = trad('msg.msg_limite', {donnees_limite
                 : donneesUtilisateur.LIMITE, limite: limite}
             ) || `Tu as atteint ta limite d'utilisation pour aujourd'hui: ${donneesUtilisateur.LIMITE}/${limite}.`
             return sock.sendMessage(jid, { text: msgLimite },

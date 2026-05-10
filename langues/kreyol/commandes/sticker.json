@@ -5,7 +5,7 @@
     "categorie": "Groupes && Privé",
     "infos": "*Transforme des vidéos ou photos en stickers* _et même personnalisé le nom du pack_\n> Exemple : `.sticker Nom de pack`\n\n``` Aussi même à partir de photos de profil.```\n> °Pour groupe si seule la commande est tapé sans argument ou si l'argument c'est le nom du pack, c'est la profil du groupe qui sera la cible.\n> °Si c'est fait en taguant quelqu'un c'est sa profil qui est pris pour cible."
   },
-  "message": {
+  "messages": {
     "pas_ma_profil": "Et pourquoi ma profil🫤🫥.",
     "pas_de_media": "```Aucun média trouvé.```",
     "erreur_creation": "_La création du sticker a échoué. Une erreur s'est produite._"
