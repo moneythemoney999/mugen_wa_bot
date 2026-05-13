@@ -18,7 +18,7 @@ const DELAI_CONVERSATION = 5 * 60 * 1000;
 const DELAI_PURGE_HISTORIQUE = 3 * 24 * 60 * 60 * 1000;
 
 //definition des modeles qu'on va utiliser
-const MODELES_PROPRIETAIRE = ["gemini-3-pro-preview", "gemini-3-flash-preview", "gemini-3.1-flash-lite-preview"];
+const MODELES_PROPRIETAIRE = ["gemini-3.1-flash-lite-preview"];
 const MODELES_AUTRES = ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.5-flash-lite"];
 
 //instruction qu'on envoi a gemini pour lui donner son rôle il doit être le plus (claire,nette et precis) que possible
