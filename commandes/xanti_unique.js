@@ -27,10 +27,11 @@ export default {
 > *Et en privé seul le bot peut l'utiliser si l'interlocuteur essaie ~il sera bloqué~*.`,
 
     execute: async ({ sock, message, args, nomSession }) => {
+
         const jid = message.key.remoteJid;
         const estGroupe = jid.endsWith('@g.us');
         const estPriveDemande = args[0]?.toLowerCase() === 'prive';
-        
+
 	//"Raccourci" de traduction importer depui le fichier outils/langue.js
 	const trad = (cle, vars = {}) => traduire(nomSession, 'commandes', 'xanti_unique', { [cle]: vars })[cle];
 

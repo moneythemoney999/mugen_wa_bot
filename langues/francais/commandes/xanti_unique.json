@@ -1,8 +1,17 @@
 {
  "metadonnees": {
-  "nom": "",
-  "description": "",
-  "categorie": ""
+  "nom": "xanti_unique",
+  "description": "Débloque les messages en vue unique.",
+  "categorie": "Groupes && Privé",
+  "infos": "*Pour l'utiliser peut importe l'endroit il faut répondre au média souhaité et il faut que se soit vraiment un message en vue unique*.\n`La commande à aussi un argument prive lui qui envera le message debloqué a soit meme au lieu du chat actuel.`\n\n> _Il ya aussi une limite d'utilisation par jour dans les groupes `{ADMIN}` pour les admin, `{MEMBRE}` pour ceux qui ne sont pas admin et `{BOT}` pour le bot lui même_.\n> *Et en privé seul le bot peut l'utiliser si l'interlocuteur essaie ~il sera bloqué~*."
  },
- "messages": {}
+ "messages": {
+  "limite_atteint": "Tu as atteint ta limite d'utilisation ({limite}).",
+  "msg_refus": "Tu ne peux pas utiliser cette commande.",
+  "msgPas_de_cible": "Tu dois répondre à un média en vue unique.",
+  "msgMedia_non_reconnu": "Ce message n'est pas un média en vue unique reconnu.",
+  "msgReussi_groupe": "Message débloqué de {nom_auteur}(+{num_auteur}) dans {nom_groupe} à {heure}.",
+  "msgReussi_prive": "Message débloqué de {nom_auteur}(+{num_auteur}) à {heure}.",
+  "msgErreur": "Erreur lors du déblocage du média."
+ }
 }

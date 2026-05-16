@@ -22,7 +22,7 @@ NB:Seul les stickers statique sont acceptées.`,
         const jid = message.key.remoteJid;
         const ctx = message.message?.extendedTextMessage?.contextInfo;
         const stickerMsg = ctx?.quotedMessage?.stickerMessage;
-        
+
 	//"Raccourci" de traduction importer depui le fichier outils/langue.js
 	const trad = (cle, vars = {}) => traduire(nomSession, 'commandes', 'xsticker', { [cle]: vars })[cle];
 
@@ -37,7 +37,7 @@ NB:Seul les stickers statique sont acceptées.`,
 
 //si le stickers est anime on dit que les stickers animes sont pas supporter
         if (stickerMsg.isAnimated) {
-            const stick_animes = trad('msg.stick_animes') || "> ```Les stickers animés ne sont pas supportés.```";  
+            const stick_animes = trad('msg.sticker_animes') || "> ```Les stickers animés ne sont pas supportés.```";  
             return sock.sendMessage(
                 jid,
                 { text: stick_animes },
@@ -86,4 +86,3 @@ NB:Seul les stickers statique sont acceptées.`,
         }
     }
 };
-		

@@ -12,7 +12,7 @@
   "msgBot_non_admin": "Debes darme los derechos de administración.",
   "msgPas_de_cible": "¿Quién debo promover?.\n*Responde a uno de sus mensajes o pon su número o tag a la persona atrás del comando*.\n> ej: `.promouve 56931437983` `.promouve @la_persona`.",
   "msgCible_deja_admin": "@{cible} ya era admin.",
-  "msgSucces": "✓ @{cible} ha sido promovido admin.",
+  "msgSucces": "✓@{cible} ha sido promovido admin.",
   "msgCible_non_membre": "~Esta Esta persona no está en el grupo~",
   "msgErreur": "Se produjo un error durante la promoción."
  }

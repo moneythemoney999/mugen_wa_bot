@@ -1,0 +1,17 @@
+{
+  "metadonnees": {
+    "nom": "xanti_unique",
+    "description": "Desbloquea los mensajes de visualización única.",
+    "categorie": "Grupos && Privado",
+    "infos": "*Para usarlo, sin importar el lugar, debes responder al medio deseado y realmente debe ser un mensaje de visualización única*.\n`El comando también tiene un argumento `prive` que enviará el mensaje desbloqueado a si mismo en lugar del chat actual.`\n\n> _También hay un límite de uso por día en los grupos: `{ADMIN}` para los admins, `{MEMBRE}` para quienes no son admins y `{BOT}` para el propio bot_.\n> *Y en privado solo el bot puede usarlo; si el interlocutor lo intenta ~será bloqueado~*."
+  },
+  "messages": {
+    "limite_atteint": "Has alcanzado tu límite de uso ({limite}).",
+    "msg_refus": "No puedes usar este comando.",
+    "msgPas_de_cible": "Debes responder a un medio de visualización única.",
+    "msgMedia_non_reconnu": "Este mensaje no es un medio de visualización única reconocido.",
+    "msgReussi_groupe": "Mensaje desbloqueado de {nom_auteur}(+{num_auteur}) en {nom_groupe} a las {heure}.",
+    "msgReussi_prive": "Mensaje desbloqueado de {nom_auteur}(+{num_auteur}) a las {heure}.",
+    "msgErreur": "Error al desbloquear el medio."
+  }
+}
