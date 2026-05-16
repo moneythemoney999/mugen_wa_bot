@@ -2,7 +2,7 @@
 
 //imports
 import { jidNormalizedUser } from "@whiskeysockets/baileys";
-
+import { traduire } from '../outils/langue.js';
 
 //export et logique
 export default {
@@ -11,11 +11,14 @@ export default {
     categorie: "Groupes && Privé",
     infos: "Utilisation : `.quitte` dans un groupe, ou `.quitte <lien>` pour quitter une discussion spécifique.",
 
-    execute: async ({ sock, message, args }) => {
+    execute: async ({ sock, message, args, nomSession }) => {
+	const trad = (cle, vars = {}) => traduire(nomSession, 'commandes', 'quitte', { [cle]: vars })[cle];
+
         if (!message.key.fromMe) {
+	    const msgRefus = trad('msg.msgRefus') || "```T'es pas autorisé à exécuter cette commande```";
             await sock.sendMessage(message.key.remoteJid,
 		//si pas moi on refuse
-		{ text: "```T'es pas autorisé à exécuter cette commande```" },
+		{ text: msgRefus },
 		{ quoted: message });
             return;
         }
@@ -29,17 +32,19 @@ export default {
                     const groupesActuels = await sock.groupFetchAllParticipating();
                     const infoGroupe = groupesActuels[jid];
                     if (!infoGroupe) {
+			const msgEtait_pas_membre = trad('msg.msgPlus_membre') || "```Je ne suis déjà plus dans ce groupe.```";
                         await sock.sendMessage(sock.user.id,
 			    //si on n'etait pas membre du groupe
-			    { text: "```Je ne suis déjà plus dans ce groupe.```" },
+			    { text: msgEtait_pas_membre },
 			    { quoted: message });
                         return 'NO_REACTION';
                     }
                     const nomGroupe = infoGroupe.subject;
                     const idBotNormalise = jidNormalizedUser(sock.user.id);
+		    const msgSucces = trad('msg.msgSucces', {groupe: nomGroupe}) || `_Groupe : ${nomGroupe} quitté avec succès._`;
                     await sock.sendMessage(idBotNormalise,
 			//message de succes
-			{ text: `_Groupe : ${nomGroupe} quitté avec succès._` },
+			{ text: msgSucces },
 			{ quoted: message});
                     await sock.groupLeave(jid);
                     return 'NO_REACTION';
@@ -48,9 +53,10 @@ export default {
                     console.error(`[(quitte), "${nomSession}": Erreur dans .quitte (groupe actuel) :`, e);
                 }
             } else {
+		const msgSi_prive = trad('msg.msgSi_prive') || `> Inutilisable en privé.
+*Où si c'est une autre discussion que tu veux quitter mets le lien de derrière la commande.*`;
                 await sock.sendMessage(jid,
-		    { text: `> Inutilisable en privé.
-*Où si c'est une autre discussion que tu veux quitter mets le lien de derrière la commande.*` },
+		    { text: msgSi_prive },
 		    { quoted: message });
             }
             return;
@@ -60,9 +66,10 @@ export default {
         const match = lien.match(regex);
 
         if (!match) {
+	    const lien_invalide = trad('msg.lien_invalide') || "```Lien invalide```";
             await sock.sendMessage(jid,
 		//si le lien est invalide
-		{ text: "```Lien invalide```" },
+		{ text: lien_invalide },
 		{ quoted: message });
             return;
         }
@@ -76,17 +83,19 @@ export default {
                 const info = await sock.groupGetInviteInfo(codeInvitation);
                 const groupesActuels = await sock.groupFetchAllParticipating();
                 if (!groupesActuels[info.id]) {
+		    const etait_pas_membre = trad('msg.etait_pas_membre') || "> Tu n'étais pas membre de la discussion";
                     await sock.sendMessage(jid,
 			//si apres verificaton on etait pas membre du groupe on s'arrete sans envoiye de requetes
-			{ text: "> Tu n'étais pas membre de la discussion" },
+			{ text: etait_pas_membre },
 			{ quoted: message });
                     return;
                 }
 		//mais si le contraire on est bien dans le groupe on envoit la requete a whatsapp
                 await sock.groupLeave(info.id);
+		const msg_succes = trad('msg.msg_succes', {nom : info.subject}) || `*Discussion quittée avec succès* : ~${info.subject}~`;
                 await sock.sendMessage(jid,
 		    //puis si on reussi on le confirme
-		    { text: `*Discussion quittée avec succès* : ~${info.subject}~` },
+		    { text: msg_succes },
 		    { quoted: message });
 
             } else if (typeLien.startsWith('whatsapp.com/channel')) { // dans le cas d'une chaine c'est un peu le meme delire mais en envoiyant "unfollow" au lieu de "leave"
@@ -104,20 +113,23 @@ export default {
                 //gestion de l'erreur de succès on envoie un message neutre
                 const metadata = await sock.newsletterMetadata("invite", codeInvitation).catch(() => null);
                 const nomChaine = metadata?.thread_metadata?.name?.text || '';
+		const succes_chaine = trad('msg.succes_chaine', {nom_chaine: nomChaine}) || `✓Opération terminée pour la chaîne : ~${nomChaine}~`;
                 await sock.sendMessage(jid,
 		    //comme on est ne gere pas bien la detection que si si on etait deja pas dans la chaine on envoi un message assez neutre
-		    { text: `✓ Opération terminée pour la chaîne : ~${nomChaine}~` },
+		    { text: succes_chaine },
 		    { quoted: message });
             } else if (e.message?.includes('not a subscriber')) { //hypothèse pour le cas "non abonné"
+		 const pas_abonne = trad('msg.pas_abonne') || "> Tu n'étais pas abonné à cette chaîne";
                  await sock.sendMessage(jid,
 		     //si on arrive a faire la detection on porra envoiyé ce message
-		     { text: "> Tu n'étais pas abonné à cette chaîne" },
+		     { text: pas_abonne },
 		     { quoted: message });
             } else {
 		//si pendans les requete quelque chose d'inatendu c'est produit on le log et envoi une notif
                 console.error(`[(quitte), "${nomSession}"]: Erreur dans .quitte (avec lien) :`, e);
+		const msgErreur = trad('msg.msgErreur') || "*Une erreur s'est produite*";
                 await sock.sendMessage(jid,
-		    { text: "*Une erreur s'est produite*" },
+		    { text: msgErreur },
 		    { quoted: message });
             }
         }
