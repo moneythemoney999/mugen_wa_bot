@@ -1,8 +1,20 @@
 {
  "metadonnees": {
-  "nom": "",
-  "description": "",
-  "categorie": ""
+  "nom": "rejoins",
+  "description": "Pour rejoindre des groupes, communautés ou s'abonner à des chaînes depuis un lien d'invitation.",
+  "categorie": "Bot",
+  "infos": "Utilisation : `.rejoins <lien>` pour rejoindre une discussion."
  },
- "messages": {}
+ "messages": {
+  "pas_le_bot": "```T'y est pas autorisé```",
+  "pas_de_lien": "> Tu veux rejoindre quoi fait genre `.rejoins <le lien en question>`",
+  "lien_invalide": "```Lien invalide```",
+  "deja_membre": "> *Déjà membre de* : _{nom_groupe}._",
+  "attente_aprobation": "> Demande laissé, en attente de l'approbation des admins",
+  "secces": "✓Groupe {nom_groupe} rejoins avec succès.",
+  "succesAbonne": "✓Abonné à la chaîne : {mom_chaine}",
+  "lien_expire": "> Lien expiré",
+  "etait_bani": "> Impossible t'as été banni",
+  "erreur": "*Une erreur s'est produite*"
+ }
 }

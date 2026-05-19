@@ -11,19 +11,22 @@ export default {
     infos: "Utilisation : `.rejoins <lien>` pour rejoindre une discussion.",
 
     execute: async ({ sock, message, args }) => {
+	const trad = (cle, vars = {}) => traduire(nomSession, 'commandes', 'rejoins', { [cle]: vars })[cle];
         if (!message.key.fromMe) {
 	    //si c'est pas moi
+	    const pas_le_bot = trad('msg.pas_le_bot') || "```T'y est pas autorisé```";
             await sock.sendMessage(message.key.remoteJid,
-		{ text: "```T'y est pas autorisé```" },
+		{ text: pas_le_bot },
 		{ quoted: message });
             return;
         }
 
         const lien = args[0];
         if (!lien) {
-	    //s'il ya pas de lien derriere la commande
+	    //s'il ya pas de lien derriere la command
+	    const pas_de_lien = trad('msg.pas_de_lien') || "> Tu veux rejoindre quoi fait genre `.rejoins <le lien en question>`";
             await sock.sendMessage(message.key.remoteJid,
-		{ text: "> Tu veux rejoindre quoi fait genre `.rejoins <le lien en question>`" },
+		{ text: pas_de_lien },
 		{ quoted: message });
             return;
         }
@@ -33,9 +36,10 @@ export default {
         const match = lien.match(regex);
 
         if (!match) {
+	    const lien_invalide = trad('msg.lien_invalide') || "```Lien invalide```";
             await sock.sendMessage(message.key.remoteJid,
 		//si le lien ne match pas
-		{ text: "```Lien invalide```" },
+		{ text: lien_invalide },
 		{ quoted: message });
             return;
         }
@@ -51,9 +55,10 @@ export default {
                 const groupesActuels = await sock.groupFetchAllParticipating();
 
                 if (groupesActuels[info.id]) {
+		    const deja_membre = trad('msg.deja_membre', {nom_groupe: info.subject}) || `> *Déjà membre de* : _${info.subject}._`;
                     await sock.sendMessage(message.key.remoteJid,
 			//si t'es deja membre
-			{ text: `> *Déjà membre de* : _${info.subject}._` },
+			{ text: deja_membre },
 			{ quoted: message });
                     return;
                 }
@@ -61,14 +66,16 @@ export default {
                 await sock.groupAcceptInvite(codeInvitation);
 
                 if (info.joinApprovalMode === true) {
+		    const attente_aprobation = trad('msg.attente_aprobation') || "> Demande laissé, en attente de l'approbation des admins";
                     await sock.sendMessage(message.key.remoteJid,
 			//si l'abrobation d'un admin est necessaire pour rejoindre
-			{ text: "> J'ai laissé une demande, en attente de l'approbation des admins" },
+			{ text: attente_aprobation },
 			{ quoted: message });
                 } else {
+		    const succes = trad('msg.secces', {nom_groupe: info.subject}) || `✓Groupe ${info.subject} rejoins avec succès`;
                     await sock.sendMessage(message.key.remoteJid,
 			//si on a reussi a rejoindre direct san laisse demande on confirme
-			{ text: `✓ J'ai bien rejoint le groupe : ${info.subject}` },
+			{ text: succes },
 			{ quoted: message });
                 }
 
@@ -89,27 +96,33 @@ export default {
                 //gestion de "l'erreur de succès" pour les chaînes
                 const metadata = await sock.newsletterMetadata("invite", codeInvitation).catch(() => null);
                 const nomChaine = metadata?.thread_metadata?.name?.text || '';
+		const succes_abonne = trad('msg.succesAbonne', {mom_chaine : nomChaine}) || `✓Abonné à la chaîne : ${nomChaine}`;
                 await sock.sendMessage(message.key.remoteJid,
 		    //reussite
-		    { text: `✓ Je me suis abonné à la chaîne : ${nomChaine}` },
+		    { text: succes_abonne },
 		    { quoted: message });
             } else {
                 //gestion des vraies erreurs
                 const statut = erreur.data?.statut || erreur.output?.statutCode;
 
                 if (statut === 410 || messageErreur.includes('expired')) {
+		    const lien_expire = trag('msg.lien_expire') || "> Lien expiré";
                     await sock.sendMessage(message.key.remoteJid,
 			//si le lien a expire
-			{ text: "> Lien expiré" },
+			{ text: lien_expire },
 			{ quoted: message });
                 } else if (statut === 401 || statut === 403 || messageErreur.includes('banned')) {
+		     const etait_banni = trad('msg.etait_bani') || "> Impossible t'as été banni";
                      await sock.sendMessage(message.key.remoteJid,
 			 //si je em suis fait bannir par un admin
-			 { text: "> Impossible t'as été banni" },
+			 { text: etait_banni },
 			 { quoted: message });
                 } else {
+		    const erreur = trad('msg.erreur') || "*Une erreur s'est produite*";
 		    //une erreur c'est produit on le mentionne
-                    await sock.sendMessage(message.key.remoteJid, { text: "*Une erreur s'est produite*" }, { quoted: message });
+                    await sock.sendMessage(message.key.remoteJid,
+			{ text: erreur },
+			{ quoted: message });
                 }
             }
         }
