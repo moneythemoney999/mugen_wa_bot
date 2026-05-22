@@ -8,6 +8,7 @@ Pour ne pas staturer le disque on suprime tout les 24h et si le statut est supri
 import { downloadMediaMessage, jidNormalizedUser } from '@whiskeysockets/baileys';
 import fs from 'fs';
 import path from 'path';
+import {traduire} from '../outils/langue.js';
 
 //variables de la base de données et le temps de nettoyage
 const CHEMIN_BASE = path.join(process.cwd(), 'memoires', 'memoires_commandes', 'xstatut');
@@ -65,6 +66,9 @@ export default {
     infos: `Pour récupérer les statuts :
 Soit en _répondant au statut de la personne ou en aimant le statut_ *attention si c'est en aimant le statut il sera envoyé à toi pas dans le chat de la personne qui a mis le statut*.`,
     execute: async ({ sock, message, args, nomSession }) => {
+
+	const trad = (cle, vars = {}) => traduire(nomSession, 'commandes', 'xstatut', { [cle]: vars })[cle];
+
 	//PARTIE AVEC MANUELLE
         if (!message.key.fromMe) return;
 
@@ -72,13 +76,19 @@ Soit en _répondant au statut de la personne ou en aimant le statut_ *attention 
         const msgRepondu = infosContexte?.quotedMessage;
 	//partie manuelle: si pas de reponse à aucun message
         if (!msgRepondu) {
-            return sock.sendMessage(message.key.remoteJid, { text: "Il est où le statut à recuper 🫉" }, { quoted: message });
+	    const pas_de_cible = trad('msg.pas_de_cible') || "Il est où le statut à recuper  ";
+            return sock.sendMessage(message.key.remoteJid,
+		{ text: pas_de_cible },
+		{ quoted: message });
         }
 
         const estUnStatut = infosContexte?.remoteJid === 'status@broadcast' || (infosContexte?.participant && infosContexte.participant.endsWith('status@broadcast'));
 	//partie manuelle: s'il y'a reponse mais que c'est pas à un statut
         if (!estUnStatut) {
-            return sock.sendMessage(message.key.remoteJid, { text: "_C'est pas un statut c'truc_" }, { quoted: message });
+	    const cible_pas_statut = trad('msg.cible_pas_statut') || "_C'est pas un statut c'truc_";
+            return sock.sendMessage(message.key.remoteJid,
+		{ text: cible_pas_statut },
+		{ quoted: message });
         }
 
         const destination = message.key.remoteJid;
@@ -86,23 +96,31 @@ Soit en _répondant au statut de la personne ou en aimant le statut_ *attention 
             const texte = msgRepondu.conversation || msgRepondu.extendedTextMessage?.text;
 	    //partie manuelle: si reponse à un statut (texte)
             if (texte) {
-                await sock.sendMessage(destination, { text: `> ${texte}` }, { quoted: message });
+		const manuel_statut_texte = trad('msg.manuel_statut_texte', {texte: texte}) || `> ${texte}`;
+                await sock.sendMessage(destination,
+		    { text: manuel_statut_texte }, { quoted: message });
             } /*si c'est plutot une image/video*/ else if (msgRepondu.imageMessage || msgRepondu.videoMessage) {
                 const tampon = await downloadMediaMessage({ key: { id: infosContexte.stanzaId }, message: msgRepondu }, 'buffer', {});
                 const type = msgRepondu.imageMessage ? 'image' : 'video';
-                await sock.sendMessage(destination, { [type]: tampon, caption: msgRepondu[type + 'Message'].caption || "" },
+		const manuel_statut_media = trad('msg.manuel_statut_media', {legende: msgRepondu[type + 'Message'].caption || ""}) || (msgRepondu[type + 'Message'].caption || "");
+                await sock.sendMessage(destination, { [type]: tampon,
+		    caption: manuel_statut_media },
 		    { quoted: message });
             } /*pour les audio*/ else if (msgRepondu.audioMessage) {
                 const tampon = await downloadMediaMessage({ key: { id: infosContexte.stanzaId }, message: msgRepondu }, 'buffer', {});
                 await sock.sendMessage(destination, { audio: tampon, mimetype: 'audio/mp4' }, { quoted: message });
             }
         } /*s'il est arrivé une erreur*/ catch (erreur) {
-            await sock.sendMessage(destination, { text: "Impossible de récupérer ce média." }, { quoted: message });
+	    const erreur_recuperation = trad('msg.erreur_recuperation') || "Impossible de récupérer ce média.";
+            await sock.sendMessage(destination,
+		{ text: erreur_recuperation },
+		{ quoted: message });
         }
     },
 
     //PARTIE SANS COMMANDES
     handleNonCommand: async ({ sock, message, nomSession }) => {
+	const trad = (cle, vars = {}) => traduire(nomSession, 'commandes', 'xstatut', { [cle]: vars })[cle];
 	//definition des evenments de statuts
         const estStatutBroadcast = message.key.remoteJid === 'status@broadcast';
         if (!estStatutBroadcast) return; //si l'evenment ne correspond pas à notre definition des statuts on ignore
@@ -112,13 +130,13 @@ Soit en _répondant au statut de la personne ou en aimant le statut_ *attention 
         if (!msg) return;
 
         const jidBot = jidNormalizedUser(sock.user.id);
-        const lidBotBrut = sock.user.lid || 'inconnu';
+        const lidBotBrut = sock.user.lid || trad('msg.lidBotBrut_inconnu') || 'inconnu';
         const lidBotNettoye = lidBotBrut.split(':')[0] + '@lid';
 
         //1. gestion des reaction: definition des variable de reaction de, la personne a mis et si cette personne est moi
         if (msg.reactionMessage) {
             const reaction = msg.reactionMessage;
-            const participantAction = message.key.participant || 'inconnu';
+            const participantAction = message.key.participant || trad('msg.participantAction_inconnu') || 'inconnu';
             const estMaReaction = message.key.fromMe || (participantAction === jidBot) || (participantAction === lidBotNettoye);
 
 	    //si c'est pas de moi on ignore
@@ -144,28 +162,47 @@ Soit en _répondant au statut de la personne ou en aimant le statut_ *attention 
             const jidNettoye = jidNormalizedUser(auteurJid);
             const numero = jidNettoye.split('@')[0];
 	    //message qu'on mets lors de l'envoi de statut
-            const piedDePage = `\n> De ${element.pushName || numero} (+${numero}) à ${heure}`;
+	    const piedDePage = trad('msg.format_legende', {
+                auteur: element.pushName || numero,
+                numero: numero,
+                heure: heure
+                }) || `\n> *De ${element.pushName || numero} (+${numero}) à ${heure}*`;
 
             try {
-		//pour les textes on mets mets le messsage mets le message (piedDePage) en sautant de ligne
+		//pour les textes on mets mets le messsage et le message (piedDePage) en sautant de ligne
                 if (element.type === "texte") {
-                    await sock.sendMessage(jidCible, { text: `${element.texte}${piedDePage}` });
+		    const auto_statut_texte = trad('msg.auto_statut_texte', {
+			texte: element.texte,
+			pied_de_page: piedDePage
+			}) || `${element.texte}${piedDePage}`;
+                    await sock.sendMessage(jidCible,
+			{ text: auto_statut_texte });
                 } else {
                     const extension = element.type === 'image' ? '.jpg' : (element.type === 'video' ? '.mp4' : '.mp3');
                     const cheminMedia = path.join(preparerDossier(nomSession), `${id}${extension}`);
                     if (!fs.existsSync(cheminMedia)) return;
 
                     const tampon = fs.readFileSync(cheminMedia);
-                    const legende = element.texte ? `${element.texte}${piedDePage}` : piedDePage.trim();
+		    const legende = element.texte ? trad('msg.legende', {
+			texte: element.texte,
+			pied_de_page: `\n${piedDePage.trim()}`
+			}) || `${element.texte}${piedDePage}` : piedDePage.trim();
 
 		    //si image on mets en legende
-                    if (element.type === "image") await sock.sendMessage(jidCible, { image: tampon, caption: legende });
+                    if (element.type === "image") {
+			const legende_auto_image = trad('msg.legende_auto_image', {legende: legende}) || `${legende}`;
+			await sock.sendMessage(jidCible, { image: tampon, caption: legende_auto_image });
+			}
 		    //de meme pour les videos
-                    else if (element.type === "video") await sock.sendMessage(jidCible, { video: tampon, caption: legende });
+                    else if (element.type === "video") {
+			const legende_auto_video = trad('msg.legende_auto_video', {legende: legende}) || `${legende}`;
+			await sock.sendMessage(jidCible, { video: tampon, caption: legende_auto_video });
+			}
 		    //mais pou les audio comme on peut mettre ni legende ni apres saut à la ligne on envoi le message en reponse après l'audio
                     else if (element.type === "audio") {
                         const m = await sock.sendMessage(jidCible, { audio: tampon, mimetype: 'audio/mp4', ptt: true });
-                        await sock.sendMessage(jidCible, { text: piedDePage.trim() }, { quoted: m });
+			const legende_auto_audio = trad('msg.legende_auto_audio', {message: piedDePage.trim()}) || `${piedDePage.trim()}`;
+                        await sock.sendMessage(jidCible, { text: legende_auto_audio }, { quoted: m });
                     }
                 }
             } catch (erreur) {}

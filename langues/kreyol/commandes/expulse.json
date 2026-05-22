@@ -13,7 +13,7 @@
   "msgPas_de_cible": "Kiyès poum retire a?.\n*Mét niméro moun nan oubyen tag li dèyè komand lan* eg: `.expulse 56931437983` `.expulse @moun_lan`.",
   "msgSi_cible_bot": "```🫩🫩```",
   "msgSi_admin": "~Fèl ou menm, mw pa kapap🥱😪~",
-  "msgSucces": "~@{expulse}~ soti isut la.",
+  "msgSucces": "~@{expulse}~ soti isit la.",
   "msgCible_non_membre": "> Mw pa jwen manb sa.",
   "msgErreur": "Gen yon erè ki rive pandan pwosésis la.."
  }

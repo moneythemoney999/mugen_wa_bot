@@ -1,8 +1,23 @@
 {
- "metadonnees": {
-  "nom": "",
-  "description": "",
-  "categorie": ""
- },
- "messages": {}
+  "metadonnees": {
+    "nom": "xstatut",
+    "description": "Récupérer les statuts des gens.",
+    "categorie": "Statuts",
+    "infos": "Pour récupérer les statuts :\nSoit en _répondant au statut de la personne ou en aimant le statut_ *attention si c'est en aimant le statut il sera envoyé à toi pas dans le chat de la personne qui a mis le statut*."
+  },
+  "messages": {
+    "pas_de_cible": "Il est où le statut à recuper",
+    "cible_pas_statut": "_C'est pas un statut c'truc_",
+    "manuel_statut_texte": "> {texte}",
+    "manuel_statut_media": "{legende}",
+    "erreur_recuperation": "Impossible de récupérer ce média.",
+    "lidBotBrut_inconnu": "inconnu",
+    "participantAction_inconnu": "inconnu",
+    "format_legende": "\n> *De {auteur} (+{numero}) à {heure}*",
+    "auto_statut_texte": "{texte}{pied_de_page}",
+    "legende": "{texte}{pied_de_page}",
+    "legende_auto_image": "{legende}",
+    "legende_auto_video": "{legende}",
+    "legende_auto_audio": "{message}"
+  }
 }

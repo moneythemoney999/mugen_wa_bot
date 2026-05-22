@@ -11,10 +11,10 @@
   "lien_invalide": "```Lien invalide```",
   "deja_membre": "> *Déjà membre de* : _{nom_groupe}._",
   "attente_aprobation": "> Demande laissé, en attente de l'approbation des admins",
-  "secces": "✓Groupe {nom_groupe} rejoins avec succès.",
+  "succes": "✓Groupe {nom_groupe} rejoins avec succès.",
   "succesAbonne": "✓Abonné à la chaîne : {mom_chaine}",
   "lien_expire": "> Lien expiré",
-  "etait_bani": "> Impossible t'as été banni",
-  "erreur": "*Une erreur s'est produite*"
+  "etait_banni": "> Impossible t'as été banni",
+  "msgErreur": "*Une erreur s'est produite*"
  }
 }

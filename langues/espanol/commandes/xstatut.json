@@ -1,8 +1,23 @@
 {
- "metadonnees": {
-  "nom": "",
-  "description": "",
-  "categorie": ""
- },
- "messages": {}
+  "metadonnees": {
+    "nom": "xstatut",
+    "description": "Recuperar los estados de la gente.",
+    "categorie": "Estados",
+    "infos": "Para recuperar los estados:\nYa sea _respondiendo al estado de la persona o dando like al estado_ *ojo, si es dando like al estado será enviado a ti y no al chat de la persona que publicó el estado*."
+  },
+  "messages": {
+    "pas_de_cible": "¿Dónde está el estado para recuperar?",
+    "cible_pas_statut": "_Eso no es un estado_",
+    "manuel_statut_texte": "> {texte}",
+    "manuel_statut_media": "{legende}",
+    "erreur_recuperation": "No se pudo recuperar este medio.",
+    "lidBotBrut_inconnu": "desconocido",
+    "participantAction_inconnu": "desconocido",
+    "format_legende": "\n> *De {auteur} (+{numero}) a las {heure}*",
+    "auto_statut_texte": "{texte}{pied_de_page}",
+    "legende": "{texte}{pied_de_page}",
+    "legende_auto_image": "{legende}",
+    "legende_auto_video": "{legende}",
+    "legende_auto_audio": "{message}"
+  }
 }

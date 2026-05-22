@@ -2,6 +2,7 @@
 
 //imports
 import { jidNormalizedUser } from "@whiskeysockets/baileys";
+import {traduire} from '../outils/langue.js';
 
 //logique
 export default {
@@ -10,7 +11,7 @@ export default {
     categorie: "Bot",
     infos: "Utilisation : `.rejoins <lien>` pour rejoindre une discussion.",
 
-    execute: async ({ sock, message, args }) => {
+    execute: async ({ sock, message, args, nomSession }) => {
 	const trad = (cle, vars = {}) => traduire(nomSession, 'commandes', 'rejoins', { [cle]: vars })[cle];
         if (!message.key.fromMe) {
 	    //si c'est pas moi
@@ -72,7 +73,7 @@ export default {
 			{ text: attente_aprobation },
 			{ quoted: message });
                 } else {
-		    const succes = trad('msg.secces', {nom_groupe: info.subject}) || `✓Groupe ${info.subject} rejoins avec succès`;
+		    const succes = trad('msg.succes', {nom_groupe: info.subject}) || `✓Groupe ${info.subject} rejoins avec succès`;
                     await sock.sendMessage(message.key.remoteJid,
 			//si on a reussi a rejoindre direct san laisse demande on confirme
 			{ text: succes },
@@ -106,19 +107,19 @@ export default {
                 const statut = erreur.data?.statut || erreur.output?.statutCode;
 
                 if (statut === 410 || messageErreur.includes('expired')) {
-		    const lien_expire = trag('msg.lien_expire') || "> Lien expiré";
+		    const lien_expire = trad('msg.lien_expire') || "> Lien expiré";
                     await sock.sendMessage(message.key.remoteJid,
 			//si le lien a expire
 			{ text: lien_expire },
 			{ quoted: message });
                 } else if (statut === 401 || statut === 403 || messageErreur.includes('banned')) {
-		     const etait_banni = trad('msg.etait_bani') || "> Impossible t'as été banni";
+		     const etait_banni = trad('msg.etait_banni') || "> Impossible t'as été banni";
                      await sock.sendMessage(message.key.remoteJid,
 			 //si je em suis fait bannir par un admin
 			 { text: etait_banni },
 			 { quoted: message });
                 } else {
-		    const erreur = trad('msg.erreur') || "*Une erreur s'est produite*";
+		    const msgErreur = trad('msg.msgErreur') || "*Une erreur s'est produite*";
 		    //une erreur c'est produit on le mentionne
                     await sock.sendMessage(message.key.remoteJid,
 			{ text: erreur },

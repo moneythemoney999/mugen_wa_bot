@@ -11,10 +11,10 @@
     "lien_invalide": "```Enlace inválido```",
     "deja_membre": "> *Ya eres miembro de*: _{nom_groupe}._",
     "attente_aprobation": "> Solicitud enviada, esperando la aprobación de los admins",
-    "secces": "✓Grupo {nom_groupe} une con éxito.",
+    "succes": "✓Grupo {nom_groupe} une con éxito.",
     "succesAbonne": "✓Suscrito al canal: {mom_chaine}",
     "lien_expire": "> Enlace expirado",
-    "etait_bani": "> Imposible has sido baneado",
-    "erreur": "*Se produjo un error*"
+    "etait_banni": "> Imposible has sido baneado",
+    "msgErreur": "*Se produjo un error*"
   }
 }

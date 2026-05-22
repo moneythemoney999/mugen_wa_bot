@@ -1,8 +1,24 @@
 {
- "metadonnees": {
-  "nom": "",
-  "description": "",
-  "categorie": ""
- },
- "messages": {}
+  "metadonnees": {
+    "nom": "xstatut",
+    "description": "Rekipere stati moun yo.",
+    "categorie": "Statuts",
+    "infos": "Pou rékipere stati yo :\nSwa _reponn a stati moun nan oubyen renmen stati a_ *atensyom si se renmen stati oi pral jwen ou en prive men pa nsn chat moun ki te met stati a*."
+  },
+
+  "messages": {
+    "pas_de_cible": "Kot stati pou rekipere a",
+    "cible_pas_statut": "_Se pa on statut bagay sa_",
+    "manuel_statut_texte": "> {texte}",
+    "manuel_statut_media": "{legende}",
+    "erreur_recuperation": "Inposib pou rekipere media sa.",
+    "lidBotBrut_inconnu": "inkoni",
+    "participantAction_inconnu": "inkoni",
+    "format_legende": "\n> *{auteur} (+{numero}) a {heure}*",
+    "auto_statut_texte": "{texte}{pied_de_page}",
+    "legende": "{texte}{pied_de_page}",
+    "legende_auto_image": "{legende}",
+    "legende_auto_video": "{legende}",
+    "legende_auto_audio": "{message}"
+  }
 }

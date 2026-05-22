@@ -11,10 +11,10 @@
   "lien_invalide": "```Lyen invalid```",
   "deja_membre": "> *Ou gentan manb nan* : _{nom_groupe}._",
   "attente_aprobation": "> Demand kite, an atant apwobasyon admins yo.",
-  "secces": "✓Group {nom_groupe} rejwenn avèk siksè.",
+  "succes": "✓Group {nom_groupe} rejwenn avèk siksè.",
   "succesAbonne": "✓Abone a chèn nan : {mom_chaine}",
   "lien_expire": "> Lyen espire",
-  "etait_bani": "> Imposib lu te bani.",
-  "erreur": "*Gon erè ki rive*"
+  "etait_banni": "> Imposib lu te bani.",
+  "msgErreur": "*Gon erè ki rive*"
  }
 }
