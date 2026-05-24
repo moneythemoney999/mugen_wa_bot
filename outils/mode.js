@@ -53,8 +53,8 @@ export default {
     description: "Gestion du mode du bot",
     categorie: `Groupes && Privé`,
     affiche_menu: "vrai",
-    infos: `Peut être utilisé en groupes ou privé pour mettre ce groupe ou contact en mode privé. Pour tout mettre en privé, il faut utiliser l'argument tous après le mode que tu veux mettre, ex : \`.mode prive tous\`. Après cette commande, un message de confirmation apparaîtra disant que les paramètres ont été enregistrés. Pour les appliquer, il faut utiliser l'argument change + le mode auquel tu veux passer, ex : \`.mode change prive\``,
-    
+    infos: `Peut être utilisé en groupes ou privé pour mettre ce groupe ou contact en mode privé. Pour tout mettre en privé, il faut utiliser l'argument tous après le mode que tu veux mettre, ex : \`.mode prive tous\`. Après cette commande, un message de confirmation apparaîtra disant que les paramètres ont été enregistrés. Pour les appliquer, il faut utiliser l'argument change + le mode auquel tu veux passer, ex : \`.mode change tous\``,
+
     execute: async (nomEvenement, donnesEvenement, { sock, nomSession, prefixe }) => {
         if (nomEvenement !== "messages.upsert") return;
 
@@ -72,9 +72,9 @@ export default {
         let etatPublique = await lireFichier(chemins.publique, [ { mode: "faux" }, { liste: [] } ]);
         let etatTous = await lireFichier(chemins.tous, [ { mode: "vrai" }, { mode_tous: "publique" } ]);
 
-        const texte = message.message.conversation || 
-                      message.message.extendedTextMessage?.text || 
-                      message.message.imageMessage?.caption || 
+        const texte = message.message.conversation ||
+                      message.message.extendedTextMessage?.text ||
+                      message.message.imageMessage?.caption ||
                       message.message.videoMessage?.caption;
 
         // --- 1. Traitement des Commandes ---
@@ -102,8 +102,8 @@ export default {
                     let txt = "";
                     if (arg1) txt += "```Argument(s) inconnu(s).```\n";
                     txt += `> Mode : *${modeActuel}*
-                    
-Arguments: 
+
+Arguments:
 -    \`.mode prive\` pour mettre la discussion actuelle en mode privé.
 -    \`.mode publique\` pour faire l'inverse.
 -    \`.mode {prive/publique} tous\` pour mettre toutes les discussions soit en privé ou publique.
@@ -131,11 +131,14 @@ Arguments:
                         await sock.sendMessage(jidChat, { text: "_Paramètre enregistré_" }, { quoted: message });
                     } else {
                         const jidPropre = await resoudreJid(sock, jidChat);
+                        // Retirer de la liste publique s'il y est et ajouter à la liste privée
+                        etatPublique[1].liste = etatPublique[1].liste.filter(id => id !== jidPropre);
                         if (!etatPrive[1].liste.includes(jidPropre)) {
                             etatPrive[1].liste.push(jidPropre);
-                            await sauvegarderFichier(chemins.prive, etatPrive);
                         }
-                        await sock.sendMessage(jidChat, { text: `\`${nomChat}\` *en mode prive*` }, { quoted: message });
+                        await sauvegarderFichier(chemins.prive, etatPrive);
+                        await sauvegarderFichier(chemins.publique, etatPublique);
+                        await sock.sendMessage(jidChat, { text: `\`${nomChat}\` *en mode prive*\n> Ces paramètres prendront effet que si tu fais la commande \`.mode change prive\`` }, { quoted: message });
                     }
                     return 'STOP';
                 }
@@ -148,11 +151,14 @@ Arguments:
                         await sock.sendMessage(jidChat, { text: "_Paramètre enregistré_" }, { quoted: message });
                     } else {
                         const jidPropre = await resoudreJid(sock, jidChat);
+                        // Retirer de la liste privée s'il y est et ajouter à la liste publique
+                        etatPrive[1].liste = etatPrive[1].liste.filter(id => id !== jidPropre);
                         if (!etatPublique[1].liste.includes(jidPropre)) {
                             etatPublique[1].liste.push(jidPropre);
-                            await sauvegarderFichier(chemins.publique, etatPublique);
                         }
-                        await sock.sendMessage(jidChat, { text: `\`${nomChat}\` *en mode publique*` }, { quoted: message });
+                        await sauvegarderFichier(chemins.prive, etatPrive);
+                        await sauvegarderFichier(chemins.publique, etatPublique);
+                        await sock.sendMessage(jidChat, { text: `\`${nomChat}\` *en mode publique*\n> Ces paramètres prendront effet que si tu fais la commande \`.mode change publique\`` }, { quoted: message });
                     }
                     return 'STOP';
                 }
@@ -187,26 +193,26 @@ Arguments:
         }
 
         // --- 2. Logique de Filtrage (si pas une commande .mode) ---
-        if (estProprio) return; 
+        if (estProprio) return;
 
         const jidPropre = await resoudreJid(sock, jidChat);
 
         // Cas 1: Mode TOUS actif
         if (etatTous[0].mode === "vrai") {
-            if (etatTous[1].mode_tous === "prive") return 'STOP'; 
-            return; 
+            if (etatTous[1].mode_tous === "prive") return 'STOP';
+            return;
         }
 
         // Cas 2: Mode PUBLIQUE (liste) actif
         if (etatPublique[0].mode === "vrai") {
-            if (etatPublique[1].liste.includes(jidPropre)) return; 
-            return 'STOP'; 
+            if (etatPublique[1].liste.includes(jidPropre)) return;
+            return 'STOP';
         }
 
         // Cas 3: Mode PRIVE (liste) actif
         if (etatPrive[0].mode === "vrai") {
-            if (etatPrive[1].liste.includes(jidPropre)) return 'STOP'; 
-            return; 
+            if (etatPrive[1].liste.includes(jidPropre)) return 'STOP';
+            return;
         }
     }
 };
