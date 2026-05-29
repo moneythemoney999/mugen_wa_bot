@@ -5,6 +5,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from 'url';
 import { jidNormalizedUser } from '@whiskeysockets/baileys';
+import {traduire} from '../outils/langue.js';
 
 
 //fonctions utilitaires pour la gestion de la mémoire
@@ -95,10 +96,12 @@ export default {
 > Si c'est l'émoji que tu veux changer il suffit de taper la même chose mais cette fois avec l'émoji que tu veux à la toute fin ex: \`.statut_auto like 🫩\`.  NB : *Si la commande globale \`.statut_auto\` était à l'état désactiver les modifications de seront enregistrés mais appliquer qu'à l'activation de la commande globale.`,
 
     execute: async ({ sock, message, args, nomSession }) => {
+	const trad = (cle, vars = {}) => traduire(nomSession, 'commandes', 'statut_auto', { [cle]: vars })[cle];
         if (!message.key.fromMe) {
+	    const si_pas_moi = trad('msg.si_pas_moi') || "> Tu ne peux pas utiliser cette commande";
             await sock.sendMessage(message.key.remoteJid,
 		//si c'est pas moi
-		{ text: "> Tu ne peux pas utiliser cette commande" },
+		{ text: si_pas_moi },
 		{ quoted: message });
             return;
         }
@@ -111,15 +114,22 @@ export default {
 	    //sous-commandes actve && desactive
             case "active":
             case "desactive": {
+		const etat_commande = trad(`msg.${premierArgument}`) || premierArgument;
                 if (infos.etat === premierArgument) {
-                    await sock.sendMessage(message.key.remoteJid,
-			{ text: `Statuts automatique ~était déjà~ \`${premierArgument}\`` },
+		    const deja_etat = trad('msg.deja_etat', {
+			etat: etat_commande
+			}) || `Statuts automatique ~était déjà~ \`${etat_commande}\``;
+
+		    await sock.sendMessage(message.key.remoteJid,
+			{ text: deja_etat },
 			{ quoted: message });
                 } else {
                     infos.etat = premierArgument;
                     sauvegarderInfos(chemins.infosFichier, infos, nomSession);
+		    const etat_change = trad('msg.etat_change',{
+			etat: etat_commande}) || `Statuts automatique ${etat_commande}`;
                     await sock.sendMessage(message.key.remoteJid,
-			{ text: `Statuts automatique ${premierArgument === 'active' ? 'activé' : 'désactivé'}` },
+			{ text: etat_change },
 			{ quoted: message });
                 }
                 break;
@@ -133,17 +143,28 @@ export default {
                 if (nouvelEmoji) {
                     const ancienEmoji = infos.like.emoji;
                     infos.like.emoji = nouvelEmoji;
-                    texteConfirmation = `L'émoji a été changé de ${ancienEmoji} à ${nouvelEmoji}.\n> État: ${infos.like.etat}`;
+                    texteConfirmation = trad('msg.texteConfirmation1',{
+			ancien_emoji: ancienEmoji,
+			nouvel_emoji: nouvelEmoji,
+			infos_like_etat: trad(`msg.${infos.like.etat}`) || infos.like.etat
+			}) || `L'émoji a été changé de ${ancienEmoji} à ${nouvelEmoji}.\n> État: ${infos.like.etat}`;
                 } else {
                     const ancienEtatLike = infos.like.etat;
                     infos.like.etat = ancienEtatLike === 'active' ? 'desactive' : 'active';
-                    texteConfirmation = `Passage de ${ancienEtatLike} à ${infos.like.etat}.\n> Émoji: ${infos.like.emoji}`;
+
+		    const traduction_ancien_etat = trad(`msg.${ancienEtatLike}`) || ancienEtatLike;
+		    const traduction_nouvel_etat = trad(`msg.${infos.like.etat}`) || infos.like.etat;
+                    texteConfirmation = trad('msg.texteConfirmation2',{
+			ancien_etat: traduction_ancien_etat,
+			nouvel_etat: traduction_nouvel_etat,
+			infos_like_emoji: infos.like.emoji
+			}) || `Passage de ${traduction_ancien_etat} à ${traduction_nouvel_etat}.\n> Émoji: ${infos.like.emoji}`;
                 }
 
                 sauvegarderInfos(chemins.infosFichier, infos, nomSession);
 
                 const messageFinal = infos.etat === 'desactive'
-                    ? "La commande globale `statut_auto` est ~désactivée~. *Les modifications seront appliquées à son activation*."
+                    ? trad("msg.messageFinal") || "La commande globale `statut_auto` est ~désactivée~. *Les modifications seront appliquées à son activation*."
                     : texteConfirmation;
 
                 await sock.sendMessage(message.key.remoteJid, { text: messageFinal }, { quoted: message });
@@ -211,18 +232,30 @@ export default {
                         sauvegarderPersonnesExclues(chemins.exclusFichier, exclusActuels, nomSession);
                     }
 
-                    const verbe = premierArgument;
+                    const verbe = trad(`msg.${premierArgument}`) || premierArgument;
                     let messageResultat = [];
 
                     if (affectes.length > 0) {
                         const noms = affectes.map(id => id.split('@')[0]).join(', ');
-                        messageResultat.push(`*${noms} ${verbe}${affectes.length > 1 ? 's' : ''}*`);
-                    }
+			const msgAffectes = trad('msg.msgAffectes', {
+			noms: noms,
+			verbe: verbe,
+			s: affectes.length > 1 ? 's' : ''
+			}) || `*+${noms} ${verbe}${affectes.length > 1 ? 's' : ''}*`;
+
+			messageResultat.push(msgAffectes);
+			}
 
                     if (dejaDansEtat.length > 0) {
                         const noms = dejaDansEtat.map(id => id.split('@')[0]).join(', ');
-                        messageResultat.push(`> ${noms} déjà ${verbe}${dejaDansEtat.length > 1 ? 's' : ''}`);
-                    }
+			const msgDejaEtat = trad('msg.msgDejaEtat', {
+			noms: noms,
+			verbe: verbe,
+			s: dejaDansEtat.length > 1 ? 's' : ''
+			}) || `> +${noms} déjà ${verbe}${dejaDansEtat.length > 1 ? 's' : ''}`;
+
+			messageResultat.push(msgDejaEtat);
+			}
 
                     await sock.sendMessage(message.key.remoteJid, { text: messageResultat.join('\n') }, { quoted: message });
                 }
@@ -231,12 +264,14 @@ export default {
 
             default: {
 		//message pour montrer les sous-commandes
-                const messageAide = `État de la commande: ${infos.etat}
+                const messageAide = trad('msg.messageAide', {
+		infos_etat: trad(`msg.${infos.etat}`) || infos.etat,
+		}) || `État de la commande: ${infos.etat}
 ╭──Voici les arguments───────────────────────────
 ├─➩ ".statut_auto active"
 ├─➩ ".statut_auto desactive"
-├─➩ ".statut_auto exclu <@user|numéro>"
-├─➩ ".statut_auto inclu <@user|numéro>"
+├─➩ ".statut_auto exclu <@utilisateur|numéro>"
+├─➩ ".statut_auto inclu <@utilisateur|numéro>"
 ├─➩ ".statut_auto like < |emoji>"
 ╰──────────────────────────────────────────`;
                 await sock.sendMessage(message.key.remoteJid, { text: messageAide }, { quoted: message });
