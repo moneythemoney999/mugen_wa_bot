@@ -9,6 +9,7 @@ const capitaliser = (chaine) => chaine.charAt(0).toUpperCase() + chaine.slice(1)
 
 /**
  * Fonction centrale pour récupérer les traductions
+ * Supporte la notation par point récursive (ex: msg.erreurs.404)
  * @param {string} nomSession - Nom de la session active
  * @param {string} type - 'commandes' ou 'outils'
  * @param {string} nom - Nom du fichier (ex: 'mugen')
@@ -22,12 +23,7 @@ export function traduire(nomSession, type, nom, clesDemandes) {
     if (fs.existsSync(cheminSessionLangue)) {
         try {
             codeLangue = JSON.parse(fs.readFileSync(cheminSessionLangue, 'utf8')).langue;
-            console.log(`[(Langue)]: Langue détectée pour "${nomSession}" : ${codeLangue}`);
-        } catch (e) {
-            console.warn(`[(Langue)]: Erreur de lecture de la langue pour "${nomSession}". Repli sur "fr".`);
-        }
-    } else {
-        console.log(`[(Langue)]: Pas de configuration de langue pour "${nomSession}". Utilisation du français par défaut.`);
+        } catch (e) {}
     }
 
     // 2. On identifie le dossier de la langue via son code
@@ -51,91 +47,79 @@ export function traduire(nomSession, type, nom, clesDemandes) {
         }
     }
 
-    if (!trouvé) {
-        console.warn(`[(Langue)]: Aucun dossier trouvé pour le code "${codeLangue}". Repli sur le dossier "français".`);
-    } else {
-        console.log(`[(Langue)]: Dossier de langue identifié : "${nomDossierLangue}"`);
-    }
-
     // 3. Chargement du fichier de traduction
     const cheminTrad = path.join(cheminDossierLangues, nomDossierLangue, type, `${nom}.json`);
     let dictionnaire = { metadonnees: {}, messages: {} };
-    let existeDeja = fs.existsSync(cheminTrad);
+    let aEteModifie = false;
 
-    if (existeDeja) {
+    if (fs.existsSync(cheminTrad)) {
         try {
             const contenu = fs.readFileSync(cheminTrad, 'utf8');
-            if (contenu.trim()) {
-                dictionnaire = JSON.parse(contenu);
-            }
+            if (contenu.trim()) dictionnaire = JSON.parse(contenu);
         } catch (e) {
-            console.error(`[(Langage)]: Erreur critique de lecture de ${cheminTrad}.`);
-            // En cas d'erreur de lecture, on renvoie tout en null pour ne pas bousiller le fichier
-            const errRes = {};
-            Object.keys(clesDemandes).forEach(k => errRes[k] = null);
-            return errRes;
+            console.error(`[(Langage)]: Erreur de lecture de ${cheminTrad}`);
         }
     } else {
-        console.log(`[(Langue)]: Fichier de traduction inexistant : ${cheminTrad}. Création d'un nouveau dictionnaire.`);
         if (!fs.existsSync(path.dirname(cheminTrad))) fs.mkdirSync(path.dirname(cheminTrad), { recursive: true });
         fs.writeFileSync(cheminTrad, JSON.stringify(dictionnaire, null, 1));
     }
 
     const resultats = {};
     const cles = Object.keys(clesDemandes);
-    let aEteModifie = false;
+
+    // Helper pour creuser dans l'objet de manière récursive
+    const creuser = (obj, path) => path.reduce((acc, curr) => (acc && acc[curr] !== undefined) ? acc[curr] : undefined, obj);
 
     // 4. Extraction et injection des variables
     cles.forEach(cleBrute => {
+        const parties = cleBrute.split('.');
+        let chemin = [...parties];
         let section = 'messages';
-        let cle = cleBrute;
         let estExplicite = false;
 
-        if (cleBrute.includes('.')) {
-            const parties = cleBrute.split('.');
-            const prefixe = parties[0].toLowerCase();
-            cle = parties.slice(1).join('.');
-
-            if (prefixe === 'meta' || prefixe === 'i' || prefixe === 'metadonnees') {
-                section = 'metadonnees';
-                estExplicite = true;
-            } else if (prefixe === 'msg' || prefixe === 'm' || prefixe === 'messages') {
-                section = 'messages';
-                estExplicite = true;
-            }
+        // Détection du préfixe de section (meta. ou msg.)
+        const prefixe = parties[0].toLowerCase();
+        if (['meta', 'i', 'metadonnees'].includes(prefixe)) {
+            section = 'metadonnees';
+            chemin = parties.slice(1);
+            estExplicite = true;
+        } else if (['msg', 'm', 'messages'].includes(prefixe)) {
+            section = 'messages';
+            chemin = parties.slice(1);
+            estExplicite = true;
         }
 
-        let texte = dictionnaire[section]?.[cle];
-        
-        // Tentative de récupération dans l'autre section si non trouvé
-        if (!texte || texte.trim() === "") {
-            const autreSection = section === 'messages' ? 'metadonnees' : 'messages';
-            const texteAlternatif = dictionnaire[autreSection]?.[cle];
-            if (texteAlternatif && texteAlternatif.trim() !== "") {
-                console.log(`[(Langue)]: Clé "${cle}" non trouvée dans "${section}", récupérée dans "${autreSection}".`);
-                texte = texteAlternatif;
-            }
+        let texte = creuser(dictionnaire[section], chemin);
+
+        // Fallback intelligent : si pas trouvé dans la section spécifique, on cherche partout
+        if (!texte || (typeof texte === 'string' && texte.trim() === "")) {
+            const fallbackMsg = creuser(dictionnaire.messages, chemin);
+            const fallbackMeta = creuser(dictionnaire.metadonnees, chemin);
+            texte = fallbackMsg || fallbackMeta;
         }
 
-        if (texte && texte.trim() !== "") {
+        if (texte && typeof texte === 'string' && texte.trim() !== "") {
             const variables = clesDemandes[cleBrute];
             if (typeof variables === 'object') {
                 Object.keys(variables).forEach(v => {
-                    const valeurVar = variables[v];
-                    if (texte.includes(`{${v}}`)) {
-                        texte = texte.replace(new RegExp(`{${v}}`, 'g'), valeurVar);
-                    }
+                    texte = texte.replace(new RegExp(`{${v}}`, 'g'), variables[v]);
                 });
             }
             resultats[cleBrute] = texte;
         } else {
-            console.warn(`[(Langue)]: Clé de traduction manquante ou vide : "${cleBrute}" dans ${nom}.json (${nomDossierLangue}).`);
+            // Création automatique récursive uniquement si demande explicite
             if (estExplicite) {
-                if (!dictionnaire[section]) dictionnaire[section] = {};
-                // On n'ajoute la clé que si elle n'existe vraiment nulle part pour éviter les doublons inutiles
-                if (dictionnaire.messages?.[cle] === undefined && dictionnaire.metadonnees?.[cle] === undefined) {
-                    console.log(`[(Langue)]: Initialisation de la clé manquante "${cle}" dans la section "${section}".`);
-                    dictionnaire[section][cle] = "";
+                const existeDeja = creuser(dictionnaire.messages, chemin) !== undefined || creuser(dictionnaire.metadonnees, chemin) !== undefined;
+                if (!existeDeja) {
+                    if (!dictionnaire[section]) dictionnaire[section] = {};
+                    let temp = dictionnaire[section];
+                    for (let i = 0; i < chemin.length - 1; i++) {
+                        if (temp[chemin[i]] === undefined || typeof temp[chemin[i]] !== 'object') {
+                            temp[chemin[i]] = {};
+                        }
+                        temp = temp[chemin[i]];
+                    }
+                    temp[chemin[chemin.length - 1]] = "";
                     aEteModifie = true;
                 }
             }
@@ -143,14 +127,8 @@ export function traduire(nomSession, type, nom, clesDemandes) {
         }
     });
 
-    // Sauvegarde unique à la fin si des clés ont été ajoutées
     if (aEteModifie) {
-        try {
-            fs.writeFileSync(cheminTrad, JSON.stringify(dictionnaire, null, 1));
-            console.log(`[(Langue)]: Dictionnaire mis à jour et sauvegardé : ${cheminTrad}`);
-        } catch (e) {
-            console.error(`[(Langage)]: Échec de sauvegarde de ${cheminTrad}`);
-        }
+        fs.writeFileSync(cheminTrad, JSON.stringify(dictionnaire, null, 1));
     }
 
     return resultats;
