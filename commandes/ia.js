@@ -142,7 +142,7 @@ async function executerConversationIA({ sock, message, nomSession, question, ima
     let messageIndicateur;
     let apiCallEstFinie = false;
 
-    const textesAttente = trad("msg.textes_de_attente") || ["◐", "◓", "◑", "◒"];
+    const textesAttente = trad("msg.textes_de_attente") || ["◐♾", "♾◓", "◑♾", "♾◒", "♾️"];
     try {
         messageIndicateur = await sock.sendMessage(jidBrut, { text: textesAttente[0] }, { quoted: message });
     } catch (e) {}
@@ -228,7 +228,7 @@ Après avoir tapé .ia, il n'est plus nécessaire de le faire dans un délai de 
 
 Il y a aussi une sous-commande pour réinitialiser la discussion avec l'IA si celle-ci part en vrille.
 
-> NB : *Il pourrait y avoir certaines données (noms de profils, numéro du propriétaire) qui seront partagées avec l'IA pour son bon fonctionnement.*`,
+> NB : *Il pourrait y avoir certaines données (noms de profils, numéro du compte) qui seront partagées avec l'IA pour son bon fonctionnement.*`,
 
     async execute({ sock, message, args, nomSession }) {
         const trad = (cle, vars = {}) => traduire(nomSession, 'commandes', 'ia', { [cle]: vars })[cle];
