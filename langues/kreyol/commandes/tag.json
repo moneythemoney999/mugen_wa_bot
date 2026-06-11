@@ -1,0 +1,22 @@
+{
+  "metadonnees": {
+    "nom": "tag",
+    "description": "Tag tout moun nan group la.",
+    "categorie": "Group",
+    "infos": "Pèmèt ou tagé tout moun nan yon grouo;\nKòmand lan gen on agiman spésial tou:\n`.tag photo`: *Pou chanje foto fon kòmand lan.*"
+  },
+  "messages": {
+    "erreur_permis": "⤫Ou paka egzekitel⤫.",
+    "statut_mon_profil": "profil mw an",
+    "statut_profil_chat": "profil chat la",
+    "profil_changee": "𑁍Foto fon chanje an *{statut}*᪥.",
+    "erreur_chat": "Kòmand lan mache nan group sèlman.",
+    "erreur_infos_groupe": "Erè nan rekipérasyon infòmasyon group la.",
+    "msg_limite": "Ou rive nan limite itilizasyonw lan pou jodia: {donnees_limite}/{limite}.",
+    "format_ligne_tag": "> {ligne}",
+    "separateur": "──────────\n",
+    "texte1": "╭──「Tag lanse pa {auteur}」\n",
+    "texte2": "├─➩{tag}\n",
+    "texte3": "╰"
+  }
+}

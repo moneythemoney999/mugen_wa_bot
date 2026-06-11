@@ -1,0 +1,24 @@
+{
+ "metadonnees": {
+  "nom": "infos",
+  "description": "Tener más información sobre las funcionalidades que el pequeño descripción de `.menu`.",
+  "categorie": "Grupos && Privado",
+  "infos": "Para usarlo debes ejecutar el comando + la funcionnalidad sobre cuál quieres más información.\n> Ejemplo : `.infos infos`\n\nEl comando también tiene un argumento :\n    `.infos photo`: *Para cambiar la foto de fondo del comando.*"
+ },
+ "messages": {
+  "erreur_permis": "⤫No puedes ejecutarlo⤫",
+  "statut_mon_profil": "mi perfil",
+  "statut_profil_chat": "perfil del chat",
+  "photo_changee": "𑁍Fondo cambiado en *{statut}*᪥.",
+  "texte_aide": "¿Sobre cual funcionalidad quieres tener más información?\n> Haz por ejemplo : `.infos infos`",
+  "aucune_infos": "```No hay información disponible.```",
+  "type_commande": "el comando",
+  "type_outil": "la herramienta",
+  "titre_resultat": "> Aquí está la información sobre {type} `{nom}`.",
+  "nom_resultat": "Nombre",
+  "infos_resultat": "Información",
+  "separateur": "\n\n⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜\n\n",
+  "msg_inexistance": "La funcionalidad ~{nom} no existe.~\n> Ve leer `.menu` para saber las funcionalidades.",
+  "titre_resultat_commandes": ""
+ }
+}

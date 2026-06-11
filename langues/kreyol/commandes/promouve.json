@@ -1,0 +1,19 @@
+{
+ "metadonnees": {
+  "nom": "promouve",
+  "description": "Mete yon manb yon admin.",
+  "categorie": "Group",
+  "infos": "Itilizasyon : `.promouve @MANB` oubyen `.promouve <niméro>` pou mete yon moun admin.\n> Men kok oumenm tou ou admin pou reyisi."
+ },
+ "messages": {
+  "msgSi_prive": "Li pa itilizab an privé.",
+  "msgMoi_non_admin": "> Ou pa admin😂🤣.",
+  "msgAutre_non_admin": "Fòw admin",
+  "msgBot_non_admin": "Fòk ou banm dwa administrasyon yo.",
+  "msgPas_de_cible": "Kiyès poum met admin an.\n*Réponn yon nan nesaj li yo oubyen met nimero moun nan oubyen tag li dèyè kommand lan*.\n> eg: `.promouve 56931437983` `.promouve @moun_nan`.",
+  "msgCible_deja_admin": "@{cible} te déja admin.",
+  "msgSucces": "✓@{cible} monte nan ran admin.",
+  "msgCible_non_membre": "~Moun sa pa nan group la.~",
+  "msgErreur": "Gen yon erè ki rive pandan promosyon an."
+ }
+}

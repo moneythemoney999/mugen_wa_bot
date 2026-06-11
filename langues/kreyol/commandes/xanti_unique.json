@@ -1,0 +1,17 @@
+{
+ "metadonnees": {
+  "nom": "xanti_unique",
+  "description": "Débloke mesaj vi inik yo.",
+  "categorie": "Group && Privé",
+  "infos": "*Pou itizel nenpòt kote a fòw reponn a mesaj ou vle a e fòk se yon vrè mesaj vi inik.*.\n`Kòmand gen yon agiman `prive` tout, li kap voye mesaj debloke a a li menm olyé chat kote kòmand la te fèt la.`\n\n> _Gen yon limite itilizasyon pa jou nan group yo `{ADMIN}` por admin yo, `{MEMBRE}` pou moun ki pa admin yo epi `{BOT}` pou bot la_.\n> *Epi an prive sèl bot la ka itilize si lòt moun nan eseyel ~lap bloke~*."
+ },
+ "messages": {
+  "limite_atteint": "Ou rive nan limit itilizasyonw lan ({limite}).",
+  "msg_refus": "Ou paka egzekite kòmand sa.",
+  "msgPas_de_cible": "Ou dwe reponn a on mesaj en vi inik.",
+  "msgMedia_non_reconnu": "Mesaj sa pa on mesaj en vi inik.",
+  "msgReussi_groupe": "Mesaj {nom_auteur}(+{num_auteur}) debloke nan {nom_groupe} a {heure}.",
+  "msgReussi_prive": "Mesaj {nom_auteur}(+{num_auteur}) debloke a {heure}.",
+  "msgErreur": "Erè pandan deblokaj media a."
+ }
+}

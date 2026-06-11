@@ -1,0 +1,14 @@
+{
+ "metadonnees": {
+  "nom": "xsticker",
+  "description": "Transfòme stikè an foto. (Sèlman stikè statik yo pa anime yo).",
+  "categorie": "Group && privé",
+  "infos": "Transfòme stikè an imaj.\n> Li de tout fason fòw reponn a stikè ou vle a.\n\nNB: Sèl stikè statik yo ki aksepte."
+ },
+ "messages": {
+  "pas_de_cible": "Kote stikè a🫩.",
+  "sticker_animes": "> ```Stikè animé yo pa sipòte.```",
+  "legende_reussite": "_Men imaj la_.",
+  "msg_erreur": "Gon erè ki rive pandan konvèsyon an."
+ }
+}

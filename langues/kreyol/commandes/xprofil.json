@@ -1,0 +1,14 @@
+{
+  "metadonnees":{
+    "nom": "xprofil",
+    "description": "Pran foto profil on moun.",
+    "categorie": "Group && Prive",
+    "infos": "Pran foto profil moun yo.\nItilizasyon: `.xprofil @tag1 569... @tag2 509...` oubyen sèlman `.xprofil` pou profil chat ou ye a."
+  },
+  "messages": {
+    "cible_groupe": "group la",
+    "cible_utilisateur": "@{utilisateur}",
+    "legende_reussis": "Men foto profil {reussis}.",
+    "legende_non_reussis": "> Imposib poum jwenn profil @{echoues}. Li ka pa genyen oubyenl protéjel."
+  }
+}

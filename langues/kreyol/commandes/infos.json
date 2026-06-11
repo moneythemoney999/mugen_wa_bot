@@ -1,0 +1,23 @@
+{
+ "metadonnees": {
+  "nom": "infos",
+  "description": "Pou gen plis infòmasyon sous Avoir plus d'infos sur les commandes que la p'tit description de `.menu`.",
+  "categorie": "Group && prive",
+  "infos": "Pou itilizel ou dwe fè lòmand lan + fonksyonalité ou vle plis infòmasyon sou li a.\n>Egzanp : `.infos infos`\n\nKòmand lan gen on agimen tout :\n    `.infos photo` : *Pou changer foto fon kòmand lan*"
+ },
+ "messages": {
+  "erreur_permis": "⤫Ou paka egzekitel⤫",
+  "statut_mon_profil": "profil mw an",
+  "statut_profil_chat": "profil chat la",
+  "photo_changee": "𑁍Foto fon changé an *{statut}*᪥.",
+  "texte_aide": "Sou ki fonksyonalité ou vle plis infòmasyon an?\n> Fè pas egzenp : `.infos infos`.",
+  "aucune_infos": "```Pyès infòmasyon disponib .```",
+  "type_commande": "outi",
+  "type_outil": "kòmand",
+  "titre_resultat": "> Men infòmasyon sou {type} `{nom}`.",
+  "nom_resultat": "Non",
+  "infos_resultat": "Infòmasyon",
+  "separateur": "\n\n⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜ ⃞⃝⃪⃜\n\n",
+  "msg_inexistance": "Fonksyonalité ~{nom} pa egziste.~\n> Al li `.menu`an pouw ka konn fonksyonalité yo."
+ }
+}
