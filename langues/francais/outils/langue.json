@@ -1,0 +1,37 @@
+{
+ "metadonnees": {
+  "nom": "langue",
+  "description": "Changer la langue du bot",
+  "categorie": "Bot",
+  "infos": "Permet d'afficher et de changer la langue du bot l'utilisation est très simple il faut faire la commande puis le nom ou code de la langue ensuite ex: `.langue ht`.\n*NB: Il ya certaines langues qui ne seront pas disponible dans le bot, si c'est le cas un message d'erreur sera plutôt afficher disant que la langue n'existe pas ou n'est pas disponible.\n\n> Pour afficher les langues disponibles c'est simple il suffit de faire la commande sans argument de langue : `.langue`.*"
+ },
+ "messages": {
+  "pas_moi": "⊙```T'as pas l'autorisation necéssaire```",
+  "reponse": {
+   "1": "> Voici les langues disponible :\n\n",
+   "2": "- {nom} (`{code}`)\n"
+  },
+  "variables": {
+   "variables_langues": {
+    "fr": {
+     "nom": "Français",
+     "code": "fr"
+    },
+    "es": {
+     "nom": "Espagnol",
+     "code": "es"
+    },
+    "ht": {
+     "nom": "Créole",
+     "code": "ht"
+    }
+   }
+  },
+  "erreur": {
+   "langue_pas_trouve": "𒀰Langue indisponible ou inexistante𒀰"
+  },
+  "succes": {
+   "change_langue": "🗘Langue changé de {ancienne} ➜ {nouvelle}✓"
+  }
+ }
+}

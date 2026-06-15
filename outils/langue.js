@@ -21,9 +21,9 @@ export function traduire(nomSession, type, nom, clesDemandes) {
 
     // 1. On récupère la langue de la session
     if (fs.existsSync(cheminSessionLangue)) {
-        try {
-            codeLangue = JSON.parse(fs.readFileSync(cheminSessionLangue, 'utf8')).langue;
-        } catch (e) {}
+	try {
+	    codeLangue = JSON.parse(fs.readFileSync(cheminSessionLangue, 'utf8')).langue;
+	} catch (e) {}
     }
 
     // 2. On identifie le dossier de la langue via son code
@@ -98,19 +98,13 @@ export function traduire(nomSession, type, nom, clesDemandes) {
             texte = fallbackMsg || fallbackMeta;
         }
 
-	if (texte !== undefined && texte !== null) {
-	    if (typeof texte === 'string') {
-		const variables = clesDemandes[cleBrute];
-
-	    	if (typeof variables === 'object') {
-		    Object.keys(variables).forEach(v => {
-		    	texte = texte.replace(
-			    new RegExp(`{${v}}`, 'g'),
-			    variables[v]
-			);
-		    });
-		}
-	    }
+        if (texte && typeof texte === 'string' && texte.trim() !== "") {
+            const variables = clesDemandes[cleBrute];
+            if (typeof variables === 'object') {
+                Object.keys(variables).forEach(v => {
+                    texte = texte.replace(new RegExp(`{${v}}`, 'g'), variables[v]);
+                });
+            }
             resultats[cleBrute] = texte;
         } else {
             // Création automatique récursive uniquement si demande explicite
@@ -142,15 +136,22 @@ export function traduire(nomSession, type, nom, clesDemandes) {
 
 export default {
     nom: 'langue',
+    description: 'Changer la langue du bot',
     evenements: 'messages.upsert',
+    categorie: 'Bot',
+    infos: `Permet d'afficher et de changer la langue du bot l'utilisation est très simple il faut faire la commande puis le nom ou code de la langue ensuite ex: \`.langue ht\`.
+*NB: Il ya certaines langues qui ne seront pas disponible dans le bot, si c'est le cas un message d'erreur sera plutôt afficher disant que la langue n'existe pas ou n'est pas disponible.
+
+> Pour afficher les langues disponibles c'est simple il suffit de faire la commande sans argument de langue : \`.langue\`.*`,
+    affiche_menu: 'vrai',
 
     execute: async (nomEvenement, donneesEvenement, { sock, nomSession, prefixe }) => {
-        const { messages } = donneesEvenement;
-        const message = messages[0];
-        if (!message.message) return;
+	const { messages } = donneesEvenement;
+	const message = messages[0];
+	if (!message.message) return;
 
-        const texte = message.message.conversation ||
-                      message.message.extendedTextMessage?.text ||
+	const texte = message.message.conversation ||
+		      message.message.extendedTextMessage?.text ||
                       message.message.imageMessage?.caption ||
                       message.message.videoMessage?.caption;
 
@@ -159,8 +160,12 @@ export default {
 
         if (commande.toLowerCase() !== 'langue') return;
 
+        // Le "Raccourci" local, sans boucle infinie
+        const trad = (cle, vars = {}) => traduire(nomSession, 'outils', 'langue', { [cle]: vars })[cle];
+
         if (!message.key.fromMe) {
-            await sock.sendMessage(message.key.remoteJid, { text: "⊙```T'as pas l'autorisation necéssaire```" }, { quoted: message });
+            const pas_moi = trad('msg.pas_moi') || "⊙```T'as pas l'autorisation necéssaire```";
+            await sock.sendMessage(message.key.remoteJid, { text: pas_moi }, { quoted: message });
             return 'STOP';
         }
 
@@ -173,16 +178,25 @@ export default {
             if (fs.existsSync(cheminJsonIdentity)) {
                 try {
                     const contenu = JSON.parse(fs.readFileSync(cheminJsonIdentity, 'utf8'));
-                    return { dossier, code: contenu.code, nom: contenu.nom || dossier };
+                    return {
+                      dossier,
+                      code: contenu.code,
+                      nom: contenu.nom || dossier
+                    };
                 } catch (e) { return null; }
             }
             return null;
         }).filter(l => l !== null);
 
         if (!arguments_[0]) {
-            let reponse = "> Voici les langues disponible :\n\n";
+            let reponse = trad('msg.reponse.1') || "> Voici les langues disponible :\n\n";
             donneesLangues.forEach(l => {
-                reponse += `- ${capitaliser(l.nom)} (\`${l.code}\`)\n`;
+              const variables_reponse_nom = trad(`msg.variables.variables_langues.${l.code}.nom`) || capitaliser(l.nom);
+              const variables_reponse_code = trad(`msg.variables.variables_langues.${l.code}.code`) || l.code;
+		reponse += trad('msg.reponse.2', {
+		    nom: variables_reponse_nom,
+		    code: variables_reponse_code
+		    }) || `- ${capitaliser(l.nom)} (\`${l.code}\`)\n`;
             });
             await sock.sendMessage(message.key.remoteJid, { text: reponse }, { quoted: message });
             return 'STOP';
@@ -192,16 +206,15 @@ export default {
         const langueCible = donneesLangues.find(l => l.dossier.toLowerCase() === argumentChoisi || l.code.toLowerCase() === argumentChoisi);
 
         if (!langueCible) {
-            await sock.sendMessage(message.key.remoteJid, { text: "𒀰Langue indisponible ou inexistant𒀰" }, { quoted: message });
+            const  langue_pas_trouve = trad('msg.erreur.langue_pas_trouve') || "𒀰Langue indisponible ou inexistante𒀰";
+            await sock.sendMessage(message.key.remoteJid, { text: langue_pas_trouve }, { quoted: message });
             return 'STOP';
         }
 
-        let ancienneLangueNom = "Français";
+        let ancien_code = 'fr';
         if (fs.existsSync(cheminSessionLangue)) {
             try {
-                const configActuelle = JSON.parse(fs.readFileSync(cheminSessionLangue, 'utf8'));
-                const ancienne = donneesLangues.find(l => l.code === configActuelle.langue);
-                if (ancienne) ancienneLangueNom = capitaliser(ancienne.nom);
+                ancien_code = JSON.parse(fs.readFileSync(cheminSessionLangue, 'utf8')).langue;
             } catch (e) {}
         }
 
@@ -209,8 +222,16 @@ export default {
         if (!fs.existsSync(path.dirname(cheminSessionLangue))) fs.mkdirSync(path.dirname(cheminSessionLangue), { recursive: true });
         fs.writeFileSync(cheminSessionLangue, JSON.stringify(nouvelleConfig, null, 1));
 
-        const messageSucces = `🗘Langue changé de ${ancienneLangueNom} ➜ ${capitaliser(langueCible.nom)}✓`;
-        await sock.sendMessage(message.key.remoteJid, { text: messageSucces }, { quoted: message });
+        // Maintenant que la session est mise à jour, trad() utilisera le nouveau dictionnaire
+        const ancienneLangueNom = trad(`msg.variables.variables_langues.${ancien_code}.nom`) || capitaliser(ancienne.nom);
+        const nouvelleLangueNom = trad(`msg.variables.variables_langues.${langueCible.code}.nom`) || capitaliser(langueCible.nom);
+
+        const succes_change_langue = trad('msg.succes.change_langue', {
+            ancienne: ancienneLangueNom,
+            nouvelle: nouvelleLangueNom
+        }) || `🗘Langue changé de ${ancienneLangueNom} ➜ ${nouvelleLangueNom}✓`;
+
+        await sock.sendMessage(message.key.remoteJid, { text: succes_change_langue }, { quoted: message });
 
         return 'STOP';
     }
