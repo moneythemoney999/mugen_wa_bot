@@ -7,6 +7,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import readline from 'readline';
 import util from 'util';
+import {traduire} from "./outils/langue.js";
 
 
 //cache metadata
@@ -245,11 +246,15 @@ async function demarrerBot(nomSession = "mugen") {
                 // appelle au commandes : analyse des evenements qui contiennent le prefixe et appelle a la commande en question
                 const [nomCommande, ...args] = texte.slice(PREFIXE.length).trim().split(/\s+/);
                 const moduleCommande = await chargerCommande(nomCommande);
-
+                const trad = (cle, vars = {}) => traduire(nomSession, '', 'mugen_wa_bot', { [cle]: vars })[cle];
                 // : en attente que la commande repond on envoie une réaction
                 if (moduleCommande?.default?.execute) {
                     try {
-                        await sock.sendMessage(message.key.remoteJid, { react: { text: "♾️", key: message.key } });
+                      const emoji_reaction_execution = trad("msg.emoji_reaction.execution") || "♾️";
+                        await sock.sendMessage(message.key.remoteJid, { react: {
+                          text: emoji_reaction_execution,
+                          key: message.key
+                        }});
 			    let log = `Commande/outil ${nomCommande} demandé depuis ${nomSession} par ${infos.nomUtilisateur} (${infos.numero})`;
 
 				if (infos.nomGroupe) {
@@ -261,7 +266,8 @@ async function demarrerBot(nomSession = "mugen") {
                         const resultat = await moduleCommande.default.execute({ sock, message, args, nomSession });
                         if (resultat !== 'NO_REACTION') {
                             // : mais si non on envoie la reaction
-                            await envoyerReactionFinale(sock, message.key.remoteJid, message.key, "✅");
+                            const emoji_reaction_reussite = trad(`msg.emoji_reaction.reussite`) || "✅";
+                            await envoyerReactionFinale(sock, message.key.remoteJid, message.key, emoji_reaction_reussite);
                             let logSucces = `Commande/outils ${nomCommande} éxecuté depuis ${nomSession} par ${infos.nomUtilisateur} (${infos.numero})`;
                             if (infos.nomGroupe) logSucces += ` dans le groupe "${infos.nomGroupe}"`;
                             console.log(logSucces);
@@ -269,7 +275,8 @@ async function demarrerBot(nomSession = "mugen") {
                     } catch (erreur) {
                         console.error(`Erreur lors de l'exécution de la commande "${nomCommande}":`, erreur);
                         // : mais si la commande a eu un problème dans son execution on envoie cette rection et de même que l'autre il est soumis à NO_REACTION
-                        await envoyerReactionFinale(sock, message.key.remoteJid, message.key, "❌");
+                        const emoji_reaction_erreur = trad(`msg.emoji_reaction.erreur`) || "❌";
+                        await envoyerReactionFinale(sock, message.key.remoteJid, message.key, emoji_reaction_erreur);
                         let logErreur = `Commande/outil ${nomCommande} échoué depuis ${nomSession} par ${infos.nomUtilisateur} (${infos.numero})`;
                         if (infos.nomGroupe) logErreur += ` dans le groupe "${infos.nomGroupe}"`;
                         console.error(logErreur);
@@ -278,13 +285,17 @@ async function demarrerBot(nomSession = "mugen") {
 
 
                     // si au moment ou on essaie de joindre la commande on le trouve pas : on envoie cette reaction
-                    await envoyerReactionFinale(sock, message.key.remoteJid, message.key, "❓");
+                    const emoji_reaction_inconnu = trad(`msg.emoji_reaction.inconnu`) || "❓";
+                    await envoyerReactionFinale(sock, message.key.remoteJid, message.key, emoji_reaction_inconnu);
                     let logInconnu = `Commande/outil ${nomCommande} inconnu depuis ${nomSession} par ${infos.nomUtilisateur} (${infos.numero})`;
                     if (infos.nomGroupe) logInconnu += ` dans le groupe "${infos.nomGroupe}"`;
                     console.error(logInconnu);
 
                     // : et ce message d'erreur
-                    await sock.sendMessage(message.key.remoteJid, { text: `𒁂Commande ou outil inconnue ".${nomCommande}"𒁂` }, { quoted: message });
+                    const fonctionalite_inconnu = trad(`msg.fonctionalite_inconnu`, {
+                      nom: nomCommande
+                    }) || `𒁂Commande ou outil inconnue ".${nomCommande}"𒁂`;
+                    await sock.sendMessage(message.key.remoteJid, { text: fonctionalite_inconnu }, { quoted: message });
                 }
             } else {
 
@@ -348,4 +359,3 @@ const chargerSessions = () => {
 
 // Lancement automatique
 chargerSessions();
-

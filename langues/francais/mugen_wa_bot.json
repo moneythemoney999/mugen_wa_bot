@@ -1,0 +1,11 @@
+{
+  "messages": {
+    "emoji_reaction": {
+      "execution": "♾️",
+      "reussite": "✅",
+      "erreur": "❌",
+      "inconnu": "❓"
+    },
+    "fonctionalite_inconnu": "𒁂Commande ou outil inconnue \".{nom}\"𒁂"
+  }
+}

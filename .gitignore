@@ -5,7 +5,12 @@ memoires/
 mugen.mg
 sauvegarde/
 exemples/
-depotoire/
+depotoir/
 bot.js
 mugen1.js
 node_modules/
+commandes/telecharge.js
+outils/message.js
+outils/sauvegarde.js
+langues/*/commandes/telecharge.json
+langues/lingala/
