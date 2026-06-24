@@ -1,5 +1,5 @@
 # Mugen WA Bot ♾️♾️  
-![Image1](lis_moi/image1_menu.png)![image2](lis_moi/image2_menu.png)
+![Image1](lis_moi/image_menu.jpg)![image2](lis_moi/image_mugen.jpg)
 
 [![Node.js](https://img.shields.io/badge/Node.js-20+-green?logo=node.js)](https://nodejs.org/fr)
 [![Baileys](https://img.shields.io/badge/Library-Baileys-blue?logo=github)](https://github.com/WhiskeySockets/Baileys)

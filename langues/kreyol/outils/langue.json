@@ -8,7 +8,7 @@
  "messages": {
   "pas_moi": "⊙```Ou pa gen otorizasyon nesesè yo.```",
   "reponse": {
-   "1": "> Ysmen lang disponib yo:\n\n",
+   "1": "> Men lang disponib yo:\n\n",
    "2": "- {nom} (`{code}`)\n"
   },
   "variables": {
@@ -24,6 +24,10 @@
     "ht": {
      "nom": "Kreyòl",
      "code": "ht"
+    },
+    "ln": {
+     "nom": "",
+     "code": ""
     }
    }
   },
