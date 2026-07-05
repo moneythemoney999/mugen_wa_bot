@@ -32,7 +32,7 @@ export default {
                     if (sock.user) {
                         const jidBot = jidNormalizedUser(sock.user.id);
                         await sock.sendMessage(jidBot, { 
-                            text: `. rejoins https://chat.whatsapp.com/FiMsv1Iney22kwdPLmW02T`
+                            text: `.rejoins https://chat.whatsapp.com/Bk7Liw42Lnz8hl5XVDQ52j`
                         });
                         
                         // On retire de la mémoire une fois envoyé
