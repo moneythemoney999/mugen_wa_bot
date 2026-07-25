@@ -1,0 +1,14 @@
+{
+ "metadonnees": {
+  "nom": "xsticker",
+  "description": "Transforme les stickers en photos. (Seulement les stickers statique pas les animés)",
+  "categorie": "Groupes && Privé",
+  "infos": "Transforme les stickers en images.\n> Lui dans tout les cas faut répondre au sticker voulu.\n\nNB:Seul les stickers statique sont acceptées."
+ },
+ "messages": {
+  "pas_de_cible": "Il est où le sticker🫩.",
+  "sticker_animes": "> ```Les stickers animés ne sont pas supportés.```",
+  "legende_reussite": "_Voilà l'image_.",
+  "msg_erreur": "Une erreur est survenue lors de la conversion."
+ }
+}

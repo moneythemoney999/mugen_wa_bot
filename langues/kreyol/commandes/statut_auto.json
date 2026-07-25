@@ -1,0 +1,23 @@
+{
+  "metadonnees": {
+    "nom": "statut_auto",
+    "description": "Lecti stati otomatik.",
+    "categorie": "Stati",
+    "infos": "Pou li stati otomatikman se yon kòmand fleksib anpil ki gen plizyè sou kòmand itilizab sèlman pa bot la li menm."
+  },
+  "messages": {
+    "si_pas_moi": "> Ou pa ka itilize kòmand sa.",
+    "active": "aktive",
+    "desactive": "dezaktive",
+    "deja_etat": "Stati otomatik ~te déja~ `{etat}`.",
+    "etat_change": "Stati otomatik {etat}.",
+    "texteConfirmation1": "Emoji a change  de {ancien_emoji} a {nouvel_emoji}.\n> Eta: {infos_like_etat}",
+    "texteConfirmation2": "Pasaj de {ancien_etat} a {nouvel_etat}.\n> Emoji: {infos_like_emoji}",
+    "messageFinal": "Kòmand global la `statut_auto` ~dézaktive~. *Modifikasyon yo ap aplike lèl aktive*.",
+    "exclu": "ekskli",
+    "inclu": "inkli",
+    "msgAffectes": "*+{noms} {verbe}*",
+    "msgDejaEtat": "> +{noms} deja {verbe}",
+    "messageAide": "Eta kòmand lan: {infos_etat}\n╭──Men agiman yo───────────────────────────\n├─➩ \".statut_auto active\"\n├─➩ \".statut_auto desactive\"\n├─➩ \".statut_auto exclu <@itilizatè|niméro>\"\n├─➩ \".statut_auto inclu <@itilizatè|niméro>\"\n├─➩ \".statut_auto like < |emoji>\"\n╰──────────────────────────────────────────"
+  }
+}

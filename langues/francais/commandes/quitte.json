@@ -1,0 +1,20 @@
+{
+ "metadonnees": {
+  "nom": "quitte",
+  "description": "Pour quitter des groupes/communautés ou se désabonner à des chaînes.",
+  "categorie": "Groupes && Privé",
+  "infos": "Utilisation : `.quitte` dans un groupe, ou `.quitte <lien>` pour quitter une discussion spécifique."
+ },
+ "messages": {
+  "msgRefus": "```T'es pas autorisé à exécuter cette commande```",
+  "msgPlus_membre": "```Je ne suis déjà plus dans ce groupe.```",
+  "msgSucces": "_Groupe : {groupe} quitté avec succès._",
+  "msgSi_prive": "> Inutilisable en privé.\n*Où si c'est une autre discussion que tu veux quitter mets le lien de derrière la commande.*",
+  "lien_invalide": "```Lien invalide```",
+  "etait_pas_membre": "> Tu n'étais pas membre de la discussion",
+  "msg_succes": "*Discussion quittée avec succès* : ~{nom}~",
+  "succes_chaine": "✓Opération terminée pour la chaîne : ~{nom_chaine}~",
+  "pas_abonne": "> Tu n'étais pas abonné à cette chaîne",
+  "msgErreur": "*Une erreur s'est produite*"
+ }
+}

@@ -1,0 +1,15 @@
+{
+ "metadonnees": {
+  "nom": "mugen",
+  "description": "Lanzar el bot",
+  "categorie": "Grupos && Privado",
+  "infos": "> Más o menos sirve para saber si el bot está en línea y tambíen es cierta forma la introducción.\nEl comando también tiene argumento :\n    `.mugen photo` : *Para cambiar la photo de fondo del comando.*"
+ },
+ "messages": {
+  "erreur_permis": "⤫No puedes ejecutarlo⤫",
+  "photo_changee": "𑁍Foto de fondo cambiada a *{statut}*᪥.",
+  "statut_mon_profil": "mi perfil",
+  "statut_profil_chat": "perfil del chat",
+  "legende": "> ╔❀══◄••❀••►══❀══❀══◄••❀••►══❀╗ 𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭              Mugen Bot♾️♾️ v{version} ╚❀══◄••❀••►══❀══❀══◄••❀••►══❀╝\n\n⫸ Aquí:\n > ⟁⃤ ♱ Mugen♾️♾️ Bot versión {version} ⟁⃤ ♱\n⫸ Creado por:\n > Money Mugen♾️♾️\n\n—͟͟͞͞Escribe `.menu`, `.menu commandes` o `.menu outils` para ver la lista de funcionalidades彡"
+ }
+}

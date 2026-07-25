@@ -1,0 +1,21 @@
+{
+ "metadonnees": {
+  "nom": "degrade",
+  "description": "Degrada a un admin de un grupo.",
+  "categorie": "Grupos",
+  "infos": "Uso: `.degrade @miembro` o `.degrade <número>` para degradar a un admin.\nPero también debes ser administrador y no puedes degradar a la persona que creó el grupo."
+ },
+ "messages": {
+  "msgSi_prive": "No se puede usar en privado.",
+  "msgMoi_non_admin": "> No eres admin😂😂.",
+  "msgAutre_non_admin": "Debes ser admin",
+  "msgBot_non_admin": "Debes darme derechos de administrador.",
+  "msgPas_de_cible": "> ¿Auién debo degradar?\n*Responde a uno de sus mensajes o escribe su número o tag a la persona atrás del comando* ej: `.degrade 56931437983` o `.degrade @la_persona`.",
+  "msgCible_moi": "```No puedo degradarme peux ```",
+  "msgCible_proprio": "~Impossible de degradar al jefe.~",
+  "msgCible_pas_admin": "_@{cible} no era administrador_",
+  "msgSucces": "✓@{cible} ha sido degradado.",
+  "msgCible_nom_membre":  "~Esta persona no era miembro del grupo.~",
+  "msgErreur": "Se produjo un error durante la degradación."
+ }
+}

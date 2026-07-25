@@ -1,0 +1,37 @@
+{
+ "metadonnees": {
+  "nom": "langue",
+  "description": "Cambiar el idioma del bot",
+  "categorie": "Bot",
+  "infos": "Permite ver y cambiar el idioma del bot. Su uso es muy simple: ejecuta el comando seguido del nombre o código del idioma, ej: `.langue es`.\n*Nota: Hay algunos idiomasx que podrían no estar disponibles en el bot. En ese caso, se mostrará un mensaje de error indicando que el idioma no existe o no está disponible.*\n\n> Para ver los idiomas disponibles, simplemente ejecuta el comando sin argumentos: `.idioma`."
+ },
+ "messages": {
+  "pas_moi": "⊙```No tienes los permisos necesarios```",
+  "reponse": {
+   "1": "> Aquí está los idiomas disponibles:\n\n",
+   "2": "- {nom} (`{code}`)\n"
+  },
+  "variables": {
+   "variables_langues": {
+    "fr": {
+     "nom": "Francés",
+     "code": "fr"
+    },
+    "es": {
+     "nom": "Español",
+     "code": "es"
+    },
+    "ht": {
+     "nom": "Criollo",
+     "code": "ht"
+    }
+   }
+  },
+  "erreur": {
+   "langue_pas_trouve": "𒀰Idioma no disponible o inexistente𒀰"
+  },
+  "succes": {
+   "change_langue": "🗘Idioma cambiado de {ancienne} ➜ {nouvelle}✓"
+  }
+ }
+}

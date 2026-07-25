@@ -1,0 +1,43 @@
+{
+  "metadonnees": {
+    "nom": "mode",
+    "description": "Jésyon mod bot la.",
+    "categorie": "Group && Privé",
+    "infos": "Ou ka itilizel nan group oubyen prive pou mete group sa, kontak oubyen bot la nan mod prive/publique. Pou mete tout bot la en prive/publique, fòw itilize agiman `tous` la aprè mod ou vle mete a, ex : `.mode prive tous`. Aprè kòmand lan, yon mesaj konfimasyon ap parèt poul di ke paramèt yo te anrejistre. Pou aplike yo, ou dwe itilize agiman `change` lan + mod ou vle pase a, eg : `.mode change tous`"
+  },
+  "messages": {
+    "est_pas_moi": "```Ou paka itilize kòmand sah.```",
+    "mode_actuel": {
+      "1": "piblik (tous)",
+      "2": "{etat} (tous)",
+      "3": "prive (lis)",
+      "4": "piblik (lis)"
+    },
+    "txt": {
+      "1": "```Agiman enkoni.```\n",
+      "2": "> Mod : *{mode}*\n\nAgiman:\n-    `.mode prive` pou mete diskisyonw ye nan mod prive.\n-    `.mode publique` pouw retirel.\n-    `.mode {prive/publique} tous` pou mete tout diskisyon yo swa an prive oubyen piblik.\n-    `.mode change {publique/prive/tous}` pou chanje konfigirasyon mod yo."
+    },
+    "nom_chat": {
+      "1": "Chat sa",
+      "2": "{nom_chat}",
+      "3": "@{nom_chat}"
+    },
+    "reussite": {
+      "chat_prive": "`{nom_chat}` *nan mod prive la*\n> Paramèt sah yo ap pran efèt ke si ou fè kòmand `.mode change prive` la.",
+      "parametre_enregistre": "_Paramèt anrejistre_",
+      "chat_publique": "*{nom_chat} nan mod piblik la*\n> Paramèt sah yo ap pran efèt ke si ou fè kòmand `.mode change prive` la.",
+      "change": {
+        "change": "> Chanjman de {ancien} a {nouveau}",
+        "tous": {
+          "prive": "prive (tous)",
+          "publique": "piblik (tous)"
+        }
+      }
+    },
+    "erreur": {
+      "change": {
+        "cible_invalide": "Sib chanjman invalid (prive/publique/tous)."
+      }
+    }
+  }
+}

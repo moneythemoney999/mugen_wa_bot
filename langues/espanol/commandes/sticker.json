@@ -1,0 +1,13 @@
+{
+  "metadonnees":{
+    "nom": "sticker",
+    "description": "Crear stickers.",
+    "categorie": "Grupos && Privado",
+    "infos": "*Transforma videos o fotos en stickers* _e incluso personalizar el nombre del pack_\n> Ejemplo: `.sticker Nombre del pack` \n\n```También a partir de fotos de perfil. ```\n> °Para grupos, si solo se escribe el comando sin argumentos o si el argumento es el nombre del pack, se tomará la foto de perfil del grupo como objetivo.\n> °Si se etiqueta a alguien, se tomará su foto de perfil como objetivo."
+  },
+  "messages": {
+    "pas_ma_profil": "Y ¿por qué mi perfil🫩🫩?",
+    "pas_de_media": "````No se encontró ningún medio.```",
+    "erreur_creation": "_La creación del sticker falló. Ocurrió un error._"
+  }
+}

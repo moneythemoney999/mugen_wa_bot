@@ -1,0 +1,19 @@
+{
+ "metadonnees": {
+  "nom": "promouve",
+  "description": "Promueve un miembro al rango de administrador.",
+  "categorie": "Grupos",
+  "infos": "Uso : `.promouve @MIEMBRO` o `.promouve <número>` para nombrar a alguien admin.\n> Pero para lograrlo debes ser admin."
+ },
+ "messages": {
+  "msgSi_prive": "No se puede usar en privado.",
+  "msgMoi_non_admin": "> No eres admin😂🤣.",
+  "msgAutre_non_admin": "Faut que tu sois admin",
+  "msgBot_non_admin": "Debes darme los derechos de administración.",
+  "msgPas_de_cible": "¿Quién debo promover?.\n*Responde a uno de sus mensajes o pon su número o tag a la persona atrás del comando*.\n> ej: `.promouve 56931437983` `.promouve @la_persona`.",
+  "msgCible_deja_admin": "@{cible} ya era admin.",
+  "msgSucces": "✓@{cible} ha sido promovido admin.",
+  "msgCible_non_membre": "~Esta Esta persona no está en el grupo~",
+  "msgErreur": "Se produjo un error durante la promoción."
+ }
+}

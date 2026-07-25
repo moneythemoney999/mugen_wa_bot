@@ -1,0 +1,21 @@
+{
+ "metadonnees": {
+  "nom": "degrade",
+  "description": "Rétrograde un administrateur d'un groupe.",
+  "categorie": "Groupes",
+  "infos": "Utilisation : `.degrade @membre` ou `.degrade <numéro>` pour rétrograder un admin.\nMais il faut que tu sois admin aussi et tu ne peux pas rétrograder la personne qui a créé le groupe."
+ },
+ "messages": {
+  "msgSi_prive": "C'est pas utilisable en privé.",
+  "msgMoi_non_admin": "> T'es pas admin😂😂",
+  "msgAutre_non_admin": "Faut que tu sois admin",
+  "msgBot_non_admin": "Faut me donner les droits d'administration",
+  "msgPas_de_cible": "> Qui dois-je rétrograder.\n*Répond à un de ses messages ou mets son num ou tag la personne derrière la commande* ex: `.degrade 56931437983` ou `.degrade @la_personne`.",
+  "msgCible_moi": "```Je peux pas me rétrograder```",
+  "msgCible_proprio": "~Impossible de rétrograder le proprio.~",
+  "msgCible_pas_admin": "_@{cible} n'était pas administrateur_",
+  "msgSucces": "✓@{cible} a bien été rétrogradé.",
+  "msgCible_nom_membre":  "~Cette personne n'est pas un membre du groupe~",
+  "msgErreur": "Une erreur est survenue lors de la rétrogradation."
+ }
+}
