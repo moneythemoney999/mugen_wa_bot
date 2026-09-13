@@ -1,4 +1,4 @@
-import fs from 'fs';
+import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -10,35 +10,38 @@ const capitaliser = (chaine) => chaine.charAt(0).toUpperCase() + chaine.slice(1)
 /**
  * Fonction centrale pour récupérer les traductions
  * Supporte la notation par point récursive (ex: msg.erreurs.404)
- * @param {string} nomSession - Nom de la session active
+ * @param {string} nom_session - Nom de la session active
  * @param {string} type - 'commandes' ou 'outils'
  * @param {string} nom - Nom du fichier (ex: 'mugen')
  * @param {object} clesDemandes - Objet { cle: { var1: val1 } }
  */
-export function traduire(nomSession, type, nom, clesDemandes) {
-    const cheminSessionLangue = path.join(__dirname, '..', 'memoires', 'memoires_sessions', nomSession, 'langue.json');
+export async function traduire(nom_session, type, nom, clesDemandes) {
+    const cheminSessionLangue = path.join(__dirname, '..', 'memoires', 'memoires_sessions', nom_session, 'langue.json');
     let codeLangue = 'fr'; // Français par défaut
 
     // 1. On récupère la langue de la session
-    if (fs.existsSync(cheminSessionLangue)) {
-	try {
-	    codeLangue = JSON.parse(fs.readFileSync(cheminSessionLangue, 'utf8')).langue;
-	} catch (e) {}
+    if (await fs.access(cheminSessionLangue).then(() => true).catch(() => false)) {
+        try {
+            codeLangue = JSON.parse(await fs.readFile(cheminSessionLangue, 'utf8')).langue;
+        } catch (e) {}
     }
 
     // 2. On identifie le dossier de la langue via son code
     const cheminDossierLangues = path.join(__dirname, '..', 'langues');
-    if (!fs.existsSync(cheminDossierLangues)) fs.mkdirSync(cheminDossierLangues, { recursive: true });
+    if (!(await fs.access(cheminDossierLangues).then(() => true).catch(() => false))) {
+        await fs.mkdir(cheminDossierLangues, { recursive: true });
+    }
 
-    const listeDossiers = fs.readdirSync(cheminDossierLangues).filter(f => fs.statSync(path.join(cheminDossierLangues, f)).isDirectory());
+    const elementsDossier = await fs.readdir(cheminDossierLangues, { withFileTypes: true });
+    const listeDossiers = elementsDossier.filter(f => f.isDirectory()).map(f => f.name);
 
     let nomDossierLangue = 'français'; // Dossier par défaut
     let trouvé = false;
     for (const dossier of listeDossiers) {
         const cheminConfig = path.join(cheminDossierLangues, dossier, `${dossier}.json`);
-        if (fs.existsSync(cheminConfig)) {
+        if (await fs.access(cheminConfig).then(() => true).catch(() => false)) {
             try {
-                if (JSON.parse(fs.readFileSync(cheminConfig, 'utf8')).code === codeLangue) {
+                if (JSON.parse(await fs.readFile(cheminConfig, 'utf8')).code === codeLangue) {
                     nomDossierLangue = dossier;
                     trouvé = true;
                     break;
@@ -52,16 +55,16 @@ export function traduire(nomSession, type, nom, clesDemandes) {
     let dictionnaire = { metadonnees: {}, messages: {} };
     let aEteModifie = false;
 
-    if (fs.existsSync(cheminTrad)) {
+    if (await fs.access(cheminTrad).then(() => true).catch(() => false)) {
         try {
-            const contenu = fs.readFileSync(cheminTrad, 'utf8');
+            const contenu = await fs.readFile(cheminTrad, 'utf8');
             if (contenu.trim()) dictionnaire = JSON.parse(contenu);
         } catch (e) {
             console.error(`[(Langage)]: Erreur de lecture de ${cheminTrad}`);
         }
     } else {
-        if (!fs.existsSync(path.dirname(cheminTrad))) fs.mkdirSync(path.dirname(cheminTrad), { recursive: true });
-        fs.writeFileSync(cheminTrad, JSON.stringify(dictionnaire, null, 1));
+        await fs.mkdir(path.dirname(cheminTrad), { recursive: true });
+        await fs.writeFile(cheminTrad, JSON.stringify(dictionnaire, null, 1));
     }
 
     const resultats = {};
@@ -128,7 +131,7 @@ export function traduire(nomSession, type, nom, clesDemandes) {
     });
 
     if (aEteModifie) {
-        fs.writeFileSync(cheminTrad, JSON.stringify(dictionnaire, null, 1));
+        await fs.writeFile(cheminTrad, JSON.stringify(dictionnaire, null, 1));
     }
 
     return resultats;
@@ -145,7 +148,7 @@ export default {
 > Pour afficher les langues disponibles c'est simple il suffit de faire la commande sans argument de langue : \`.langue\`.*`,
     affiche_menu: 'vrai',
 
-    execute: async (nomEvenement, donneesEvenement, { sock, nomSession, prefixe }) => {
+    execute: async (nomEvenement, donneesEvenement, { connexion, nom_session, prefixe }) => {
 	const { messages } = donneesEvenement;
 	const message = messages[0];
 	if (!message.message) return;
@@ -161,44 +164,46 @@ export default {
         if (commande.toLowerCase() !== 'langue') return;
 
         // Le "Raccourci" local, sans boucle infinie
-        const trad = (cle, vars = {}) => traduire(nomSession, 'outils', 'langue', { [cle]: vars })[cle];
+        const trad = async (cle, vars = {}) => (await traduire(nom_session, 'outils', 'langue', { [cle]: vars }))[cle];
 
         if (!message.key.fromMe) {
-            const pas_moi = trad('msg.pas_moi') || "⊙```T'as pas l'autorisation necéssaire```";
-            await sock.sendMessage(message.key.remoteJid, { text: pas_moi }, { quoted: message });
+            const pas_moi = (await trad('msg.pas_moi')) || "⊙```T'as pas l'autorisation necéssaire```";
+            await connexion.sendMessage(message.key.remoteJid, { text: pas_moi }, { quoted: message });
             return 'STOP';
         }
 
         const cheminDossierLangues = path.join(__dirname, '..', 'langues');
-        const cheminSessionLangue = path.join(__dirname, '..', 'memoires', 'memoires_sessions', nomSession, 'langue.json');
+        const cheminSessionLangue = path.join(__dirname, '..', 'memoires', 'memoires_sessions', nom_session, 'langue.json');
 
-        const listeDossiers = fs.readdirSync(cheminDossierLangues).filter(f => fs.statSync(path.join(cheminDossierLangues, f)).isDirectory());
-        const donneesLangues = listeDossiers.map(dossier => {
+        const elementsDossier = await fs.readdir(cheminDossierLangues, { withFileTypes: true });
+        const listeDossiers = elementsDossier.filter(f => f.isDirectory()).map(f => f.name);
+        
+        const donneesLangues = [];
+        for (const dossier of listeDossiers) {
             const cheminJsonIdentity = path.join(cheminDossierLangues, dossier, `${dossier}.json`);
-            if (fs.existsSync(cheminJsonIdentity)) {
+            if (await fs.access(cheminJsonIdentity).then(() => true).catch(() => false)) {
                 try {
-                    const contenu = JSON.parse(fs.readFileSync(cheminJsonIdentity, 'utf8'));
-                    return {
+                    const contenu = JSON.parse(await fs.readFile(cheminJsonIdentity, 'utf8'));
+                    donneesLangues.push({
                       dossier,
                       code: contenu.code,
                       nom: contenu.nom || dossier
-                    };
-                } catch (e) { return null; }
+                    });
+                } catch (e) { continue; }
             }
-            return null;
-        }).filter(l => l !== null);
+        }
 
         if (!arguments_[0]) {
-            let reponse = trad('msg.reponse.1') || "> Voici les langues disponible :\n\n";
-            donneesLangues.forEach(l => {
-              const variables_reponse_nom = trad(`msg.variables.variables_langues.${l.code}.nom`) || capitaliser(l.nom);
-              const variables_reponse_code = trad(`msg.variables.variables_langues.${l.code}.code`) || l.code;
-		reponse += trad('msg.reponse.2', {
+            let reponse = (await trad('msg.reponse.1')) || "> Voici les langues disponible :\n\n";
+            for (const l of donneesLangues) {
+              const variables_reponse_nom = (await trad(`msg.variables.variables_langues.${l.code}.nom`)) || capitaliser(l.nom);
+              const variables_reponse_code = (await trad(`msg.variables.variables_langues.${l.code}.code`)) || l.code;
+		reponse += (await trad('msg.reponse.2', {
 		    nom: variables_reponse_nom,
 		    code: variables_reponse_code
-		    }) || `- ${capitaliser(l.nom)} (\`${l.code}\`)\n`;
-            });
-            await sock.sendMessage(message.key.remoteJid, { text: reponse }, { quoted: message });
+		    })) || `- ${capitaliser(l.nom)} (\`${l.code}\`)\n`;
+            }
+            await connexion.sendMessage(message.key.remoteJid, { text: reponse }, { quoted: message });
             return 'STOP';
         }
 
@@ -206,32 +211,32 @@ export default {
         const langueCible = donneesLangues.find(l => l.dossier.toLowerCase() === argumentChoisi || l.code.toLowerCase() === argumentChoisi);
 
         if (!langueCible) {
-            const  langue_pas_trouve = trad('msg.erreur.langue_pas_trouve') || "𒀰Langue indisponible ou inexistante𒀰";
-            await sock.sendMessage(message.key.remoteJid, { text: langue_pas_trouve }, { quoted: message });
+            const  langue_pas_trouve = (await trad('msg.erreur.langue_pas_trouve')) || "𒀰Langue indisponible ou inexistante𒀰";
+            await connexion.sendMessage(message.key.remoteJid, { text: langue_pas_trouve }, { quoted: message });
             return 'STOP';
         }
 
         let ancien_code = 'fr';
-        if (fs.existsSync(cheminSessionLangue)) {
+        if (await fs.access(cheminSessionLangue).then(() => true).catch(() => false)) {
             try {
-                ancien_code = JSON.parse(fs.readFileSync(cheminSessionLangue, 'utf8')).langue;
+                ancien_code = JSON.parse(await fs.readFile(cheminSessionLangue, 'utf8')).langue;
             } catch (e) {}
         }
 
         const nouvelleConfig = { langue: langueCible.code };
-        if (!fs.existsSync(path.dirname(cheminSessionLangue))) fs.mkdirSync(path.dirname(cheminSessionLangue), { recursive: true });
-        fs.writeFileSync(cheminSessionLangue, JSON.stringify(nouvelleConfig, null, 1));
+        if (!(await fs.access(path.dirname(cheminSessionLangue)).then(() => true).catch(() => false))) await fs.mkdir(path.dirname(cheminSessionLangue), { recursive: true });
+        await fs.writeFile(cheminSessionLangue, JSON.stringify(nouvelleConfig, null, 1));
 
         // Maintenant que la session est mise à jour, trad() utilisera le nouveau dictionnaire
-        const ancienneLangueNom = trad(`msg.variables.variables_langues.${ancien_code}.nom`) || capitaliser(ancienne.nom);
-        const nouvelleLangueNom = trad(`msg.variables.variables_langues.${langueCible.code}.nom`) || capitaliser(langueCible.nom);
+        const ancienneLangueNom = (await trad(`msg.variables.variables_langues.${ancien_code}.nom`)) || capitaliser(ancien_code);
+        const nouvelleLangueNom = (await trad(`msg.variables.variables_langues.${langueCible.code}.nom`)) || capitaliser(langueCible.nom);
 
-        const succes_change_langue = trad('msg.succes.change_langue', {
+        const succes_change_langue = (await trad('msg.succes.change_langue', {
             ancienne: ancienneLangueNom,
             nouvelle: nouvelleLangueNom
-        }) || `🗘Langue changé de ${ancienneLangueNom} ➜ ${nouvelleLangueNom}✓`;
+        })) || `🗘Langue changé de ${ancienneLangueNom} ➜ ${nouvelleLangueNom}✓`;
 
-        await sock.sendMessage(message.key.remoteJid, { text: succes_change_langue }, { quoted: message });
+        await connexion.sendMessage(message.key.remoteJid, { text: succes_change_langue }, { quoted: message });
 
         return 'STOP';
     }

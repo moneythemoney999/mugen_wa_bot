@@ -11,8 +11,8 @@ export default {
     categorie: "Groupes && Privé",
     infos: "Utilisation : `.quitte` dans un groupe, ou `.quitte <lien>` pour quitter une discussion spécifique.",
 
-    execute: async ({ sock, message, args, nomSession }) => {
-	const trad = (cle, vars = {}) => traduire(nomSession, 'commandes', 'quitte', { [cle]: vars })[cle];
+    execute: async ({ sock, message, arguments, nom_session }) => {
+	const trad = (cle, vars = {}) => traduire(nom_session, 'commandes', 'quitte', { [cle]: vars })[cle];
 
         if (!message.key.fromMe) {
 	    const msgRefus = trad('msg.msgRefus') || "```T'es pas autorisé à exécuter cette commande```";
@@ -23,7 +23,7 @@ export default {
             return;
         }
 
-        const lien = args[0];
+        const lien = arguments[0];
         const jid = message.key.remoteJid;
 
         if (!lien) {
@@ -50,7 +50,7 @@ export default {
                     return 'NO_REACTION';
                 } catch (e) {
 		    //une erreur non identifié on le log
-                    console.error(`[(quitte), "${nomSession}": Erreur dans .quitte (groupe actuel) :`, e);
+                    console.error(`[(quitte), "${nom_session}": Erreur dans .quitte (groupe actuel) :`, e);
                 }
             } else {
 		const msgSi_prive = trad('msg.msgSi_prive') || `> Inutilisable en privé.
@@ -102,7 +102,7 @@ export default {
                 const metadata = await sock.newsletterMetadata("invite", codeInvitation);
                 if (!metadata?.id) {
 		     //si la recheche avec le lien a echoue
-                     throw new Error(`[(quitte), "${nomSession}"]: Métadonnées de la chaîne introuvables via le code.`);
+                     throw new Error(`[(quitte), "${nom_session}"]: Métadonnées de la chaîne introuvables via le code.`);
                 }
                 await sock.newsletterUnfollow(metadata.id);
                 //ce code n'est probablement jamais atteint le succès est géré dans le catch
@@ -126,7 +126,7 @@ export default {
 		     { quoted: message });
             } else {
 		//si pendans les requete quelque chose d'inatendu c'est produit on le log et envoi une notif
-                console.error(`[(quitte), "${nomSession}"]: Erreur dans .quitte (avec lien) :`, e);
+                console.error(`[(quitte), "${nom_session}"]: Erreur dans .quitte (avec lien) :`, e);
 		const msgErreur = trad('msg.msgErreur') || "*Une erreur s'est produite*";
                 await sock.sendMessage(jid,
 		    { text: msgErreur },

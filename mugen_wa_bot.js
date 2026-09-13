@@ -4,185 +4,188 @@ import qrcode from 'qrcode-terminal';
 import fs from 'fs';
 import pino from 'pino';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 import readline from 'readline';
 import util from 'util';
 import {traduire} from "./outils/langue.js";
 
 
 //cache metadata
-const cacheGroupes = new Map();
+const cache_groupes = new Map();
 
 
 //fonction pour avoir des infos sur un utilisateur ou un groupe : declaration
-async function obtenirInfosExpediteur(sock, message) {
-    const jidBrut = message.key.participant || message.key.remoteJid;
-    let jidUtilisateur = jidBrut;
+async function obtenir_infos_expediteur(connexion, message) {
+	const jid_brut = message.key.participant || message.key.remoteJid;
+	let jid_utilisateur = jid_brut;
 
-    //: correction pour résoudre les LID
-    if (jidBrut && jidBrut.endsWith('@lid')) {
-        try {
-            const pn = await sock.signalRepository.lidMapping.getPNForLID(jidBrut);
-            if (pn) {
-                jidUtilisateur = jidNormalizedUser(pn);
-            }
-        } catch (e) {
-            console.error(`[LID-Erreur] Impossible de résoudre le LID ${jidBrut}:`, e);
-        }
-    }
-    //: fin de la correction
+	//: correction pour résoudre les LID
+	if (jid_brut && jid_brut.endsWith('@lid')) {
+		try {
+			const pn = await connexion.signalRepository.lidMapping.getPNForLID(jid_brut);
+			if (pn) {
+				jid_utilisateur = jidNormalizedUser(pn);
+			}
+		} catch (e) {
+			console.error(`[LID-Erreur] Impossible de résoudre le LID ${jid_brut}:`, e);
+		}
+	}
+	//: fin de la correction
 
-    const numero = jidUtilisateur ? jidUtilisateur.split("@")[0] : 'inconnu';
+	const numero = jid_utilisateur ? jid_utilisateur.split("@")[0] : 'inconnu';
+	const nom_utilisateur = message.pushName || numero;
+	let nom_groupe = null;
+	const jid_groupe = message.key.remoteJid;
 
-    const nomUtilisateur = message.pushName || numero;
-
-    let nomGroupe = null;
-    const jidGroupe = message.key.remoteJid;
-
-    if (jidGroupe?.endsWith("@g.us")) {
-        if (cacheGroupes.has(jidGroupe)) {
-            nomGroupe = cacheGroupes.get(jidGroupe);
-        } else {
-            try {
-                const metadata = await sock.groupMetadata(jidGroupe);
-                nomGroupe = metadata.subject;
-                cacheGroupes.set(jidGroupe, nomGroupe);
-            } catch (e) {
-                nomGroupe = "groupe inconnu";
-            }
-        }
-    }
-
-    return {
-        jid: jidUtilisateur,
-        numero,
-        nomUtilisateur,
-        nomGroupe
-    };
+	if (jid_groupe?.endsWith("@g.us")) {
+		if (cache_groupes.has(jid_groupe)) {
+			nom_groupe = cache_groupes.get(jid_groupe);
+		} else {
+				try {
+					const metadata = await connexion.groupMetadata(jid_groupe);
+					nom_groupe = metadata.subject;
+					cache_groupes.set(jid_groupe, nom_groupe);
+				} catch (e) {
+						nom_groupe = "groupe inconnu";
+				}
+		}
+	}
+	return {
+		jid: jid_utilisateur,
+		numero,
+		nom_utilisateur,
+		nom_groupe
+	};
 }
 
 
 //gestion des logs colores
-const logOriginal = console.log;
-const erreurOriginale = console.error;
+const log_succes = console.log;
+const log_erreur = console.error;
 const couleurs = { vert: '\x1b[32m', rouge: '\x1b[31m', reset: '\x1b[0m' };
-const formaterMessage = (parametres) => parametres.map(param => (typeof param === 'object' && param !== null) ? util.inspect(param, { colors: false, depth: null }) : param).join(' ');
-console.log = (...parametres) => logOriginal(`${couleurs.vert}${formaterMessage(parametres)}${couleurs.reset}`);
-console.error = (...parametres) => erreurOriginale(`${couleurs.rouge}${formaterMessage(parametres)}${couleurs.reset}`);
+const formater_log = (parametres) => parametres.map(param => (typeof param === 'object' && param !== null) ? util.inspect(param, { colors: false, depth: null }) : param).join(' ');
+console.log = (...parametres) => log_succes(`${couleurs.vert}${formater_log(parametres)}${couleurs.reset}`);
+console.error = (...parametres) => log_erreur(`${couleurs.rouge}${formater_log(parametres)}${couleurs.reset}`);
 
 
 //initialisation des chemins de memoires
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const cheminMemoires = path.join(__dirname, "memoires");
-const cheminMemoiresCommandes = path.join(cheminMemoires, "memoires_commandes");
-const cheminMemoiresSessions = path.join(cheminMemoires, "memoires_sessions");
-const cheminMemoiresOutils = path.join(cheminMemoires, "memoires_outils");
-fs.mkdirSync(cheminMemoiresCommandes, { recursive: true });
-fs.mkdirSync(cheminMemoiresSessions, { recursive: true });
-fs.mkdirSync(cheminMemoiresOutils, { recursive: true });
+const nom_fichier = fileURLToPath(import.meta.url);
+const nom_dossier = path.dirname(nom_fichier);
+const chemin_memoires = path.join(nom_dossier, "memoires");
+const chemin_memoires_commandes = path.join(chemin_memoires, "memoires_commandes");
+const chemin_memoires_sessions = path.join(chemin_memoires, "memoires_sessions");
+const chemin_memoires_outils = path.join(chemin_memoires, "memoires_outils");
+
+(async () => {
+	await fs.promises.mkdir(chemin_memoires_commandes, { recursive: true });
+	await fs.promises.mkdir(chemin_memoires_sessions, { recursive: true });
+	await fs.promises.mkdir(chemin_memoires_outils, { recursive: true });
+})();
 
 //prefixe du bot
-const PREFIXE = ".";
+const prefixe = ".";
 
+// Utilitaire pour convertir un chemin de fichier en URL file:// compatible Windows/Linux
+const chemin_url = (chemin) => pathToFileURL(chemin).href;
 
 //chemin des commandes
-const poserQuestion = (texte) => new Promise((resolve) => { const rl = readline.createInterface({ input: process.stdin, output: process.stdout }); rl.question(`${couleurs.vert}${texte}${couleurs.reset}`, (reponse) => { rl.close(); resolve(reponse); }); });
-const chargerCommande = (nomCommande) => { const chemin = path.join(__dirname, "commandes", `${nomCommande}.js`); return fs.existsSync(chemin) ? import(chemin) : null; };
-
-//SYSTÈME D'OUTILS (NOUVEAU)
-const chargerOutil = (nomOutil) => { const chemin = path.join(__dirname, "outils", `${nomOutil}.js`); return fs.existsSync(chemin) ? import(`${chemin}?update=${Date.now()}`) : null; };
-const outilsCharges = [];
+const poser_question = (texte) => new Promise((resolve) => { const rl = readline.createInterface({ input: process.stdin, output: process.stdout }); rl.question(`${couleurs.vert}${texte}${couleurs.reset}`, (reponse) => { rl.close(); resolve(reponse); }); });
+const charger_commande = async (nom_commande) => { const chemin = path.join(nom_dossier, "commandes", `${nom_commande}.js`); return (await fs.promises.access(chemin).then(() => true).catch(() => false)) ? import(chemin_url(chemin)) : null; };
+//chemin des outils 
+const charger_outil = async (nom_outil) => { const chemin = path.join(nom_dossier, "outils", `${nom_outil}.js`); return (await fs.promises.access(chemin).then(() => true).catch(() => false)) ? import(`${chemin_url(chemin)}?update=${Date.now()}`) : null; };
+const outils_charges = [];
 
 //fuction pour les outils
-async function dispatcherEvenements(nomEvenement, donneesEvenement, sock, nomSession) {
-    for (const outil of outilsCharges) {
-        const module = outil.default;
-        if (module.evenements && (module.evenements === nomEvenement || (Array.isArray(module.evenements) && module.evenements.includes(nomEvenement)))) {
-            try {
-                const resultat = await module.execute(nomEvenement, donneesEvenement, { sock, nomSession, prefixe: PREFIXE });
-                if (resultat === 'STOP') return 'STOP';
-            } catch (erreur) {
-                console.error(`[(Mugen Bot♾️♾️))]; Erreur dans l'outil "${module.nom || 'inconnu'}" sur l'événement "${nomEvenement}":`, erreur);
-            }
-        }
-    }
+async function distribuer_evenement(nom_evenement, donnees_evenement, connexion, nom_session) {
+	for (const outil of outils_charges) {
+		const module = outil.default;
+		if (module.evenements && (module.evenements === nom_evenement || (Array.isArray(module.evenements) && module.evenements.includes(nom_evenement)))) {
+			try {
+				const resultat = await module.execute(nom_evenement, donnees_evenement, { connexion, nom_session, prefixe: prefixe });
+				if (resultat === 'STOP') return 'STOP';
+			}
+			catch (erreur) {
+				console.error(`[(Mugen Bot♾️♾️))]; Erreur dans l'outil "${module.nom || 'inconnu'}" sur l'événement "${nom_evenement}":`, erreur);
+			}
+		}
+	}
 }
 
 
 //chargement des outils
-async function chargerLesOutils() {
-    try {
-        const cheminDossierOutils = path.join(__dirname, "outils");
-        if (fs.existsSync(cheminDossierOutils)) {
-            const fichiersOutils = fs.readdirSync(cheminDossierOutils).filter(f => f.endsWith('.js'));
-            outilsCharges.length = 0; //vider la liste avant de recharger
-            for (const fichier of fichiersOutils) {
-                const nomOutil = path.parse(fichier).name;
-                const moduleOutil = await chargerOutil(nomOutil);
-                if (moduleOutil) {
-                    outilsCharges.push(moduleOutil);
-                    console.log(`[(Mugen Bot♾️♾️ )]; Outil "${moduleOutil.default.nom || nomOutil}" chargé.`);
-                }
-            }
-        }
-    } catch (erreur) {
-        console.error(`[(Mugen Bot♾️♾️ )]; Erreur lors du chargement des outils:`, erreur);
-    }
+async function charger_outils() {
+	try {
+		const chemin_outils = path.join(nom_dossier, "outils");
+		if (await fs.promises.access(chemin_outils).then(() => true).catch(() => false)) {
+			const fichiers_outils = (await fs.promises.readdir(chemin_outils)).filter(f => f.endsWith('.js'));
+			outils_charges.length = 0; //vider la liste avant de recharger
+			for (const fichier of fichiers_outils) {
+				const nom_outil = path.parse(fichier).name;
+				const module_outil = await charger_outil(nom_outil);
+				if (module_outil) {
+					outils_charges.push(module_outil);
+					console.log(`[(Mugen Bot♾️♾️ )]; Outil "${module_outil.default.nom || nom_outil}" chargé.`);
+				}
+			}
+		}
+	}
+	catch (erreur) {
+		console.error(`[(Mugen Bot♾️♾️ )]; Erreur lors du chargement des outils:`, erreur);
+	}
 }
-chargerLesOutils();
+charger_outils();
 
 
 //fonction pour envoyer et retirer des reaction
-async function envoyerReactionFinale(sock, jid, cleMessage, emoji) {
-    await sock.sendMessage(jid, {
-        react: { text: emoji, key: cleMessage }
+async function envoyer_reaction(connexion, jid, cle_message, emoji) {
+	await connexion.sendMessage(jid, {
+		react: { text: emoji, key: cle_message }
     });
-    setTimeout(() => {
-        try {
-            sock.sendMessage(jid, { react: { text: "", key: cleMessage } });
-        } catch (e) {}
-    }, 30000); //secondes
+	setTimeout(() => {
+		try {
+			connexion.sendMessage(jid, { react: { text: "", key: cle_message } });
+		}
+		catch (e) {}
+	}, 30000); //secondes
 }
 
 
-       //logique du bot : chargement des commandes et initialisation des sessions
-async function demarrerBot(nomSession = "mugen") {
+//logique du bot : chargement des commandes et initialisation des sessions
+async function demarrer_bot(nom_session = "mugen") {
+	try {
+		const chemin_commandes = path.join(nom_dossier, "commandes");
+		const fichiers_commandes = (await fs.promises.readdir(chemin_commandes)).filter(fichier => fichier.endsWith('.js'));
+		for (const fichier of fichiers_commandes) {
+			const nom_commande = path.parse(fichier).name;
+			// : creation des dossiers memoires pour chaque commande
+			const chemin_memoire_session_commande = path.join(chemin_memoires_commandes, nom_commande, nom_session);
+			await fs.promises.mkdir(chemin_memoire_session_commande, { recursive: true });
+		}
 
-    try {
-        const cheminDossierCommandes = path.join(__dirname, "commandes");
-        const fichiersCommandes = fs.readdirSync(cheminDossierCommandes).filter(fichier => fichier.endsWith('.js') && !fichier.endsWith('_db.js'));
-
-        for (const fichier of fichiersCommandes) {
-            const nomCommande = path.parse(fichier).name;
-            // : creation des dossiers memoires pour chaque commande
-            const cheminDossierSessionDansCommande = path.join(cheminMemoiresCommandes, nomCommande, nomSession);
-            fs.mkdirSync(cheminDossierSessionDansCommande, { recursive: true });
-        }
-
-        // : creation des dossiers memoires pour chaque outil
-        const cheminDossierOutils = path.join(__dirname, "outils");
-        if (fs.existsSync(cheminDossierOutils)) {
-            const fichiersOutils = fs.readdirSync(cheminDossierOutils).filter(f => f.endsWith('.js'));
-            for (const fichier of fichiersOutils) {
-                const nomOutil = path.parse(fichier).name;
-                const cheminDossierSessionDansOutil = path.join(cheminMemoiresOutils, nomOutil, nomSession,);
-                fs.mkdirSync(cheminDossierSessionDansOutil, { recursive: true });
-            }
-        }
-        console.log(`[(Mugen Bot♾️♾️ )]; Dossiers de mémoire pour la session "${nomSession}" vérifié`);
-    } catch (erreur) {
-        console.error(`[(Mugen Bot♾️♾️ )]; Erreur lors de la création des dossiers de mémoire pour "${nomSession}":`, erreur);
-    }
-    // : chargement des sessions si les fichiers authentification existe
-    const cheminAuth = path.join(__dirname, ".secret/.auth", nomSession);
-    const { state, saveCreds } = await useMultiFileAuthState(cheminAuth);
-    const { version } = await fetchLatestBaileysVersion();
-    // : creation du socket
-    const sock = makeWASocket({
-    //logger: pino({ level: 'silent' }),
+		// : creation des dossiers memoires pour chaque outil
+		const chemin_outils = path.join(nom_dossier, "outils");
+		if (await fs.promises.access(chemin_outils).then(() => true).catch(() => false)) {
+			const fichiers_outils = (await fs.promises.readdir(chemin_outils)).filter(f => f.endsWith('.js'));
+			for (const fichier of fichiers_outils) {
+				const nom_outil = path.parse(fichier).name;
+				const chemin_memoire_session_outils = path.join(chemin_memoires_outils, nom_outil, nom_session,);
+				await fs.promises.mkdir(chemin_memoire_session_outils, { recursive: true });
+			}
+		}
+		console.log(`[(Mugen Bot♾️♾️ )]; Dossiers de mémoire pour la session "${nom_session}" vérifié`);
+	}
+	catch (erreur) {
+		console.error(`[(Mugen Bot♾️♾️ )]; Erreur lors de la création des dossiers de mémoire pour "${nom_session}":`, erreur);
+	}
+	// : chargement des sessions si les fichiers authentification existe
+	const chemin_auth = path.join(nom_dossier, ".secret/.auth", nom_session);
+	const { state: etat, saveCreds: sauvegarder_auth } = await useMultiFileAuthState(chemin_auth);
+	const { version } = await fetchLatestBaileysVersion();
+	// : creation du socket
+	const connexion = makeWASocket({
+	logger: pino({ level: 'silent' }),
 	version,
-	auth: state,
+	auth: etat,
 	browser: ["Ubuntu", "Chrome"],
 	syncFullHistory: true,
 	markOnlineOnConnect : false ,
@@ -190,172 +193,166 @@ async function demarrerBot(nomSession = "mugen") {
 	retryRequestDelayMs : 500 ,
 	maxMsgRetryCount : 5 ,
 	});
-    // : si les fichiers authentification existe pas on pose des questions sur la methode de de connexion
-    let isPairingCodeChosen = false;
-    if (!state.creds.registered) {
-        const choix = await poserQuestion(`Authentification pour ${nomSession}
+	// : si les fichiers authentification existe pas on pose des questions sur la methode de de connexion
+	let code_pairage_choisi = false;
+	if (!etat.creds.registered) {
+		const choix = await poser_question(`Authentification pour ${nom_session}
 1: QR Code
 2: Code de pairage\n\t:`);
-        // : si code de pair est choisi comme methode
-        if (choix.trim() === '2') {
-            isPairingCodeChosen = true;
-            const numeroTelephone = await poserQuestion(`Numéro de téléphone pour ${nomSession} (ex: 56931437983: `);
-            const code = await sock.requestPairingCode(numeroTelephone);
-            console.log(`\nVoilà le code: ${code}\n`);
-        }
-    }
-    // : si qr code est choisi ou que le choix fait est pas dans la liste
-    sock.ev.on("connection.update", async (miseAJour) => {
-        if (await dispatcherEvenements("connection.update", miseAJour, sock, nomSession) === 'STOP') return;
-        const { connection, lastDisconnect, qr } = miseAJour;
-        if (qr && !isPairingCodeChosen) {
-            qrcode.generate(qr, { small: true });
-        }
-        if (connection === "close") {
-            const devraitReconnecter = lastDisconnect?.error?.output?.statusCode !== 401;
-            if (devraitReconnecter) demarrerBot(nomSession);
-        } else if (connection === "open") {
-            console.log(`"${nomSession}" connecté`);
-        }
-    });
+		// : si code de pair est choisi comme methode
+		if (choix.trim() === '2') {
+			code_pairage_choisi = true;
+			const numero = await poser_question(`Numéro de téléphone pour ${nom_session} (ex: 56931437983: `);
+			const code = await connexion.requestPairingCode(numero);
+			console.log(`\nVoilà le code: ${code}\n`);
+		}
+	}
+	// : si qr code est choisi ou que le choix fait est pas dans la liste
+	connexion.ev.on("connection.update", async (mise_a_jour) => {
+		if (await distribuer_evenement("connection.update", mise_a_jour, connexion, nom_session) === 'STOP') return;
+		const { connection, lastDisconnect, qr } = mise_a_jour;
+		if (qr && !code_pairage_choisi) {
+			qrcode.generate(qr, { small: true });
+		}
+		if (connection === "close") {
+			const reconnexion = lastDisconnect?.error?.output?.statusCode !== 401;
+			if (reconnexion) demarrer_bot(nom_session);
+		} else if (connection === "open") {
+			console.log(`"${nom_session}" connecté`);
+		}
+	});
 
-    //detection des evenements
-    sock.ev.on("creds.update", async (creds) => {
-        if (await dispatcherEvenements("creds.update", creds, sock, nomSession) === 'STOP') return;
-        await saveCreds();
-    });
+	//detection des evenements
+	connexion.ev.on("creds.update", async (creds) => {
+		if (await distribuer_evenement("creds.update", creds, connexion, nom_session) === 'STOP') return;
+		await sauvegarder_auth();
+	});
 
-    sock.ev.on("group-participants.update", async (donnees) => {
-        if (await dispatcherEvenements("group-participants.update", donnees, sock, nomSession) === 'STOP') return;
-    });
+	connexion.ev.on("group-participants.update", async (donnees) => {
+		if (await distribuer_evenement("group-participants.update", donnees, connexion, nom_session) === 'STOP') return;
+	});
 
-    sock.ev.on("messages.upsert", async (donnees) => {
-        if (await dispatcherEvenements("messages.upsert", donnees, sock, nomSession) === 'STOP') return;
+	connexion.ev.on("messages.upsert", async (donnees) => {
+		if (await distribuer_evenement("messages.upsert", donnees, connexion, nom_session) === 'STOP') return;
 
-        const { messages, type } = donnees;
-        const message = messages[0];
+		const { messages, type } = donnees;
+		const message = messages[0];
 
-        if (!message.message) return;
+		if (!message.message) return;
 
-        const texte = message.message.conversation || message.message.extendedTextMessage?.text || message.message.imageMessage?.caption || message.message.videoMessage?.caption;
-        // : si dans la fouille des evenements on trouve des messages avec le prefixe on le capture
-        if (texte && texte.startsWith(PREFIXE)) {
+		const texte = message.message.conversation || message.message.extendedTextMessage?.text || message.message.imageMessage?.caption || message.message.videoMessage?.caption;
+		// : si dans la fouille des evenements on trouve des messages avec le prefixe on le capture
+		if (texte && texte.startsWith(prefixe)) {
 
-		const infos = await obtenirInfosExpediteur(sock, message);
+		const infos = await obtenir_infos_expediteur(connexion, message);
 
-                // appelle au commandes : analyse des evenements qui contiennent le prefixe et appelle a la commande en question
-                const [nomCommande, ...args] = texte.slice(PREFIXE.length).trim().split(/\s+/);
-                const moduleCommande = await chargerCommande(nomCommande);
-                const trad = (cle, vars = {}) => traduire(nomSession, '', 'mugen_wa_bot', { [cle]: vars })[cle];
-                // : en attente que la commande repond on envoie une réaction
-                if (moduleCommande?.default?.execute) {
-                    try {
-                      const emoji_reaction_execution = trad("msg.emoji_reaction.execution") || "♾️";
-                        await sock.sendMessage(message.key.remoteJid, { react: {
-                          text: emoji_reaction_execution,
-                          key: message.key
-                        }});
-			    let log = `Commande/outil ${nomCommande} demandé depuis ${nomSession} par ${infos.nomUtilisateur} (${infos.numero})`;
+			// appelle au commandes : analyse des evenements qui contiennent le prefixe et appelle a la commande en question
+			const [nom_commande, ...arguments] = texte.slice(prefixe.length).trim().split(/\s+/);
+			const module_commande = await charger_commande(nom_commande);
+			const trad = (cle, vars = {}) => traduire(nom_session, '', 'mugen_wa_bot', { [cle]: vars })[cle];
+			// : en attente que la commande repond on envoie une réaction
+			if (module_commande?.default?.execute) {
+				try {
+					const emoji_reaction_execution = trad("msg.emoji_reaction.execution") || "♾️";
+					await connexion.sendMessage(message.key.remoteJid, { react: {
+						text: emoji_reaction_execution,
+						key: message.key
+					}});
+					let log = `Commande/outil ${nom_commande} demandé depuis ${nom_session} par ${infos.nom_utilisateur} (${infos.numero})`;
+					if (infos.nom_groupe) {
+						log += ` dans le groupe "${infos.nom_groupe}"`;
+					}
+					console.log(log);
 
-				if (infos.nomGroupe) {
-				    log += ` dans le groupe "${infos.nomGroupe}"`;
-			  	}
-				console.log(log);
+					// : si la commande nous revois NO_REACTION on envoi pas de reaction apres la commande
+					const resultat = await module_commande.default.execute({ connexion, message, arguments, nom_session });
+					if (resultat !== 'NO_REACTION') {
+						// : mais si non on envoie la reaction
+						const emoji_reaction_reussite = trad(`msg.emoji_reaction.reussite`) || "✅";
+						await envoyer_reaction(connexion, message.key.remoteJid, message.key, emoji_reaction_reussite);
+						let log_succes = `Commande/outils ${nom_commande} éxecuté depuis ${nom_session} par ${infos.nom_utilisateur} (${infos.numero})`;
+						if (infos.nom_groupe) log_succes += ` dans le groupe "${infos.nom_groupe}"`;
+						console.log(log_succes);
+					}
+				} catch (erreur) {
+					console.error(`Erreur lors de l'exécution de la commande "${nom_commande}":`, erreur);
+					// : mais si la commande a eu un problème dans son execution on envoie cette rection et de même que l'autre il est soumis à NO_REACTION
+					const emoji_reaction_erreur = trad(`msg.emoji_reaction.erreur`) || "❌";
+					await envoyer_reaction(connexion, message.key.remoteJid, message.key, emoji_reaction_erreur);
+					let log_erreur = `Commande/outil ${nom_commande} échoué depuis ${nom_session} par ${infos.nom_utilisateur} (${infos.numero})`;
+					if (infos.nom_groupe) log_erreur += ` dans le groupe "${infos.nom_groupe}"`;
+					console.error(log_erreur);
+				}
+			}
+			else {
+				// si au moment ou on essaie de joindre la commande on le trouve pas : on envoie cette reaction
+				const emoji_reaction_inconnu = trad(`msg.emoji_reaction.inconnu`) || "❓";
+				await envoyer_reaction(connexion, message.key.remoteJid, message.key, emoji_reaction_inconnu);
+				let log_inconnu = `Commande/outil ${nom_commande} inconnu depuis ${nom_session} par ${infos.nom_utilisateur} (${infos.numero})`;
+				if (infos.nom_groupe) log_inconnu += ` dans le groupe "${infos.nom_groupe}"`;
+				console.error(log_inconnu);
 
-                        // : si la commande nous revois NO_REACTION on envoi pas de reaction apres la commande
-                        const resultat = await moduleCommande.default.execute({ sock, message, args, nomSession });
-                        if (resultat !== 'NO_REACTION') {
-                            // : mais si non on envoie la reaction
-                            const emoji_reaction_reussite = trad(`msg.emoji_reaction.reussite`) || "✅";
-                            await envoyerReactionFinale(sock, message.key.remoteJid, message.key, emoji_reaction_reussite);
-                            let logSucces = `Commande/outils ${nomCommande} éxecuté depuis ${nomSession} par ${infos.nomUtilisateur} (${infos.numero})`;
-                            if (infos.nomGroupe) logSucces += ` dans le groupe "${infos.nomGroupe}"`;
-                            console.log(logSucces);
-                        }
-                    } catch (erreur) {
-                        console.error(`Erreur lors de l'exécution de la commande "${nomCommande}":`, erreur);
-                        // : mais si la commande a eu un problème dans son execution on envoie cette rection et de même que l'autre il est soumis à NO_REACTION
-                        const emoji_reaction_erreur = trad(`msg.emoji_reaction.erreur`) || "❌";
-                        await envoyerReactionFinale(sock, message.key.remoteJid, message.key, emoji_reaction_erreur);
-                        let logErreur = `Commande/outil ${nomCommande} échoué depuis ${nomSession} par ${infos.nomUtilisateur} (${infos.numero})`;
-                        if (infos.nomGroupe) logErreur += ` dans le groupe "${infos.nomGroupe}"`;
-                        console.error(logErreur);
-                    }
-                } else {
+				// : et ce message d'erreur
+				const fonctionalite_inconnu = trad(`msg.fonctionalite_inconnu`, {
+					nom: nom_commande
+				}) || `𒁂Commande ou outil inconnue ".${nom_commande}"𒁂`;
+				await connexion.sendMessage(message.key.remoteJid, { text: fonctionalite_inconnu }, { quoted: message });
+			}
+		}
+		else {
+			// fonction et appelle des commandes sans besoin du evenement aillant le prefixe il est à la disposition de tous les commandes
+			const chemin_commandes = path.join(nom_dossier, "commandes");
+			const fichiers_commandes = (await fs.promises.readdir(chemin_commandes)).filter(f => f.endsWith('.js') && !f.endsWith('_db.js'));
 
-
-                    // si au moment ou on essaie de joindre la commande on le trouve pas : on envoie cette reaction
-                    const emoji_reaction_inconnu = trad(`msg.emoji_reaction.inconnu`) || "❓";
-                    await envoyerReactionFinale(sock, message.key.remoteJid, message.key, emoji_reaction_inconnu);
-                    let logInconnu = `Commande/outil ${nomCommande} inconnu depuis ${nomSession} par ${infos.nomUtilisateur} (${infos.numero})`;
-                    if (infos.nomGroupe) logInconnu += ` dans le groupe "${infos.nomGroupe}"`;
-                    console.error(logInconnu);
-
-                    // : et ce message d'erreur
-                    const fonctionalite_inconnu = trad(`msg.fonctionalite_inconnu`, {
-                      nom: nomCommande
-                    }) || `𒁂Commande ou outil inconnue ".${nomCommande}"𒁂`;
-                    await sock.sendMessage(message.key.remoteJid, { text: fonctionalite_inconnu }, { quoted: message });
-                }
-            } else {
-
-                // fonction et appelle des commandes sans besoin du evenement aillant le prefixe il est à la disposition de tous les commandes
-                const cheminDossierCommandes = path.join(__dirname, "commandes");
-                const fichiersCommandes = fs.readdirSync(cheminDossierCommandes).filter(f => f.endsWith('.js') && !f.endsWith('_db.js'));
-
-                for (const fichier of fichiersCommandes) {
-                    const nomCommande = path.parse(fichier).name;
-                    const moduleCommande = await chargerCommande(nomCommande);
-                    if (moduleCommande?.default?.handleNonCommand) {
-                        try {
-                            const messageGere = await moduleCommande.default.handleNonCommand({ sock, message, nomSession });
-                            if (messageGere) break;
-                        } catch (erreur) {
-                            console.error(`Erreur dans handleNonCommand pour ${nomCommande}:`, erreur);
-                        }
-                    }
-                }
-            }
-    });
+			for (const fichier of fichiers_commandes) {
+				const nom_commande = path.parse(fichier).name;
+				const module_commande = await charger_commande(nom_commande);
+				if (module_commande?.default?.evenements_sans_prefixe) {
+					try {
+						const getion_message = await module_commande.default.evenements_sans_prefixe({ connexion, message, nom_session });
+						if (getion_message) break;
+					} catch (erreur) {
+						console.error(`Erreur dans evenements_sans_prefixe pour ${nom_commande}:`, erreur);
+					}
+				}
+			}
+		}
+	});
 }
 
 //recherche des session à lancer dans "session.js"
-const chargerSessions = () => {
-    const cheminSessions = path.join(__dirname, "session.js");
+const charger_sessions = async () => {
+	const chemin_sessions = path.join(nom_dossier, "session.js");
+	//si le fichier n'existe pas, on lance la session par défaut
+	if (!(await fs.promises.access(chemin_sessions).then(() => true).catch(() => false))) {
+		demarrer_bot();
+		return;
+	}
+	try {
+		const contenu_brut = await fs.promises.readFile(chemin_sessions, "utf8");
+		//si le fichier est vide, on lance la session par défaut
+		if (!contenu_brut.trim()) {
+			demarrer_bot();
+			return;
+		}
+		//sinon, on cherche les appels actifs (non commentés)
+		// On retire d'abord les blocs /* ... */
+		let contenu_nettoye = contenu_brut.replace(/\/\*[\s\S]*?\*\//g, "");
+		const lignes = contenu_nettoye.split("\n");
 
-    //si le fichier n'existe pas, on lance la session par défaut
-    if (!fs.existsSync(cheminSessions)) {
-        demarrerBot();
-        return;
-    }
-
-    try {
-        const contenuRaw = fs.readFileSync(cheminSessions, "utf8");
-
-        //si le fichier est vide, on lance la session par défaut
-        if (!contenuRaw.trim()) {
-            demarrerBot();
-            return;
-        }
-
-        //sinon, on cherche les appels actifs (non commentés)
-        // On retire d'abord les blocs /* ... */
-        let contenuNettoye = contenuRaw.replace(/\/\*[\s\S]*?\*\//g, "");
-        const lignes = contenuNettoye.split("\n");
-
-        for (let ligne of lignes) {
-            //on ignore ce qui est après //
-            const instruction = ligne.split("//")[0].trim();
-            const match = instruction.match(/demarrerBot\s*\(\s*["']([^"']+)["']\s*\)/);
-
-            if (match && match[1]) {
-                demarrerBot(match[1]);
-            }
-        }
-    } catch (erreur) {
-        console.error("[(Mugen Bot♾️♾️ )]; Erreur lors de la lecture de session.js :", erreur);
-    }
+		for (const ligne of lignes) {
+			//on ignore ce qui est après //
+			const instruction = ligne.split("//")[0].trim();
+			const correspondance = instruction.match(/demarrer_bot\s*\(\s*["']([^"']+)["']\s*\)/);
+			if (correspondance && correspondance[1]) {
+				demarrer_bot(correspondance[1]);
+			}
+		}
+	}
+	catch (erreur) {
+		console.error("[(Mugen Bot♾️♾️ )]; Erreur lors de la lecture de session.js :", erreur);
+	}
 };
 
 // Lancement automatique
-chargerSessions();
+charger_sessions();

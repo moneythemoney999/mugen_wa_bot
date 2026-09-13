@@ -1,21 +1,21 @@
 /* */
 
 //imports nécessaire
-import fs from "fs";
-import path from "path";
+import { promises as fs } from 'fs';
+import path from 'path';
 import { fileURLToPath } from 'url';
 import { jidNormalizedUser } from '@whiskeysockets/baileys';
 import {traduire} from '../outils/langue.js';
 
 
 //fonctions utilitaires pour la gestion de la mémoire
-function obtenirCheminsMemoire(nomSession) {
+async function obtenirCheminsMemoire(nom_session) {
     const nomFichier = fileURLToPath(import.meta.url);
     const cheminDossier = path.dirname(nomFichier);
     const nomCommande = "statut_auto";
 
-    const cheminDossierMemoire = path.join(cheminDossier, '..', 'memoires', 'memoires_commandes', nomCommande, nomSession);
-    fs.mkdirSync(cheminDossierMemoire, { recursive: true });
+    const cheminDossierMemoire = path.join(cheminDossier, '..', 'memoires', 'memoires_commandes', nomCommande, nom_session);
+    await fs.mkdir(cheminDossierMemoire, { recursive: true });
 
     return {
         infosFichier: path.join(cheminDossierMemoire, `infos.json`),
@@ -24,7 +24,7 @@ function obtenirCheminsMemoire(nomSession) {
     };
 }
 
-function chargerInfos(cheminFichier) {
+async function chargerInfos(cheminFichier) {
     const infosParDefaut = {
         etat: "desactive",
         like: {
@@ -33,9 +33,9 @@ function chargerInfos(cheminFichier) {
         }
     };
 
-    if (fs.existsSync(cheminFichier)) {
+    if (await fs.access(cheminFichier).then(() => true).catch(() => false)) {
         try {
-            const contenu = JSON.parse(fs.readFileSync(cheminFichier, 'utf-8'));
+            const contenu = JSON.parse(await fs.readFile(cheminFichier, 'utf-8'));
             return { ...infosParDefaut, ...contenu, like: { ...infosParDefaut.like, ...(contenu.like || {}) } };
         } catch (e) {
             return infosParDefaut;
@@ -44,36 +44,36 @@ function chargerInfos(cheminFichier) {
     return infosParDefaut;
 }
 
-function sauvegarderInfos(cheminFichier, nouvellesInfos, nomSession) {
+async function sauvegarderInfos(cheminFichier, nouvellesInfos, nom_session) {
     try {
-        fs.writeFileSync(cheminFichier, JSON.stringify(nouvellesInfos, null, 2));
-    } catch (e) { console.error(`[(statut_auto), "${nomSession}"]: Erreur d'écriture du fichier d'infos:`, e); }
+        await fs.writeFile(cheminFichier, JSON.stringify(nouvellesInfos, null, 2));
+    } catch (e) { console.error(`[(statut_auto), "${nom_session}"]: Erreur d'écriture du fichier d'infos:`, e); }
 }
 
-function chargerStatutsLus(cheminFichier) {
-    if (fs.existsSync(cheminFichier)) {
-        try { return JSON.parse(fs.readFileSync(cheminFichier, 'utf-8')); } catch (e) { return []; }
+async function chargerStatutsLus(cheminFichier) {
+    if (await fs.access(cheminFichier).then(() => true).catch(() => false)) {
+        try { return JSON.parse(await fs.readFile(cheminFichier, 'utf-8')); } catch (e) { return []; }
     }
     return [];
 }
 
-function sauvegarderStatutsLus(cheminFichier, objets, nomSession) {
+async function sauvegarderStatutsLus(cheminFichier, objets, nom_session) {
     try {
-        fs.writeFileSync(cheminFichier, JSON.stringify(objets, null, 2));
-    } catch (e) { console.error(`[(statut_auto), "${nomSession}"]: Erreur d'écriture du fichier des statuts lus:`, e); }
+        await fs.writeFile(cheminFichier, JSON.stringify(objets, null, 2));
+    } catch (e) { console.error(`[(statut_auto), "${nom_session}"]: Erreur d'écriture du fichier des statuts lus:`, e); }
 }
 
-function chargerPersonnesExclues(cheminFichier) {
-    if (fs.existsSync(cheminFichier)) {
-        try { return JSON.parse(fs.readFileSync(cheminFichier, 'utf-8')); } catch (e) { return []; }
+async function chargerPersonnesExclues(cheminFichier) {
+    if (await fs.access(cheminFichier).then(() => true).catch(() => false)) {
+        try { return JSON.parse(await fs.readFile(cheminFichier, 'utf-8')); } catch (e) { return []; }
     }
     return [];
 }
 
-function sauvegarderPersonnesExclues(cheminFichier, jids, nomSession) {
+async function sauvegarderPersonnesExclues(cheminFichier, jids, nom_session) {
     try {
-        fs.writeFileSync(cheminFichier, JSON.stringify(jids, null, 2));
-    } catch (e) { console.error(`[(statut_auto), "${nomSession}"]: Erreur d'écriture du fichier d'exclusion:`, e); }
+        await fs.writeFile(cheminFichier, JSON.stringify(jids, null, 2));
+    } catch (e) { console.error(`[(statut_auto), "${nom_session}"]: Erreur d'écriture du fichier d'exclusion:`, e); }
 }
 
 
@@ -95,20 +95,20 @@ export default {
 > Pour le désactiver il suffit de taper tout simplement \`.statut_auto like\` et c'est de même pour le désactiver.
 > Si c'est l'émoji que tu veux changer il suffit de taper la même chose mais cette fois avec l'émoji que tu veux à la toute fin ex: \`.statut_auto like 🫩\`.  NB : *Si la commande globale \`.statut_auto\` était à l'état désactiver les modifications de seront enregistrés mais appliquer qu'à l'activation de la commande globale.`,
 
-    execute: async ({ sock, message, args, nomSession }) => {
-	const trad = (cle, vars = {}) => traduire(nomSession, 'commandes', 'statut_auto', { [cle]: vars })[cle];
+    execute: async ({ connexion, message, arguments, nom_session }) => {
+	const trad = (cle, vars = {}) => traduire(nom_session, 'commandes', 'statut_auto', { [cle]: vars })[cle];
         if (!message.key.fromMe) {
 	    const si_pas_moi = trad('msg.si_pas_moi') || "> Tu ne peux pas utiliser cette commande";
-            await sock.sendMessage(message.key.remoteJid,
+            await connexion.sendMessage(message.key.remoteJid,
 		//si c'est pas moi
 		{ text: si_pas_moi },
 		{ quoted: message });
             return;
         }
 	//gestion des sous-commnades
-        const chemins = obtenirCheminsMemoire(nomSession);
-        const premierArgument = args[0]?.toLowerCase();
-        const infos = chargerInfos(chemins.infosFichier);
+        const chemins = await obtenirCheminsMemoire(nom_session);
+        const premierArgument = arguments[0]?.toLowerCase();
+        const infos = await chargerInfos(chemins.infosFichier);
 
         switch (premierArgument) {
 	    //sous-commandes actve && desactive
@@ -120,15 +120,15 @@ export default {
 			etat: etat_commande
 			}) || `Statuts automatique ~était déjà~ \`${etat_commande}\``;
 
-		    await sock.sendMessage(message.key.remoteJid,
+		    await connexion.sendMessage(message.key.remoteJid,
 			{ text: deja_etat },
 			{ quoted: message });
                 } else {
                     infos.etat = premierArgument;
-                    sauvegarderInfos(chemins.infosFichier, infos, nomSession);
+                    await sauvegarderInfos(chemins.infosFichier, infos, nom_session);
 		    const etat_change = trad('msg.etat_change',{
 			etat: etat_commande}) || `Statuts automatique ${etat_commande}`;
-                    await sock.sendMessage(message.key.remoteJid,
+                    await connexion.sendMessage(message.key.remoteJid,
 			{ text: etat_change },
 			{ quoted: message });
                 }
@@ -137,7 +137,7 @@ export default {
 
 	     //sous-commandes like
              case "like": {
-                const nouvelEmoji = args[1];
+                const nouvelEmoji = arguments[1];
                 let texteConfirmation = "";
 
                 if (nouvelEmoji) {
@@ -161,20 +161,20 @@ export default {
 			}) || `Passage de ${traduction_ancien_etat} à ${traduction_nouvel_etat}.\n> Émoji: ${infos.like.emoji}`;
                 }
 
-                sauvegarderInfos(chemins.infosFichier, infos, nomSession);
+                await sauvegarderInfos(chemins.infosFichier, infos, nom_session);
 
                 const messageFinal = infos.etat === 'desactive'
                     ? trad("msg.messageFinal") || "La commande globale `statut_auto` est ~désactivée~. *Les modifications seront appliquées à son activation*."
                     : texteConfirmation;
 
-                await sock.sendMessage(message.key.remoteJid, { text: messageFinal }, { quoted: message });
+                await connexion.sendMessage(message.key.remoteJid, { text: messageFinal }, { quoted: message });
                 break;
             }
 	    //sous-commandes exclu && inclu
             case "exclu":
             case "inclu": {
                 let jidsCibles = [];
-                const numeroFourni = args[1];
+                const numeroFourni = arguments[1];
                 const estGroupe = message.key.remoteJid.endsWith('@g.us');
 
                 if (numeroFourni) {
@@ -193,7 +193,7 @@ export default {
                     let idFinal = jid;
                     if (jid.endsWith('@lid')) {
                         try {
-                            const pn = await sock.signalRepository.lidMapping.getPNForLID(jid);
+                            const pn = await connexion.signalRepository.lidMapping.getPNForLID(jid);
                             if (pn) idFinal = pn;
                         } catch (e) {}
                     }
@@ -201,7 +201,7 @@ export default {
                 }
 
                 if (jidsResolus.length > 0) {
-                    const exclusActuels = chargerPersonnesExclues(chemins.exclusFichier);
+                    const exclusActuels = await chargerPersonnesExclues(chemins.exclusFichier);
                     let affectes = [];
                     let dejaDansEtat = [];
 
@@ -229,7 +229,7 @@ export default {
                     }
 
                     if (affectes.length > 0) {
-                        sauvegarderPersonnesExclues(chemins.exclusFichier, exclusActuels, nomSession);
+                        await sauvegarderPersonnesExclues(chemins.exclusFichier, exclusActuels, nom_session);
                     }
 
                     const verbe = trad(`msg.${premierArgument}`) || premierArgument;
@@ -257,7 +257,7 @@ export default {
 			messageResultat.push(msgDejaEtat);
 			}
 
-                    await sock.sendMessage(message.key.remoteJid, { text: messageResultat.join('\n') }, { quoted: message });
+                    await connexion.sendMessage(message.key.remoteJid, { text: messageResultat.join('\n') }, { quoted: message });
                 }
                 break;
             }
@@ -274,14 +274,14 @@ export default {
 ├─➩ ".statut_auto inclu <@utilisateur|numéro>"
 ├─➩ ".statut_auto like < |emoji>"
 ╰──────────────────────────────────────────`;
-                await sock.sendMessage(message.key.remoteJid, { text: messageAide }, { quoted: message });
+                await connexion.sendMessage(message.key.remoteJid, { text: messageAide }, { quoted: message });
                 break;
             }
         }
     },
 
     //le handler qui reçoit vraiment les statuts et les lus
-    handleNonCommand: async ({ sock, message, nomSession }) => {
+    evenement_sans_prefixe: async ({ connexion, message, nom_session }) => {
         if (message.key.remoteJid !== 'status@broadcast') {
             return false;
         }
@@ -301,25 +301,25 @@ export default {
 	//normalisation des IDs avnt de les utilliser
         if (auteur.endsWith('@lid')) {
             try {
-                const pn = await sock.signalRepository.lidMapping.getPNForLID(auteur);
+                const pn = await connexion.signalRepository.lidMapping.getPNForLID(auteur);
                 if (pn) auteur = pn;
             } catch (e) {}
         }
         auteur = jidNormalizedUser(auteur);
 
-        if (auteur === jidNormalizedUser(sock.user.id)) {
+        if (auteur === jidNormalizedUser(connexion.user.id)) {
             return false;
         }
 
 	//recherche et lecture des fichiers des personnes exclues
-        const chemins = obtenirCheminsMemoire(nomSession);
-        const personnesExclues = chargerPersonnesExclues(chemins.exclusFichier);
+        const chemins = await obtenirCheminsMemoire(nom_session);
+        const personnesExclues = await chargerPersonnesExclues(chemins.exclusFichier);
 
         if (personnesExclues.includes(auteur)) {
             return false;
         }
 
-        const infos = chargerInfos(chemins.infosFichier);
+        const infos = await chargerInfos(chemins.infosFichier);
         if (infos.etat !== "active") {
             return false;
         }
@@ -329,19 +329,19 @@ export default {
         const idStatut = message.key.id;
 
 	//verification de la liste des statuts lus
-        const statutsLus = chargerStatutsLus(chemins.lusFichier);
+        const statutsLus = await chargerStatutsLus(chemins.lusFichier);
         const statutsRecents = statutsLus.filter(statut => (maintenant - statut.dateLecture) < vingtQuatreHeures);
 
 	//si le statut nettait pas dans la liste on continu si non on l'ignore
         if (!statutsRecents.some(statut => statut.id === idStatut)) {
             try {
-                await sock.readMessages([message.key]);
+                await connexion.readMessages([message.key]);
 
 		//si l'aito j'aime est actif
                 if (infos.like.etat === "active") {
 		    //on charge la reaction qu'on a dans les fichiers si non on envoi l'emoi par defaut
                     const emojiReaction = infos.like.emoji || "♾️";
-                    await sock.sendMessage(
+                    await connexion.sendMessage(
                         'status@broadcast',
                         { react: { text: emojiReaction, key: message.key } },
                         { statusJidList: [auteur] }
@@ -350,10 +350,10 @@ export default {
 
 		//apres on enregistre le nouveau statut qu'on vient de lire
                 statutsRecents.push({ id: idStatut, dateLecture: maintenant });
-                sauvegarderStatutsLus(chemins.lusFichier, statutsRecents, nomSession);
+                await sauvegarderStatutsLus(chemins.lusFichier, statutsRecents, nom_session);
             } catch(e) {
 		//pour une erreur non identifie
-                console.error(`[(statut_auto), "${nomSession}"]: Erreur pendant le traitement:`, e);
+                console.error(`[(statut_auto), "${nom_session}"]: Erreur pendant le traitement:`, e);
             }
         }
         return false;

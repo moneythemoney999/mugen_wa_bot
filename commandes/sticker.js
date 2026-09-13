@@ -20,15 +20,15 @@ export default {
 > °Pour groupe si seule la commande est tapé sans argument ou si l'argument c'est le nom du pack, c'est la profil du groupe qui sera la cible.
 > °Si c'est fait en taguant quelqu'un c'est sa profil qui est pris pour cible.`,
 
-    execute: async ({ sock, message, args, nomSession}) => {
+    execute: async ({ connexion, message, arguments, nom_sesession}) => {
         const jid = message.key.remoteJid;
-        const botJid = sock.user.id;
+        const botJid = connexion.user.id;
 
 	//"Raccourci" de traduction importer depui le fichier outils/langue.js
-	const trad = (cle, vars = {}) => traduire(nomSession, 'commandes', 'sticker', { [cle]: vars })[cle];
+	const trad = (cle, vars = {}) => traduire(nom_sesession, 'commandes', 'sticker', { [cle]: vars })[cle];
 
 	//meta-donnees des stickers on mets le non de packs que la personne a mis en argument s'il y'en a pas on mets un par defaut et le nom d'auteur lui est fixe
-        const nomPack = args.filter(arg => !arg.startsWith('@')).join(' ') || "Mugen♾️♾️";
+        const nomPack = arguments.filter(arg => !arg.startsWith('@')).join(' ') || "Mugen♾️♾️";
         const nomAuteur = "Mugen Bot♾️♾️";
 
         try {
@@ -53,16 +53,16 @@ export default {
                     let jidCible = contexteInfo.participant;
                     if (jidNormalizedUser(jidCible) === jidNormalizedUser(botJid) && !message.key.fromMe) {
 		    const pas_ma_profil = trad('msg.pas_ma_profil') || `Et pourquoi ma profil🫤🫥.`;
-		    return sock.sendMessage(jid, { text: pas_ma_profil }, { quoted: message });
+		    return connexion.sendMessage(jid, { text: pas_ma_profil }, { quoted: message });
                     }
 		    //si profil de quelqu'un d'autre on continu en telechargant la photo
-		    const lien = await sock.profilePictureUrl(jidCible, "image");
+		    const lien = await connexion.profilePictureUrl(jidCible, "image");
                     const reponse = await fetch(lien);
                     tamponCible = Buffer.from(await reponse.arrayBuffer());
                 }
             } else if (contexteInfo?.mentionedJid?.length > 0) { //si la cible etait plutot mentionner dans un groupe on recupere d'abord ses identifiant
                 const jidCible = contexteInfo.mentionedJid[0];
-                const lien = await sock.profilePictureUrl(jidCible, "image");
+                const lien = await connexion.profilePictureUrl(jidCible, "image");
                 const reponse = await fetch(lien);
                 tamponCible = Buffer.from(await reponse.arrayBuffer());
             } else if (message.message?.imageMessage || message.message?.videoMessage) {
@@ -71,7 +71,7 @@ export default {
 		//si c'est la profil du groupe la cible
                 const estGroupe = jid.endsWith("@g.us");
                 const jidCible = estGroupe ? jid : (message.key.participant || jid);
-                const lien = await sock.profilePictureUrl(jidCible, "image");
+                const lien = await connexion.profilePictureUrl(jidCible, "image");
                 const reponse = await fetch(lien);
                 tamponCible = Buffer.from(await reponse.arrayBuffer());
             }
@@ -79,7 +79,7 @@ export default {
             if (!tamponCible) {
 		//si on trouve aucune profil ou pas de media repondu ou ayant la commande en legende
 		const pas_de_media = trad('msg.pas_de_media') || "```Aucun média trouvé.```";
-                return sock.sendMessage(jid, { text: pas_de_media }, { quoted: message });
+                return connexion.sendMessage(jid, { text: pas_de_media }, { quoted: message });
             }
 
 	    //on construit le sticker apres avoir trouver et telecharger l'image cible
@@ -93,13 +93,13 @@ export default {
             });
 
 	    //on l'envoi
-            await sock.sendMessage(jid, await sticker.toMessage(), { quoted: message });
+            await connexion.sendMessage(jid, await sticker.toMessage(), { quoted: message });
 
         } catch (erreur) {
 	    //si une erreur on le logs et envoi un message
-            console.error(`[(sticker), "${nomSession}"] Erreur:`, erreur);
+            console.error(`[(sticker), "${nom_sesession}"] Erreur:`, erreur);
 	    const erreur_creation = trad('msg.erreur_creation') || "_La création du sticker a échoué. Une erreur s'est produite._";
-            await sock.sendMessage(jid, { text: erreur_creation }, { quoted: message });
+            await connexion.sendMessage(jid, { text: erreur_creation }, { quoted: message });
         }
     }
 };

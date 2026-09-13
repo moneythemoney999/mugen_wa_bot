@@ -12,10 +12,10 @@ export default {
     infos: `Utilisation : \`.promouve @MEMBRE\` ou \`.promouve <numéro>\` pour nommer quelqu'un admin.
 > Mais il faut être admin pour réussir.`,
 
-    execute: async ({ sock, nomSession, message, args }) => {
+    execute: async ({ connexion, nom_session, message, arguments }) => {
 
         const trad = (cle, vars = {}) =>
-            traduire(nomSession, 'commandes', 'promouve', { [cle]: vars })[cle];
+            traduire(nom_session, 'commandes', 'promouve', { [cle]: vars })[cle];
 
         const jid = message.key.remoteJid;
         const estGroupe = jid.endsWith('@g.us');
@@ -23,7 +23,7 @@ export default {
         if (!estGroupe) {
             const msgSi_prive = trad('msg.msgSi_prive') || "C'est pas utilisable en privé.";
 
-            await sock.sendMessage(jid,
+            await connexion.sendMessage(jid,
                 //si c'est utilisé en privé on préviens
                 { text: msgSi_prive },
                 { quoted: message });
@@ -33,12 +33,12 @@ export default {
 
         try {
             //appelle metadata et resolution des IDs
-            const metadonneesGroupe = await sock.groupMetadata(jid);
+            const metadonneesGroupe = await connexion.groupMetadata(jid);
             const participants = metadonneesGroupe.participants;
 
             const idAuteurBrut = message.key.participant;
-            const idBotBrut = sock.user.id;
-            const idBotLidBrut = sock.user.lid || idBotBrut;
+            const idBotBrut = connexion.user.id;
+            const idBotLidBrut = connexion.user.lid || idBotBrut;
 
             const participantAuteur = participants.find(p => p.id === idAuteurBrut);
             const estAdminAuteur = participantAuteur?.admin;
@@ -57,7 +57,7 @@ export default {
 
                     const msgMoi_non_admin = trad('msg.msgMoi_non_admin') || "> T'es pas admin😂🤣.";
 
-                    await sock.sendMessage(jid,
+                    await connexion.sendMessage(jid,
                         //si c'est moi et que je suis pas admin on envoie un ça
                         { text: msgMoi_non_admin },
                         { quoted: message });
@@ -66,7 +66,7 @@ export default {
 
                     const msgAutre_non_admin = trad('msg.msgAutre_non_admin') || "Faut que tu sois admin";
 
-                    await sock.sendMessage(jid,
+                    await connexion.sendMessage(jid,
                         //pour quelqu'un d'autre qui n'est pas admin
                         { text: msgAutre_non_admin },
                         { quoted: message });
@@ -79,7 +79,7 @@ export default {
 
                 const msgBot_non_admin = trad('msg.msgBot_non_admin') || "Faut me donner les droits d'administration";
 
-                await sock.sendMessage(jid,
+                await connexion.sendMessage(jid,
                     //ça vient d'un admin mais que le bot lui n'est pas admin
                     { text: msgBot_non_admin },
                     { quoted: message });
@@ -91,7 +91,7 @@ export default {
             let ciblesInitiales = [];
 
             const mentions = message.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
-            const numCible = args.find(arg => /^\d+$/.test(arg));
+            const numCible = arguments.find(arg => /^\d+$/.test(arg));
             const auteurReponduBrut = message.message?.extendedTextMessage?.contextInfo?.participant;
 
             if (mentions.length > 0) {
@@ -112,7 +112,7 @@ export default {
 *Répond à un de ses messages ou mets son num ou tag la personne derrière la commande*.
 > ex: \`.promouve 56931437983\` \`.promouve @la_personne\`.`;
 
-                await sock.sendMessage(jid,
+                await connexion.sendMessage(jid,
                     //detection d'aucun argument
                     { text: msgPas_de_cible },
                     { quoted: message });
@@ -142,7 +142,7 @@ export default {
                             }) ||
                             `@${participant.id.split('@')[0]} était déjà administrateur`;
 
-                        await sock.sendMessage(jid,
+                        await connexion.sendMessage(jid,
                             {
                                 //si la cible est deja admin
                                 text: msgCible_deja_admin,
@@ -166,7 +166,7 @@ export default {
 
                 try {
 
-                    await sock.groupParticipantsUpdate(
+                    await connexion.groupParticipantsUpdate(
                         jid,
                         ciblesAPromouvoir,
                         "promote"
@@ -180,7 +180,7 @@ export default {
 
                         try {
 
-                            await sock.groupParticipantsUpdate(
+                            await connexion.groupParticipantsUpdate(
                                 jidParent,
                                 ciblesAPromouvoir,
                                 "promote"
@@ -205,7 +205,7 @@ export default {
                         }) ||
                         `✓ @${promus.split('@')[0]} a été promu admin.`;
 
-                    await sock.sendMessage(jid,
+                    await connexion.sendMessage(jid,
                         {
                             //apres les requete si on reussi
                             text: msgSucces,
@@ -220,7 +220,7 @@ export default {
                     trad('msg.msgCible_non_membre') ||
                     "~Cette personne n'est pas un membre du groupe~";
 
-                await sock.sendMessage(jid,
+                await connexion.sendMessage(jid,
                     //par contre si on pas trouve la personne dans metadata
                     { text: msgCible_non_membre },
                     { quoted: message });
@@ -229,13 +229,13 @@ export default {
         } catch (erreur) {
 
             //si une erreur non identifie on le log et envoi un message d'erreur
-            console.error(`[(promouve), "${nomSession}"] Erreur dans la commande promouve :`, erreur);
+            console.error(`[(promouve), "${nom_session}"] Erreur dans la commande promouve :`, erreur);
 
             const msgErreur =
                 trad('msg.msgErreur') ||
                 "Une erreur est survenue lors de la promotion.";
 
-            await sock.sendMessage(jid,
+            await connexion.sendMessage(jid,
                 { text: msgErreur },
                 { quoted: message });
         }

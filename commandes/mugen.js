@@ -1,8 +1,7 @@
 /* */
 
 //imports necessaire
-import fs from 'fs';
-import { promises as fsPromises } from 'fs';
+import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { traduire } from '../outils/langue.js';
@@ -12,32 +11,32 @@ const __dirname = path.dirname(__filename);
 
 //recherche de la version dans package.json
 const cheminPackageJson = path.resolve('./package.json');
-const pkg = JSON.parse(fs.readFileSync(cheminPackageJson, 'utf8'));
+const pkg = JSON.parse(await fs.readFile(cheminPackageJson, 'utf8'));
 
 //fonction pour mettre à jour la photo de profil en arrière-plan
-async function mettreAJourPhotoProfil(sock, nomSession) {
-    const cheminDossierSession = path.join(__dirname, '..', 'memoires', 'memoires_sessions', nomSession);
+async function mettreAJourPhotoProfil(connexion, nom_session) {
+    const cheminDossierSession = path.join(__dirname, '..', 'memoires', 'memoires_sessions', nom_session);
     const cheminProfil = path.join(cheminDossierSession, 'profil.jpg');
 
     try {
-        const urlPhotoProfil = await sock.profilePictureUrl(sock.user.id, 'image');
+        const urlPhotoProfil = await connexion.profilePictureUrl(connexion.user.id, 'image');
         const reponse = await fetch(urlPhotoProfil);
         if (!reponse.ok) {
-            throw new Error(`[(mugen), "${nomSession}"]: La requête de la photo de profil a échoué avec le statut : ${reponse.status}`);
+            throw new Error(`[(mugen), "${nom_session}"]: La requête de la photo de profil a échoué avec le statut : ${reponse.status}`);
         }
         const bufferImage = Buffer.from(await reponse.arrayBuffer());
 
-        await fsPromises.mkdir(cheminDossierSession, { recursive: true });
-        await fsPromises.writeFile(cheminProfil, bufferImage);
+        await fs.mkdir(cheminDossierSession, { recursive: true });
+        await fs.writeFile(cheminProfil, bufferImage);
     } catch (erreur) {
-          console.error(`[(mugen), "${nomSession}"]: Erreur lors de la mise à jour en arrière-plan de la photo pour ${nomSession}:`, erreur);
+          console.error(`[(mugen), "${nom_session}"]: Erreur lors de la mise à jour en arrière-plan de la photo pour ${nom_session}:`, erreur);
           //si la mise à jour échoue (ex: l'utilisateur n'a plus de photo), on supprime l'ancienne du cache.
         try {
-            if (fs.existsSync(cheminProfil)) {
-                await fsPromises.unlink(cheminProfil);
+            if (await fs.access(cheminProfil).then(() => true).catch(() => false)) {
+                await fs.unlink(cheminProfil);
             }
         } catch (errSuppression) {
-              console.error(`[(mugen), "${nomSession}"]: Erreur lors de la suppression de l'ancienne photo de profil pour ${nomSession}:`, errSuppression);
+              console.error(`[(mugen), "${nom_session}"]: Erreur lors de la suppression de l'ancienne photo de profil pour ${nom_session}:`, errSuppression);
         }
     }
 }
@@ -51,39 +50,39 @@ export default {
 La commande a aussi un argument :
     \`.mugen photo\` : *Pour changer la photo de fond de la commande.*`,
 
-    execute: async ({ sock, message, args, nomSession }) => {
-        const dossierMugenMemo = path.join(__dirname, '..', 'memoires', 'memoires_commandes', 'mugen', nomSession);
+    execute: async ({ connexion, message, arguments, nom_session }) => {
+        const dossierMugenMemo = path.join(__dirname, '..', 'memoires', 'memoires_commandes', 'mugen', nom_session);
         const cheminPhotoConfig = path.join(dossierMugenMemo, 'photo.json');
 
         //"Raccourci" de traduction importer depui le fichier outils/langue.js
-        const trad = (cle, vars = {}) => traduire(nomSession, 'commandes', 'mugen', { [cle]: vars })[cle];
+        const trad = (cle, vars = {}) => traduire(nom_session, 'commandes', 'mugen', { [cle]: vars })[cle];
 
         // gestion de la sous-commande "photo"
-        if (args[0]?.toLowerCase() === 'photo') {
+        if (arguments[0]?.toLowerCase() === 'photo') {
             if (!message.key.fromMe) {
                 const msgPermis = trad('msg.erreur_permis') || "⤫Tu peux pas l'executer⤫";
-                return sock.sendMessage(message.key.remoteJid, { text: msgPermis }, { quoted: message });
+                return connexion.sendMessage(message.key.remoteJid, { text: msgPermis }, { quoted: message });
             }
 
-            await fsPromises.mkdir(dossierMugenMemo, { recursive: true });
+            await fs.mkdir(dossierMugenMemo, { recursive: true });
             let config = [{ "mon_profil": "vrai" }];
 
-            if (fs.existsSync(cheminPhotoConfig)) {
+            if (await fs.access(cheminPhotoConfig).then(() => true).catch(() => false)) {
                 try {
-                    config = JSON.parse(fs.readFileSync(cheminPhotoConfig, 'utf8'));
+                    config = JSON.parse(await fs.readFile(cheminPhotoConfig, 'utf8'));
                 } catch (e) {
                     config = [{ "mon_profil": "vrai" }];
                 }
             }
 
             config[0].mon_profil = config[0].mon_profil === "vrai" ? "faux" : "vrai";
-            fs.writeFileSync(cheminPhotoConfig, JSON.stringify(config, null, 1));
+            await fs.writeFile(cheminPhotoConfig, JSON.stringify(config, null, 1));
 
             const statutBrut = config[0].mon_profil === "vrai" ? (trad('msg.statut_mon_profil') || "mon profil.") : (trad('msg.statut_profil_chat') || "profil du chat.");
             
             const msgSucces = trad('msg.photo_changee', { statut: statutBrut }) || `𑁍Photo de fond changée en *${statutBrut}*᪥.`;
 
-            return sock.sendMessage(message.key.remoteJid, { text: msgSucces }, { quoted: message });
+            return connexion.sendMessage(message.key.remoteJid, { text: msgSucces }, { quoted: message });
         }
 
         const légende = trad('msg.legende', { version: pkg.version }) || `> ╔❀══◄••❀••►══❀══❀══◄••❀••►══❀╗ 𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭              Mugen Bot♾️♾️ v${pkg.version} ╚❀══◄••❀••►══❀══❀══◄••❀••►══❀╝
@@ -97,39 +96,40 @@ La commande a aussi un argument :
 
         //lecture de la configuration photo
         let mon_profil = "vrai";
-        if (fs.existsSync(cheminPhotoConfig)) {
+        if (await fs.access(cheminPhotoConfig).then(() => true).catch(() => false)) {
             try {
-                const config = JSON.parse(fs.readFileSync(cheminPhotoConfig, 'utf8'));
+                const config = JSON.parse(await fs.readFile(cheminPhotoConfig, 'utf8'));
                 mon_profil = config[0].mon_profil;
             } catch (e) { mon_profil = "vrai"; }
         }
 
         if (mon_profil === "vrai") {
-            const cheminProfil = path.join(__dirname, '..', 'memoires', 'memoires_sessions', nomSession, 'profil.jpg');
+            const cheminProfil = path.join(__dirname, '..', 'memoires', 'memoires_sessions', nom_session, 'profil.jpg');
             try {
-                if (fs.existsSync(cheminProfil)) {
+                if (await fs.access(cheminProfil).then(() => true).catch(() => false)) {
                     //le profil existe on l'envoie et on met à jour en arrière-plan
-                    await sock.sendMessage(
+                    const buffer = await fs.readFile(cheminProfil);
+                    await connexion.sendMessage(
                         message.key.remoteJid,
                         {
-                            image: fs.readFileSync(cheminProfil),
+                            image: buffer,
                             caption: légende
                         },
                         { quoted: message }
                     );
                     //lancer la mise à jour sans attendre
-                    mettreAJourPhotoProfil(sock, nomSession);
+                    mettreAJourPhotoProfil(connexion, nom_session);
                 } else {
                     //le profil n'existe pas on le télécharge sauvegarde et envoie
-                    const urlPhotoProfil = await sock.profilePictureUrl(sock.user.id, 'image');
+                    const urlPhotoProfil = await connexion.profilePictureUrl(connexion.user.id, 'image');
                     const reponse = await fetch(urlPhotoProfil);
                     const bufferImage = Buffer.from(await reponse.arrayBuffer());
 
                     //assurer que le dossier existe avant d'écrire
-                    await fsPromises.mkdir(path.dirname(cheminProfil), { recursive: true });
-                    fs.writeFileSync(cheminProfil, bufferImage);
+                    await fs.mkdir(path.dirname(cheminProfil), { recursive: true });
+                    await fs.writeFile(cheminProfil, bufferImage);
 
-                    await sock.sendMessage(
+                    await connexion.sendMessage(
                         message.key.remoteJid,
                         {
                             image: bufferImage,
@@ -140,7 +140,7 @@ La commande a aussi un argument :
                 }
             } catch (e) {
                 //en cas d'erreur (ex: impossible de télécharger), envoyer le texte seul
-                await sock.sendMessage(
+                await connexion.sendMessage(
                     message.key.remoteJid,
                     { text: légende },
                     { quoted: message }
@@ -149,13 +149,13 @@ La commande a aussi un argument :
         } else {
             //utiliser la photo du chat
             try {
-                const urlPhotoProfil = await sock.profilePictureUrl(message.key.remoteJid, 'image');
+                const urlPhotoProfil = await connexion.profilePictureUrl(message.key.remoteJid, 'image');
                 const reponse = await fetch(urlPhotoProfil);
                 if (!reponse.ok) throw new Error();
                 const bufferImage = Buffer.from(await reponse.arrayBuffer());
-                await sock.sendMessage(message.key.remoteJid, { image: bufferImage, caption: légende }, { quoted: message });
+                await connexion.sendMessage(message.key.remoteJid, { image: bufferImage, caption: légende }, { quoted: message });
             } catch (e) {
-                await sock.sendMessage(message.key.remoteJid, { text: légende }, { quoted: message });
+                await connexion.sendMessage(message.key.remoteJid, { text: légende }, { quoted: message });
             }
         }
     }

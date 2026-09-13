@@ -47,13 +47,13 @@ fi
 echo "Étape 4 : Application du correctif pour wa-sticker-formatter..."
 INTERNAL_SHARP="node_modules/wa-sticker-formatter/node_modules/sharp"
 
-if [ -d "node_modules/wa-sticker-formatter" ]; then
-    # On supprime la version interne si elle existe
-    rm -rf "$INTERNAL_SHARP"
-    
-    # On crée le lien symbolique vers la version pré-compilé qu'on vient de téléchargé
-    ln -s ../../../sharp "$INTERNAL_SHARP"
-    echo "Correctif appliqué (Lien symbolique créé)."
+if [ -d "node_modules/wa-sticker-formatter" ]; the
+	# On supprime la version interne si elle existe
+	rm -rf "$INTERNAL_SHARP"
+
+	# On crée le lien symbolique vers la version pré-compilé qu'on vient de téléchargé
+	ln -s ../../../sharp "$INTERNAL_SHARP"
+	echo "Correctif appliqué (Lien symbolique créé)."
 else
-    echo "Une erreur s'est produite"
+	echo "Une erreur s'est produite"
 fi

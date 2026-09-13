@@ -1,5 +1,7 @@
-# Mugen WA Bot ♾️♾️  
-![Image1](lis_moi/image_menu.jpg)![image2](lis_moi/image_mugen.jpg)
+# Mugen WA Bot ♾️♾️
+| Menu | Mugen |
+|------|-------|
+| <img src="lis_moi/image_menu.jpg" width="300"> | <img src="lis_moi/image_mugen.jpg" width="300"> |
 
 [![Node.js](https://img.shields.io/badge/Node.js-20+-green?logo=node.js)](https://nodejs.org/fr)
 [![Baileys](https://img.shields.io/badge/Library-Baileys-blue?logo=github)](https://github.com/WhiskeySockets/Baileys)

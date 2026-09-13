@@ -5,8 +5,8 @@ import {traduire} from './langue.js'
 
 //utilitaires de chemins
 
-function obtenirChemins(nomSession) {
-    const dossierBase = path.join(process.cwd(), 'memoires', 'memoires_outils', 'mode', nomSession);
+function obtenirChemins(nom_session) {
+    const dossierBase = path.join(process.cwd(), 'memoires', 'memoires_outils', 'mode', nom_session);
     return {
         dossierBase,
         prive: path.join(dossierBase, 'prive.json'),
@@ -36,10 +36,10 @@ async function sauvegarderFichier(chemin, donnees) {
 
 //reolution JID-LID
 
-async function resoudreJid(sock, jidBrut) {
+async function resoudreJid(connexion, jidBrut) {
     if (jidBrut && jidBrut.endsWith('@lid')) {
         try {
-            const pn = await sock.signalRepository.lidMapping.getPNForLID(jidBrut);
+            const pn = await connexion.signalRepository.lidMapping.getPNForLID(jidBrut);
             if (pn) return jidNormalizedUser(pn);
         } catch (e) {}
     }
@@ -56,8 +56,8 @@ export default {
     affiche_menu: "vrai",
     infos: `Peut être utilisé en groupes ou privé pour mettre ce groupe, contact ou le bot en mode privé/publique. Pour mettre tout le bot en mode privé/publique, il faut utiliser l'argument \`tous\` après le mode que tu veux mettre, ex : \`.mode prive tous\`. Après cette commande, un message de confirmation apparaîtra disant que les paramètres ont été enregistrés. Pour les appliquer, il faut utiliser l'argument change + le mode auquel tu veux passer, ex : \`.mode change tous\``,
 
-    execute: async (nomEvenement, donnesEvenement, { sock, nomSession, prefixe }) => {
-	const trad = (cle, vars = {}) => traduire(nomSession, 'outils', 'mode', { [cle]: vars })[cle];
+    execute: async (nomEvenement, donnesEvenement, { connexion, nom_session, prefixe }) => {
+	const trad = (cle, vars = {}) => traduire(nom_session, 'outils', 'mode', { [cle]: vars })[cle];
 
         if (nomEvenement !== "messages.upsert") return;
 
@@ -67,7 +67,7 @@ export default {
 
         const jidChat = message.key.remoteJid;
         const estProprio = message.key.fromMe;
-        const chemins = obtenirChemins(nomSession);
+        const chemins = obtenirChemins(nom_session);
         await initialiserDossier(chemins.dossierBase);
 
         //charger les états avec le format spécifique [ { mode: "vrai/faux" }, { ... } ]
@@ -82,13 +82,13 @@ export default {
 
         //traitement des commandes
         if (texte && texte.startsWith(prefixe)) {
-            const [cmdBrute, ...args] = texte.slice(prefixe.length).trim().split(/\s+/);
+            const [cmdBrute, ...arguments] = texte.slice(prefixe.length).trim().split(/\s+/);
             const commande = cmdBrute.toLowerCase();
 
             if (commande === "mode") {
                 if (!estProprio) {
                   const est_pas_moi = trad('msg.est_pas_moi') || "```Tu ne peux pas utiliser cette commande.```";
-                    await sock.sendMessage(jidChat, { text: est_pas_moi }, { quoted: message });
+                    await connexion.sendMessage(jidChat, { text: est_pas_moi }, { quoted: message });
                     return 'STOP';
                 }
 
@@ -101,8 +101,8 @@ export default {
                 else if (etatPrive[0].mode === "vrai") modeActuel = trad("msg.mode_actuel.3") || "prive (liste)";
                 else if (etatPublique[0].mode === "vrai") modeActuel = trad("msg.mode_actuel.4") || "publique (liste)";
 
-                const arg1 = args[0]?.toLowerCase();
-                const arg2 = args[1]?.toLowerCase();
+                const arg1 = arguments[0]?.toLowerCase();
+                const arg2 = arguments[1]?.toLowerCase();
 
                 // .mode simple ou argument inconnu
                 if (!arg1 || (arg1 !== "prive" && arg1 !== "publique" && arg1 !== "change")) {
@@ -117,7 +117,7 @@ Arguments:
 -    \`.mode publique\` pour faire l'inverse.
 -    \`.mode {prive/publique} tous\` pour mettre toutes les discussions soit en privé ou publique.
 -    \`.mode change {publique/prive/tous}\` pour changer la configuration des modes`;
-                    await sock.sendMessage(jidChat, { text: txt }, { quoted: message });
+                    await connexion.sendMessage(jidChat, { text: txt }, { quoted: message });
                     return 'STOP';
                 }
 
@@ -126,12 +126,12 @@ Arguments:
                 let mentions = [];
                 try {
                     if (jidChat.endsWith('@g.us')) {
-                        const meta = await sock.groupMetadata(jidChat);
+                        const meta = await connexion.groupMetadata(jidChat);
                         nomChat = trad("msg.nom_chat.2", {
                           nom_chat: meta.subject
                           }) || meta.subject;
                     } else {
-                      const jid_propre = await resoudreJid(sock, jidChat);
+                      const jid_propre = await resoudreJid(connexion, jidChat);
                       nomChat = trad("msg.nom_chat.3", {
                           nom_chat: jid_propre.split('@')[0]
                           }) || `@${jid_propre.split('@')[0]}`;
@@ -147,9 +147,9 @@ Arguments:
                     if (arg2 === "tous") {
                         etatTous[1].mode_tous = "prive";
                         await sauvegarderFichier(chemins.tous, etatTous);
-                        await sock.sendMessage(jidChat, { text: parametre_enregistre }, { quoted: message });
+                        await connexion.sendMessage(jidChat, { text: parametre_enregistre }, { quoted: message });
                     } else {
-                        const jid_propre = await resoudreJid(sock, jidChat);
+                        const jid_propre = await resoudreJid(connexion, jidChat);
                         //retirer de la liste publique s'il y est et ajouter à la liste privée
                         etatPublique[1].liste = etatPublique[1].liste.filter(id => id !== jid_propre);
                         if (!etatPrive[1].liste.includes(jid_propre)) {
@@ -160,7 +160,7 @@ Arguments:
                         const chat_prive = trad("msg.reussite.chat_prive",{
                           nom_chat: nomChat
                         }) || `*${nomChat} en mode prive*\n> Ces paramètres prendront effet que si tu fais la commande \`.mode change prive\``;
-                        await sock.sendMessage(jidChat, {
+                        await connexion.sendMessage(jidChat, {
                           text: chat_prive,
                           mentions: mentions
                         }, { quoted: message });
@@ -173,9 +173,9 @@ Arguments:
                     if (arg2 === "tous") {
                         etatTous[1].mode_tous = "publique";
                         await sauvegarderFichier(chemins.tous, etatTous);
-                        await sock.sendMessage(jidChat, { text: parametre_enregistre }, { quoted: message });
+                        await connexion.sendMessage(jidChat, { text: parametre_enregistre }, { quoted: message });
                     } else {
-                        const jid_propre = await resoudreJid(sock, jidChat);
+                        const jid_propre = await resoudreJid(connexion, jidChat);
                         //retirer de la liste privée s'il y est et ajouter à la liste publique
                         etatPrive[1].liste = etatPrive[1].liste.filter(id => id !== jid_propre);
                         if (!etatPublique[1].liste.includes(jid_propre)) {
@@ -186,7 +186,7 @@ Arguments:
                         const chat_publique= trad("msg.reussite.chat_publique", {
                           nom_chat: nomChat
                         }) || `\`${nomChat}\` *en mode publique*\n> Ces paramètres prendront effet que si tu fais la commande \`.mode change publique\``;
-                        await sock.sendMessage(jidChat, {
+                        await connexion.sendMessage(jidChat, {
                           text: chat_publique,
                           mentions: mentions
                         }, { quoted: message });
@@ -220,10 +220,10 @@ Arguments:
                             ancien: ancien,
                             nouveau: nouveau
                           }) || `> Changement de ${ancien} à ${nouveau}`;
-                        await sock.sendMessage(jidChat, { text: changement_reussi }, { quoted: message });
+                        await connexion.sendMessage(jidChat, { text: changement_reussi }, { quoted: message });
                     } else {
                       const cible_invalide = trad("msg.erreur.change.cible_invalide") || "Cible de changement invalide (prive/publique/tous).";
-                        await sock.sendMessage(jidChat, { text: cible_invalide }, { quoted: message });
+                        await connexion.sendMessage(jidChat, { text: cible_invalide }, { quoted: message });
                     }
                     return 'STOP';
                 }
@@ -233,7 +233,7 @@ Arguments:
         //logique de filtrage (si pas une commande .mode)
         if (estProprio) return;
 
-        const jid_propre = await resoudreJid(sock, jidChat);
+        const jid_propre = await resoudreJid(connexion, jidChat);
 
         // cas :1 mode TOUS actif
         if (etatTous[0].mode === "vrai") {

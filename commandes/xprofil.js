@@ -12,12 +12,12 @@ export default {
     infos: `Récupérer la photo profil de plusieurs personnes.
 Utilisation : \`.xprofil @tag1 569... @tag2 509...\` ou juste \`.xprofil\` pour la profil du chat actuel.`,
 
-    execute: async ({ sock, message, args, nomSession }) => {
+    execute: async ({ connexion, message, arguments, nom_session }) => {
         const jid = message.key.remoteJid;
         const estGroupe = jid.endsWith('@g.us');
 
         //"Raccourci" de traduction importer depui le fichier outils/langue.js
-	const trad = (cle, vars = {}) => traduire(nomSession, 'commandes', 'xprofil', { [cle]: vars })[cle];
+	const trad = (cle, vars = {}) => traduire(nom_session, 'commandes', 'xprofil', { [cle]: vars })[cle];
 
         let ciblesSujets = new Set();
         const contextInfo = message.message?.extendedTextMessage?.contextInfo;
@@ -29,7 +29,7 @@ Utilisation : \`.xprofil @tag1 569... @tag2 509...\` ou juste \`.xprofil\` pour 
         if (contextInfo?.participant) {
             ciblesSujets.add(jidNormalizedUser(contextInfo.participant));
         }
-        args?.forEach(arg => {
+        arguments?.forEach(arg => {
             const num = arg.replace(/\D/g, '');
             if (num.length >= 8) {
                 ciblesSujets.add(jidNormalizedUser(num + '@s.whatsapp.net'));
@@ -52,7 +52,7 @@ Utilisation : \`.xprofil @tag1 569... @tag2 509...\` ou juste \`.xprofil\` pour 
 		: trad('msg.cible_utilisateur', {utilisateur: cible.split('@')[0]}) || `de @${cible.split('@')[0]}`;
 
             try {
-                const url = await sock.profilePictureUrl(cible, 'image');
+                const url = await connexion.profilePictureUrl(cible, 'image');
                 reussis.push({ url, nom, jid: cible });
             } catch (e) {
                 echoues.push({ nom });
@@ -79,7 +79,7 @@ Utilisation : \`.xprofil @tag1 569... @tag2 509...\` ou juste \`.xprofil\` pour 
         if (reussis.length > 0) {
             for (let i = 0; i < reussis.length; i++) {
                 const estDernier = (i === reussis.length - 1);
-                await sock.sendMessage(
+                await connexion.sendMessage(
                     jid,
                     {
                         image: { url: reussis[i].url },
@@ -96,7 +96,7 @@ Utilisation : \`.xprofil @tag1 569... @tag2 509...\` ou juste \`.xprofil\` pour 
             }
         } else if (echoues.length > 0) {
             //uniquement des échecs : un seul message textuel
-            await sock.sendMessage(jid, { text: legendeFinale, mentions: toutesMentions }, { quoted: message });
+            await connexion.sendMessage(jid, { text: legendeFinale, mentions: toutesMentions }, { quoted: message });
         }
     }
 };

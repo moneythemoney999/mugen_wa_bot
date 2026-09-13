@@ -12,27 +12,27 @@ export default {
 
 Pour retirer quelqu'un du groupe il fait que tu sois admin du groupe.`,
 
-    execute: async ({ sock, message, args, nomSession }) => {
+    execute: async ({ connexion, message, arguments, nom_session }) => {
         const jid = message.key.remoteJid;
         const estGroupe = jid.endsWith('@g.us');
-        const trad = (cle, vars = {}) => traduire (nomSession, 'commandes', 'expulse', { [cle] : vars}) [cle];
+        const trad = (cle, vars = {}) => traduire (nom_session, 'commandes', 'expulse', { [cle] : vars}) [cle];
 
         if (!estGroupe) {
             //si c'est utiliser en privé
             const msgSi_prive = trad('msg.msgSi_prive') || "C'est pas utilisable en privé";
-            await sock.sendMessage(jid,
+            await connexion.sendMessage(jid,
                 { text: msgSi_prive },
                 { quoted: message });
             return;
         }
 
         try {
-            const metadonneesGroupe = await sock.groupMetadata(jid);
+            const metadonneesGroupe = await connexion.groupMetadata(jid);
             const participants = metadonneesGroupe.participants;
 
             const idAuteurBrut = message.key.participant;
-            const idBotBrut = sock.user.id;
-            const idBotLidBrut = sock.user.lid || idBotBrut;
+            const idBotBrut = connexion.user.id;
+            const idBotLidBrut = connexion.user.lid || idBotBrut;
 
             //on cherche le rôle de l'auteur avec son ID brut (qui est un LID propre)
             const participantAuteur = participants.find(p => p.id === idAuteurBrut);
@@ -52,13 +52,13 @@ Pour retirer quelqu'un du groupe il fait que tu sois admin du groupe.`,
                 if (estMoi) {
                     //si c'est moi mais que chuis pas admin
                     const msgMoi_non_admin = trad("msg.msgMoi_non_admin") || "> T'es pas admin😂🤣";
-                    await sock.sendMessage(jid,
+                    await connexion.sendMessage(jid,
                         { text: msgMoi_non_admin },
                         { quoted: message });
                 } else {
                     //si quelqu'un d'autre et qu'il n'est pas admin
                     const msgAutre_non_admin = trad('msg.msgAutre_non_admin') || "Faut que tu sois admin";
-                    await sock.sendMessage(jid,
+                    await connexion.sendMessage(jid,
                         { text: msgAutre_non_admin },
                         { quoted: message });
                 }
@@ -67,7 +67,7 @@ Pour retirer quelqu'un du groupe il fait que tu sois admin du groupe.`,
 
             if (!estAdminBot) {
                 const msgBot_non_admin = trad('msg.msgBot_non_admin') || "Faut me donner les droits d'administration";
-                await sock.sendMessage(jid,
+                await connexion.sendMessage(jid,
                     //si un admi mais que le bot n'a pas les droits
                     { text: msgBot_non_admin },
                     { quoted: message });
@@ -77,7 +77,7 @@ Pour retirer quelqu'un du groupe il fait que tu sois admin du groupe.`,
             //identification des cibles
             let ciblesInitiales = [];
             const mentions = message.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
-            const numCible = args.find(arg => /^\+?\d+$/.test(arg))?.replace('+', '');
+            const numCible = arguments.find(arg => /^\+?\d+$/.test(arg))?.replace('+', '');
             const auteurReponduBrut = message.message?.extendedTextMessage?.contextInfo?.participant;
 
             if (mentions.length > 0) {
@@ -90,7 +90,7 @@ Pour retirer quelqu'un du groupe il fait que tu sois admin du groupe.`,
                 const msgPas_de_cible = trad('msg.msgPas_de_cible') || `Qui dois-je expulser.
 *Mets son num ou tag la personne derrière la commande* ex: \`.expulse 56931437983\` \`.expulse @la_personne\`.`;
                 //si on ne detecte pas de cible
-                await sock.sendMessage(jid,
+                await connexion.sendMessage(jid,
                     { text: msgPas_de_cible},
                     { quoted: message });
                 return;
@@ -114,14 +114,14 @@ Pour retirer quelqu'un du groupe il fait que tu sois admin du groupe.`,
                     // On compare avec l'ID normalisé du bot pour être sûr
                     if (jidNormalizedUser(participant.id) === idBotLidNormalise) {
                         const msgSi_cible_bot = trad('msg.msgSi_cible_bot') || "```🫩🫩```";
-                        await sock.sendMessage(jid,
+                        await connexion.sendMessage(jid,
                             { text: msgSi_cible_bot},
                             { quoted: message });
                         continue;
                     }
                     if (participant.admin === 'admin' || participant.admin === 'superadmin') {
                         const msgSi_admin = trad('msg.msgSi_admin') || "~Fait le toi même, flemme🥱😪~"
-                        await sock.sendMessage(jid,
+                        await connexion.sendMessage(jid,
                             //si la cible est un administrateur on refuse
                             { text: msgSi_admin },
                             { quoted: message });
@@ -135,11 +135,11 @@ Pour retirer quelqu'un du groupe il fait que tu sois admin du groupe.`,
 
             //envoi de la requête a whatsapp
             if (ciblesAExpulser.length > 0) {
-                await sock.groupParticipantsUpdate(jid, ciblesAExpulser, "remove");
+                await connexion.groupParticipantsUpdate(jid, ciblesAExpulser, "remove");
                 for (const expulse of ciblesAExpulser) {
                     //si on reussi on envoi ce message de confirmation
                     const msgSucces = trad('msg.msgSucces', {expulse: expulse.split('@')[0]}) || `~@${expulse.split('@')[0]}~ a été viré d'ici`
-                    await sock.sendMessage(jid, {
+                    await connexion.sendMessage(jid, {
                         text: msgSucces,
                         mentions: [expulse]
                     }, { quoted: message });
@@ -147,16 +147,16 @@ Pour retirer quelqu'un du groupe il fait que tu sois admin du groupe.`,
             } else if (nonTrouve) {
                 //si on trouve pas la personne dans la liste des participant
                 const msgCible_non_membre = trad('msg.msgCible_non_membre') || "> Membre introuvable.";
-                await sock.sendMessage(jid,
+                await connexion.sendMessage(jid,
                     { text: msgCible_non_membre},
                     { quoted: message });
             }
 
         } catch (erreur) {
             //s'il y'a une autre erreur on l'affiche au terminal et envoi un message d'erreur sur whatsapp
-            console.error(`[(expulse), "${nomSession}"]: Erreur dans la commande expulse :`, erreur);
+            console.error(`[(expulse), "${nom_session}"]: Erreur dans la commande expulse :`, erreur);
             const msgErreur = trad('msg.msgErreur') ||  "Une erreur est survenue lors de l'expulsion.";
-            await sock.sendMessage(jid,
+            await connexion.sendMessage(jid,
                 { text: msgErreur},
                 { quoted: message });
         }

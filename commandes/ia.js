@@ -1,5 +1,5 @@
 /* Cette commande est dependante de l'API de GEMINI donc faut installer @google/generative-ai avec npm
-Et aller sur le site de des api gemini(https://aistudio.google.com/api-keys?project=gen-lang-client-0988145692) pour en creer une et le stocker dans ".secret/.cles_ia/.cles_ia.json:
+Et aller sur le site de des api gemini(https://aistudio.google.com/apikey) pour en creer une et le stocker dans ".secret/.cles_ia/.cles_ia.json:
 {
 "cle_gemini": "LA CLE DE GEMINI ICI"
 }*/
@@ -31,9 +31,9 @@ function creuser(obj, chemin) {
 export async function obtenir_prompt(cle, vars = {}) {
     try {
         const contenu = await fs.readFile(CHEMIN, "utf-8");
-        const data = JSON.parse(contenu);
+        const donnees = JSON.parse(contenu);
         const chemin = cle.split(".");
-        let texte = creuser(data, chemin);
+        let texte = creuser(donnees, chemin);
 
         if (typeof texte !== "string") return null;
         // injection variables
@@ -46,9 +46,9 @@ export async function obtenir_prompt(cle, vars = {}) {
     }
 }
 
-const OBTENIR_INSTRUCTION_SYSTEME = async (numeroBot, nomSession) => {
+const OBTENIR_INSTRUCTION_SYSTEME = async (numeroBot, nom_session) => {
     const prompt = async (cle, vars = {}) => await obtenir_prompt(cle, vars);
-    const trad = (cle, vars = {}) => traduire(nomSession, 'commandes', 'ia', { [cle]: vars })[cle];
+    const trad = (cle, vars = {}) => traduire(nom_session, 'commandes', 'ia', { [cle]: vars })[cle];
 
     const instructions = [
         trad("msg.instruction_systeme.identite") || await prompt("instruction_systeme.identite"),
@@ -84,31 +84,31 @@ let cleApiDisponible = false;
 })();
 
 //fonctions utilitaires et resolutions des IDs
-async function resoudreJid(sock, jid, nomSession) {
+async function resoudreJid(connexion, jid, nom_session) {
     if (jid && jid.endsWith('@lid')) {
         try {
-            const pn = await sock.signalRepository.lidMapping.getPNForLID(jid);
+            const pn = await connexion.signalRepository.lidMapping.getPNForLID(jid);
             if (pn) return jidNormalizedUser(pn);
         } catch (e) {
-            console.error(`[(ia), "${nomSession}"]: Erreur LID ${jid}:`, e);
+            console.error(`[(ia), "${nom_session}"]: Erreur LID ${jid}:`, e);
         }
     }
     return jidNormalizedUser(jid);
 }
 
-async function obtenirCheminHistorique(sock, nomSession, jidResolut) {
+async function obtenirCheminHistorique(connexion, nom_session, jidResolut) {
     let nomFichier = jidResolut;
     const type = jidResolut.endsWith('@g.us') ? 'groupe' : 'prive';
 
     if (type === 'groupe') {
         try {
-            const metadata = await sock.groupMetadata(jidResolut);
+            const metadata = await connexion.groupMetadata(jidResolut);
             const nomGroupeNettoye = metadata.subject.replace(/[\/\?%*:|"<>]/g, '-');
             nomFichier = `${nomGroupeNettoye}_${jidResolut}`;
         } catch (e) {}
     }
 
-    const cheminDossier = path.join(CHEMIN_MEMOIRE_IA, nomSession, type);
+    const cheminDossier = path.join(CHEMIN_MEMOIRE_IA, nom_session, type);
     await fs.mkdir(cheminDossier, { recursive: true });
     return path.join(cheminDossier, `${nomFichier}.json`);
 }
@@ -127,24 +127,24 @@ async function sauvegarderHistorique(cheminHistorique, historique) {
 }
 
 //logique principale de l'IA
-async function executerConversationIA({ sock, message, nomSession, question, imageBuffer }) {
-    const trad = (cle, vars = {}) => traduire(nomSession, 'commandes', 'ia', { [cle]: vars })[cle];
+async function executerConversationIA({ connexion, message, nom_session, question, imageBuffer }) {
+    const trad = (cle, vars = {}) => traduire(nom_session, 'commandes', 'ia', { [cle]: vars })[cle];
 
     if (!cleApiDisponible) {
-        console.error(`[(ia), "${nomSession}"]; Cle ia introuvable il faut aller creer une cle gemini sur (https://aistudio.google.com) et le stocker dans : "${CHEMIN_SECRET}".`);
+        console.error(`[(ia), "${nom_session}"]; Cle ia introuvable il faut aller creer une cle gemini sur (https://aistudio.google.com/apikey) et le stocker dans : "${CHEMIN_SECRET}".`);
         const cleAPI_introuvable = trad("msg.cleAPI_introuvable") || "> L'IA n'est pas prête.";
-        await sock.sendMessage(message.key.remoteJid, { text: cleAPI_introuvable }, { quoted: message });
+        await connexion.sendMessage(message.key.remoteJid, { text: cleAPI_introuvable }, { quoted: message });
         return;
     }
 
     const jidBrut = message.key.remoteJid;
-    const jidResolut = await resoudreJid(sock, jidBrut, nomSession);
+    const jidResolut = await resoudreJid(connexion, jidBrut, nom_session);
     let messageIndicateur;
     let apiCallEstFinie = false;
 
     const textesAttente = trad("msg.textes_de_attente") || ["◐♾", "♾◓", "◑♾", "♾◒", "♾️"];
     try {
-        messageIndicateur = await sock.sendMessage(jidBrut, { text: textesAttente[0] }, { quoted: message });
+        messageIndicateur = await connexion.sendMessage(jidBrut, { text: textesAttente[0] }, { quoted: message });
     } catch (e) {}
 
     const demarrerIndicateur = async () => {
@@ -154,7 +154,7 @@ async function executerConversationIA({ sock, message, nomSession, question, ima
                 await new Promise(r => setTimeout(r, 600));
                 if (apiCallEstFinie) break;
                 i = (i + 1) % textesAttente.length;
-                await sock.sendMessage(jidBrut, { text: textesAttente[i], edit: messageIndicateur.key });
+                await connexion.sendMessage(jidBrut, { text: textesAttente[i], edit: messageIndicateur.key });
             }
         } catch (e) { apiCallEstFinie = true; }
     };
@@ -168,13 +168,13 @@ async function executerConversationIA({ sock, message, nomSession, question, ima
 
     for (const nomModele of modeles) {
         try {
-            const numeroBot = jidNormalizedUser(sock.user.id).split('@')[0];
+            const numeroBot = jidNormalizedUser(connexion.user.id).split('@')[0];
             const modeleActuel = genAI.getGenerativeModel({
                 model: nomModele,
-                systemInstruction: { parts: [{ text: await OBTENIR_INSTRUCTION_SYSTEME(numeroBot, nomSession) }] }
+                systemInstruction: { parts: [{ text: await OBTENIR_INSTRUCTION_SYSTEME(numeroBot, nom_session) }] }
             });
 
-            const cheminHist = await obtenirCheminHistorique(sock, nomSession, jidResolut);
+            const cheminHist = await obtenirCheminHistorique(connexion, nom_session, jidResolut);
             const historique = await lireEtPurgerHistorique(cheminHist);
             const apiHistory = historique.map(({ role, parts }) => ({ role, parts }));
 
@@ -193,7 +193,7 @@ async function executerConversationIA({ sock, message, nomSession, question, ima
             break;
 
         } catch (err) {
-            console.error(`[(ia), "${nomSession}"]: Erreur avec le modèle ${nomModele}:`, err);
+            console.error(`[(ia), "${nom_session}"]: Erreur avec le modèle ${nomModele}:`, err);
             erreurFinale = err;
             if (err.status === 429 || err.status === 503) continue;
             break;
@@ -203,17 +203,17 @@ async function executerConversationIA({ sock, message, nomSession, question, ima
     apiCallEstFinie = true;
     if (reponseFinale) {
         if (messageIndicateur) {
-            await sock.sendMessage(jidBrut, { text: reponseFinale, edit: messageIndicateur.key });
+            await connexion.sendMessage(jidBrut, { text: reponseFinale, edit: messageIndicateur.key });
         } else {
-            messageIndicateur = await sock.sendMessage(jidBrut, { text: reponseFinale }, { quoted: message });
+            messageIndicateur = await connexion.sendMessage(jidBrut, { text: reponseFinale }, { quoted: message });
         }
         conversationsActives[jidResolut] = { lastAiMessageId: messageIndicateur.key.id, horodatage: Date.now() };
     } else {
         const msgErr = (erreurFinale?.status === 429 || erreurFinale?.status === 503) ? trad("msg.erreurs.plus_de_token") || trad("msg.erreurs.autres") || "> Plus de jus 😅" : "_Erreur_";
         if (messageIndicateur) {
-            await sock.sendMessage(jidBrut, { text: msgErr, edit: messageIndicateur.key });
+            await connexion.sendMessage(jidBrut, { text: msgErr, edit: messageIndicateur.key });
         } else {
-            await sock.sendMessage(jidBrut, { text: msgErr }, { quoted: message });
+            await connexion.sendMessage(jidBrut, { text: msgErr }, { quoted: message });
         }
     }
 }
@@ -230,23 +230,23 @@ Il y a aussi une sous-commande pour réinitialiser la discussion avec l'IA si ce
 
 > NB : *Il pourrait y avoir certaines données (noms de profils, numéro du compte) qui seront partagées avec l'IA pour son bon fonctionnement.*`,
 
-    async execute({ sock, message, args, nomSession }) {
-        const trad = (cle, vars = {}) => traduire(nomSession, 'commandes', 'ia', { [cle]: vars })[cle];
+    async execute({ connexion, message, arguments, nom_session }) {
+        const trad = (cle, vars = {}) => traduire(nom_session, 'commandes', 'ia', { [cle]: vars })[cle];
         const jidBrut = message.key.remoteJid;
         const nomAuteur = message.pushName || trad('msg.nomAuteur') || "Utilisateur";
 
-        const premierArg = args[0]?.toLowerCase();
+        const premierArg = arguments[0]?.toLowerCase();
         if (premierArg === "reinitialise") {
-            const jidResolut = await resoudreJid(sock, jidBrut, nomSession);
-            const cheminHist = await obtenirCheminHistorique(sock, nomSession, jidResolut);
+            const jidResolut = await resoudreJid(connexion, jidBrut, nom_session);
+            const cheminHist = await obtenirCheminHistorique(connexion, nom_session, jidResolut);
             try {
                 await fs.unlink(cheminHist);
                 delete conversationsActives[jidResolut];
                 const succes_supression = trad("msg.succes_supression") || "Historique de la conversation effacé.";
-                return sock.sendMessage(jidBrut, { text: succes_supression }, { quoted: message });
+                return connexion.sendMessage(jidBrut, { text: succes_supression }, { quoted: message });
             } catch (e) {
                 const pas_de_historique = trad("msg.pas_de_historique") || "Info : Aucun historique trouvé pour cette discussion.";
-                return sock.sendMessage(jidBrut, { text: pas_de_historique }, { quoted: message });
+                return connexion.sendMessage(jidBrut, { text: pas_de_historique }, { quoted: message });
             }
         }
 
@@ -254,7 +254,7 @@ Il y a aussi une sous-commande pour réinitialiser la discussion avec l'IA si ce
         const currentCaption = currentImage?.caption || "";
         const estLegendeImage = !!currentImage;
 
-        let texteUtilisateur = args.join(" ").trim();
+        let texteUtilisateur = arguments.join(" ").trim();
         if (!texteUtilisateur && currentCaption) {
             texteUtilisateur = currentCaption.replace(/^\.ia\s*/i, "").trim();
         }
@@ -270,7 +270,7 @@ Il y a aussi une sous-commande pour réinitialiser la discussion avec l'IA si ce
 
         if (msgCite) {
             const auteurCiteJid = contextInfo.participant || contextInfo.remoteJid;
-            const auteurCiteJidResolut = await resoudreJid(sock, auteurCiteJid, nomSession);
+            const auteurCiteJidResolut = await resoudreJid(connexion, auteurCiteJid, nom_session);
             const nomCite = auteurCiteJidResolut.split('@')[0];
             const texteCite = msgCite.conversation || msgCite.extendedTextMessage?.text;
             const imageCite = msgCite.imageMessage;
@@ -300,16 +300,16 @@ Il y a aussi une sous-commande pour réinitialiser la discussion avec l'IA si ce
 
         if (!texteUtilisateur && !imageBuffer && !msgCite) {
             const pas_de_question = trad("msg.pas_de_question") || "Euh... C'est quoi la question ?";
-            return sock.sendMessage(jidBrut, { text: pas_de_question }, { quoted: message });
+            return connexion.sendMessage(jidBrut, { text: pas_de_question }, { quoted: message });
         }
 
-        await executerConversationIA({ sock, message, nomSession, question: JSON.stringify(structurePrompt, null, 2), imageBuffer });
+        await executerConversationIA({ connexion, message, nom_session, question: JSON.stringify(structurePrompt, null, 2), imageBuffer });
     },
 
-    async handleNonCommand({ sock, message, nomSession }) {
-        const trad = (cle, vars = {}) => traduire(nomSession, 'commandes', 'ia', { [cle]: vars })[cle];
+    async evenements_sans_prefixe({ connexion, message, nom_session }) {
+        const trad = (cle, vars = {}) => traduire(nom_session, 'commandes', 'ia', { [cle]: vars })[cle];
         const jidBrut = message.key.remoteJid;
-        const jidResolut = await resoudreJid(sock, jidBrut, nomSession);
+        const jidResolut = await resoudreJid(connexion, jidBrut, nom_session);
         const conv = conversationsActives[jidResolut];
         if (!conv) return false;
 
@@ -328,7 +328,7 @@ Il y a aussi une sous-commande pour réinitialiser la discussion avec l'IA si ce
                 const msgCite = contextInfo?.quotedMessage;
                 if (msgCite) {
                     const texteCite = msgCite.conversation || msgCite.extendedTextMessage?.text;
-                    const numeroBot = jidNormalizedUser(sock.user.id).split('@')[0];
+                    const numeroBot = jidNormalizedUser(connexion.user.id).split('@')[0];
                     structurePrompt[trad("msg.structurePrompt.reponse.reponse") || "reponse"] = {
                         [trad("msg.structurePrompt.reponse.a") || "a"]: numeroBot,
                         [trad("msg.structurePrompt.reponse.details.details") || "details"]: {
@@ -338,7 +338,7 @@ Il y a aussi une sous-commande pour réinitialiser la discussion avec l'IA si ce
                     };
                 }
 
-                await executerConversationIA({ sock, message, nomSession, question: JSON.stringify(structurePrompt, null, 2) });
+                await executerConversationIA({ connexion, message, nom_session, question: JSON.stringify(structurePrompt, null, 2) });
                 return true;
             }
         }

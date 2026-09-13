@@ -1,10 +1,10 @@
 /* */
 
 //les imports
-import { downloadMediaMessage, jidNormalizedUser } from '@whiskeysockets/baileys';
-import fs from "fs";
-import path from "path";
+import { promises as fs } from 'fs';
+import path from 'path';
 import { fileURLToPath } from 'url';
+import { downloadMediaMessage, jidNormalizedUser } from '@whiskeysockets/baileys';
 import { traduire } from '../outils/langue.js';
 
 //congiguration des LIMITES
@@ -26,14 +26,14 @@ export default {
 
 > *Et en privé seul le bot peut l'utiliser si l'interlocuteur essaie ~il sera bloqué~*.`,
 
-    execute: async ({ sock, message, args, nomSession }) => {
+    execute: async ({ connexion, message, arguments, nom_session }) => {
 
         const jid = message.key.remoteJid;
         const estGroupe = jid.endsWith('@g.us');
-        const estPriveDemande = args[0]?.toLowerCase() === 'prive';
+        const estPriveDemande = arguments[0]?.toLowerCase() === 'prive';
 
 	//"Raccourci" de traduction importer depui le fichier outils/langue.js
-	const trad = (cle, vars = {}) => traduire(nomSession, 'commandes', 'xanti_unique', { [cle]: vars })[cle];
+	const trad = (cle, vars = {}) => traduire(nom_session, 'commandes', 'xanti_unique', { [cle]: vars })[cle];
 
         //sous-commande 'prive' réservée au propriétaire
         if (estPriveDemande && !message.key.fromMe) {
@@ -52,22 +52,22 @@ export default {
             const __dirname = path.dirname(__filename);
             let metadonneesGroupe;
             try {
-                metadonneesGroupe = await sock.groupMetadata(jid);
+                metadonneesGroupe = await connexion.groupMetadata(jid);
             } catch (e) {
-                console.error(`[(xanti_unique), "${nomSession}"]: Erreur métadonnées:`, e);
+                console.error(`[(xanti_unique), "${nom_session}"]: Erreur métadonnées:`, e);
             }
 
-            const nomGroupeNettoye = (metadonneesGroupe.subject || "groupe").replace(/[\/\\?%*:|"<>]/g, '-');
-            const cheminDossierGroupe = path.join(__dirname, '..', 'memoires', 'memoires_commandes', 'xanti_unique', nomSession, 'groupes', `${nomGroupeNettoye}_${jid.split('@')[0]}`);
-            fs.mkdirSync(cheminDossierGroupe, { recursive: true });
+            const nomGroupeNettoye = (metadonneesGroupe?.subject || "groupe").replace(/[\/\\?%*:|"<>]/g, '-');
+            const cheminDossierGroupe = path.join(__dirname, '..', 'memoires', 'memoires_commandes', 'xanti_unique', nom_session, 'groupes', `${nomGroupeNettoye}_${jid.split('@')[0]}`);
+            await fs.mkdir(cheminDossierGroupe, { recursive: true });
             const cheminFichierUtilisateur = path.join(cheminDossierGroupe, `${expediteurJid.split('@')[0]}.json`);
 
             donneesUtilisateur = { NOM: message.pushName, NUM: expediteurJid, LIMITE: 0, DATE: '' };
             try {
-                if (fs.existsSync(cheminFichierUtilisateur)) {
-                    donneesUtilisateur = JSON.parse(fs.readFileSync(cheminFichierUtilisateur, 'utf-8'));
+                if (await fs.access(cheminFichierUtilisateur).then(() => true).catch(() => false)) {
+                    donneesUtilisateur = JSON.parse(await fs.readFile(cheminFichierUtilisateur, 'utf-8'));
                 }
-            } catch (e) { console.error(`[(xanti_unique), "${nomSession}"]; Erreur lecture:`, e); }
+            } catch (e) { console.error(`[(xanti_unique), "${nom_session}"]; Erreur lecture:`, e); }
 
             const dateActuelle = new Date().toISOString().split('T')[0];
             if (donneesUtilisateur.DATE !== dateActuelle) {
@@ -80,7 +80,7 @@ export default {
             if (message.key.fromMe) {
                 limite = LIMITES_UTILISATION.BOT;
             } else {
-                const participant = metadonneesGroupe.participants.find(p => p.id === expediteurJid);
+                const participant = metadonneesGroupe?.participants.find(p => p.id === expediteurJid);
                 if (participant?.admin) {
                     limite = LIMITES_UTILISATION.ADMIN;
                 }
@@ -89,17 +89,17 @@ export default {
             if (donneesUtilisateur.LIMITE >= limite) {
 		//quand quelqu'un atteint la limite
 		        const limite_atteint = trad('msg.limite_atteint', {limite: limite}) || `Tu as atteint ta limite d'utilisation (${limite}).`;
-                return sock.sendMessage(jid, { text: limite_atteint},
+                return connexion.sendMessage(jid, { text: limite_atteint},
 		    { quoted: message });
             }
 
             donneesUtilisateur.LIMITE++;
-            fs.writeFileSync(cheminFichierUtilisateur, JSON.stringify(donneesUtilisateur, null, 2));
+            await fs.writeFile(cheminFichierUtilisateur, JSON.stringify(donneesUtilisateur, null, 2));
 
         } else if (!message.key.fromMe) {
 	    //en prive si c'est pas moi ou si le message vient de moi dans un groupe
 	        const msg_refus = trad('msg.msg_refus') || "Tu ne peux pas utiliser cette commande.";
-            return sock.sendMessage(jid, { text: msg_refus },
+            return connexion.sendMessage(jid, { text: msg_refus },
 		{ quoted: message });
         }
 
@@ -110,7 +110,7 @@ export default {
         if (!msgRepondu) {
 	    //si le message n'est pas vraiment une vue unique
 	        const msgPas_de_cible = trad('msg.msgPas_de_cible') || "Tu dois répondre à un média en vue unique.";
-            return sock.sendMessage(jid, { text: msgPas_de_cible },
+            return connexion.sendMessage(jid, { text: msgPas_de_cible },
 		{ quoted: message });
         }
 
@@ -125,24 +125,24 @@ export default {
         if (!typeMedia || !media) {
 	    //si le contenue du message ne conrespond pas l'un des types
 	        const msgMedia_non_reconnu = trad('msg.msgMedia_non_reconnu') || "Ce message n'est pas un média en vue unique reconnu.";
-            return sock.sendMessage(jid, { text: msgMedia_non_reconnu },
+            return connexion.sendMessage(jid, { text: msgMedia_non_reconnu },
 		{ quoted: message });
         }
 
         //preparation du transfer
-        const destination = estPriveDemande ? jidNormalizedUser(sock.user.id) : jid;
+        const destination = estPriveDemande ? jidNormalizedUser(connexion.user.id) : jid;
         const jidBrutAuteur = contextInfo.participant;
         let auteurJid = jidNormalizedUser(jidBrutAuteur);
 
         //résolution du LID en numéro (JID) si nécessaire
         if (jidBrutAuteur && jidBrutAuteur.endsWith('@lid')) {
             try {
-                const pn = await sock.signalRepository.lidMapping.getPNForLID(jidBrutAuteur);
+                const pn = await connexion.signalRepository.lidMapping.getPNForLID(jidBrutAuteur);
                 if (pn) {
                     auteurJid = jidNormalizedUser(pn);
                 }
             } catch (e) {
-                console.error(`[(xanti_unique), "${nomSession}"]; Impossible de résoudre le LID ${jidBrutAuteur}:`, e);
+                console.error(`[(xanti_unique), "${nom_session}"]; Impossible de résoudre le LID ${jidBrutAuteur}:`, e);
             }
         }
 
@@ -154,7 +154,7 @@ export default {
         let nomGroupe = "";
         if (estGroupe) {
             try {
-                const meta = await sock.groupMetadata(jid);
+                const meta = await connexion.groupMetadata(jid);
                 nomGroupe = meta.subject || "le groupe";
             } catch (e) {
                 nomGroupe = "le groupe";
@@ -190,21 +190,21 @@ export default {
 
             if (typeMedia === "image") {
                 const caption = estPriveDemande ? legendePrive : (media.caption || "");
-                await sock.sendMessage(destination, { image: buffer, caption: caption }, { quoted: estPriveDemande ? null : message });
+                await connexion.sendMessage(destination, { image: buffer, caption: caption }, { quoted: estPriveDemande ? null : message });
             } else if (typeMedia === "video") {
                 const caption = estPriveDemande ? legendePrive : (media.caption || "");
-                await sock.sendMessage(destination, { video: buffer, caption: caption }, { quoted: estPriveDemande ? null : message });
+                await connexion.sendMessage(destination, { video: buffer, caption: caption }, { quoted: estPriveDemande ? null : message });
             } else if (typeMedia === "audio") {
-                const msgAudio = await sock.sendMessage(destination, { audio: buffer, mimetype: 'audio/mp4', ptt: true }, { quoted: estPriveDemande ? null : message });
+                const msgAudio = await connexion.sendMessage(destination, { audio: buffer, mimetype: 'audio/mp4', ptt: true }, { quoted: estPriveDemande ? null : message });
                 if (estPriveDemande) {
-                    await sock.sendMessage(destination, { text: legendePrive }, { quoted: msgAudio });
+                    await connexion.sendMessage(destination, { text: legendePrive }, { quoted: msgAudio });
                 }
             }
 
         } /*une erreur s'est produite alors en log et on envoi ça*/ catch (e) {
-            console.error(`[(xanti_unique), "${nomSession}"]; Erreur:`, e);
+            console.error(`[(xanti_unique), "${nom_session}"]; Erreur:`, e);
             const msgErreur = trad('msg.msgErreur') || "Erreur lors du déblocage du média.";
-            return sock.sendMessage(jid, { text: msgErreur }, { quoted: message });
+            return connexion.sendMessage(jid, { text: msgErreur }, { quoted: message });
         }
     }
 };
