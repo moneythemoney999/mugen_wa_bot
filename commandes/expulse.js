@@ -12,7 +12,7 @@ export default {
 
 Pour retirer quelqu'un du groupe il fait que tu sois admin du groupe.`,
 
-    execute: async ({ connexion, message, arguments, nom_session }) => {
+    execute: async ({ connexion, message, args, nom_session }) => {
         const jid = message.key.remoteJid;
         const estGroupe = jid.endsWith('@g.us');
         const trad = (cle, vars = {}) => traduire (nom_session, 'commandes', 'expulse', { [cle] : vars}) [cle];
@@ -77,7 +77,7 @@ Pour retirer quelqu'un du groupe il fait que tu sois admin du groupe.`,
             //identification des cibles
             let ciblesInitiales = [];
             const mentions = message.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
-            const numCible = arguments.find(arg => /^\+?\d+$/.test(arg))?.replace('+', '');
+            const numCible = args.find(arg => /^\+?\d+$/.test(arg))?.replace('+', '');
             const auteurReponduBrut = message.message?.extendedTextMessage?.contextInfo?.participant;
 
             if (mentions.length > 0) {

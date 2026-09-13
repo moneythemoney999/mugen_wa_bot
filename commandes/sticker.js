@@ -20,7 +20,7 @@ export default {
 > °Pour groupe si seule la commande est tapé sans argument ou si l'argument c'est le nom du pack, c'est la profil du groupe qui sera la cible.
 > °Si c'est fait en taguant quelqu'un c'est sa profil qui est pris pour cible.`,
 
-    execute: async ({ connexion, message, arguments, nom_sesession}) => {
+    execute: async ({ connexion, message, args, nom_sesession}) => {
         const jid = message.key.remoteJid;
         const botJid = connexion.user.id;
 
@@ -28,7 +28,7 @@ export default {
 	const trad = (cle, vars = {}) => traduire(nom_sesession, 'commandes', 'sticker', { [cle]: vars })[cle];
 
 	//meta-donnees des stickers on mets le non de packs que la personne a mis en argument s'il y'en a pas on mets un par defaut et le nom d'auteur lui est fixe
-        const nomPack = arguments.filter(arg => !arg.startsWith('@')).join(' ') || "Mugen♾️♾️";
+        const nomPack = args.filter(arg => !arg.startsWith('@')).join(' ') || "Mugen♾️♾️";
         const nomAuteur = "Mugen Bot♾️♾️";
 
         try {

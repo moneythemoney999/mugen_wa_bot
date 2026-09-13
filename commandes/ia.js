@@ -230,12 +230,12 @@ Il y a aussi une sous-commande pour réinitialiser la discussion avec l'IA si ce
 
 > NB : *Il pourrait y avoir certaines données (noms de profils, numéro du compte) qui seront partagées avec l'IA pour son bon fonctionnement.*`,
 
-    async execute({ connexion, message, arguments, nom_session }) {
+    async execute({ connexion, message, args, nom_session }) {
         const trad = (cle, vars = {}) => traduire(nom_session, 'commandes', 'ia', { [cle]: vars })[cle];
         const jidBrut = message.key.remoteJid;
         const nomAuteur = message.pushName || trad('msg.nomAuteur') || "Utilisateur";
 
-        const premierArg = arguments[0]?.toLowerCase();
+        const premierArg = args[0]?.toLowerCase();
         if (premierArg === "reinitialise") {
             const jidResolut = await resoudreJid(connexion, jidBrut, nom_session);
             const cheminHist = await obtenirCheminHistorique(connexion, nom_session, jidResolut);
@@ -254,7 +254,7 @@ Il y a aussi une sous-commande pour réinitialiser la discussion avec l'IA si ce
         const currentCaption = currentImage?.caption || "";
         const estLegendeImage = !!currentImage;
 
-        let texteUtilisateur = arguments.join(" ").trim();
+        let texteUtilisateur = args.join(" ").trim();
         if (!texteUtilisateur && currentCaption) {
             texteUtilisateur = currentCaption.replace(/^\.ia\s*/i, "").trim();
         }

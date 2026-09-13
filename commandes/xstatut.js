@@ -67,7 +67,7 @@ export default {
     categorie: "Statuts",
     infos: `Pour récupérer les statuts :
 Soit en _répondant au statut de la personne ou en aimant le statut_ *attention si c'est en aimant le statut il sera envoyé à toi pas dans le chat de la personne qui a mis le statut*.`,
-    execute: async ({ connexion, message, arguments, nom_session }) => {
+    execute: async ({ connexion, message, args, nom_session }) => {
 
 	const trad = (cle, vars = {}) => traduire(nom_session, 'commandes', 'xstatut', { [cle]: vars })[cle];
 

@@ -11,7 +11,7 @@ export default {
     categorie: "Groupes && Privé",
     infos: "Utilisation : `.quitte` dans un groupe, ou `.quitte <lien>` pour quitter une discussion spécifique.",
 
-    execute: async ({ sock, message, arguments, nom_session }) => {
+    execute: async ({ sock, message, args, nom_session }) => {
 	const trad = (cle, vars = {}) => traduire(nom_session, 'commandes', 'quitte', { [cle]: vars })[cle];
 
         if (!message.key.fromMe) {
@@ -23,7 +23,7 @@ export default {
             return;
         }
 
-        const lien = arguments[0];
+        const lien = args[0];
         const jid = message.key.remoteJid;
 
         if (!lien) {

@@ -95,7 +95,7 @@ export default {
 > Pour le désactiver il suffit de taper tout simplement \`.statut_auto like\` et c'est de même pour le désactiver.
 > Si c'est l'émoji que tu veux changer il suffit de taper la même chose mais cette fois avec l'émoji que tu veux à la toute fin ex: \`.statut_auto like 🫩\`.  NB : *Si la commande globale \`.statut_auto\` était à l'état désactiver les modifications de seront enregistrés mais appliquer qu'à l'activation de la commande globale.`,
 
-    execute: async ({ connexion, message, arguments, nom_session }) => {
+    execute: async ({ connexion, message, args, nom_session }) => {
 	const trad = (cle, vars = {}) => traduire(nom_session, 'commandes', 'statut_auto', { [cle]: vars })[cle];
         if (!message.key.fromMe) {
 	    const si_pas_moi = trad('msg.si_pas_moi') || "> Tu ne peux pas utiliser cette commande";
@@ -107,7 +107,7 @@ export default {
         }
 	//gestion des sous-commnades
         const chemins = await obtenirCheminsMemoire(nom_session);
-        const premierArgument = arguments[0]?.toLowerCase();
+        const premierArgument = args[0]?.toLowerCase();
         const infos = await chargerInfos(chemins.infosFichier);
 
         switch (premierArgument) {
@@ -137,7 +137,7 @@ export default {
 
 	     //sous-commandes like
              case "like": {
-                const nouvelEmoji = arguments[1];
+                const nouvelEmoji = args[1];
                 let texteConfirmation = "";
 
                 if (nouvelEmoji) {
@@ -174,7 +174,7 @@ export default {
             case "exclu":
             case "inclu": {
                 let jidsCibles = [];
-                const numeroFourni = arguments[1];
+                const numeroFourni = args[1];
                 const estGroupe = message.key.remoteJid.endsWith('@g.us');
 
                 if (numeroFourni) {

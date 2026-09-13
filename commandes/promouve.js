@@ -12,7 +12,7 @@ export default {
     infos: `Utilisation : \`.promouve @MEMBRE\` ou \`.promouve <numéro>\` pour nommer quelqu'un admin.
 > Mais il faut être admin pour réussir.`,
 
-    execute: async ({ connexion, nom_session, message, arguments }) => {
+    execute: async ({ connexion, nom_session, message, args }) => {
 
         const trad = (cle, vars = {}) =>
             traduire(nom_session, 'commandes', 'promouve', { [cle]: vars })[cle];
@@ -91,7 +91,7 @@ export default {
             let ciblesInitiales = [];
 
             const mentions = message.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
-            const numCible = arguments.find(arg => /^\d+$/.test(arg));
+            const numCible = args.find(arg => /^\d+$/.test(arg));
             const auteurReponduBrut = message.message?.extendedTextMessage?.contextInfo?.participant;
 
             if (mentions.length > 0) {

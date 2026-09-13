@@ -46,13 +46,13 @@ export default {
 La commande a aussi un argument :
     \`.infos photo\` : *Pour changer la photo de fond de la commande.*`,
 
-    execute: async ({ connexion, message, arguments, nom_session }) => {
+    execute: async ({ connexion, message, args, nom_session }) => {
         const dossierInfosMemo = path.join(nom_dossier, '..', 'memoires', 'memoires_commandes', 'infos', nom_session);
         const cheminPhotoConfig = path.join(dossierInfosMemo, 'photo.json');
 
         const trad = (cle, vars = {}) => traduire(nom_session, 'commandes', 'infos', { [cle]: vars })[cle];
 
-        if (arguments[0]?.toLowerCase() === 'photo') {
+        if (args[0]?.toLowerCase() === 'photo') {
             if (!message.key.fromMe) {
                 const msgPermis = trad('msg.erreur_permis') || "⤫Tu peux pas l'executer⤫";
                 return connexion.sendMessage(message.key.remoteJid, { text: msgPermis}, { quoted: message });
@@ -116,13 +116,13 @@ La commande a aussi un argument :
             }
         }
 
-        if (!arguments[0]) {
+        if (!args[0]) {
             const texteAide = trad('msg.texte_aide') || `Sur quelle fonctionnalité souhaites-tu avoir plus d'infos?\n> Fais par exemple : \`.infos infos\``;
             await repondreAvecProfil(texteAide);
             return;
         }
 
-        const nomRecherche = arguments[0].toLowerCase();
+        const nomRecherche = args[0].toLowerCase();
         let cmdTrouvee = null;
         let outilTrouve = null;
 

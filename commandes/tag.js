@@ -67,7 +67,7 @@ export default {
 La commande a aussi un argument spécial :
     \`.tag photo\` : *Pour changer la photo de fond de la commande.*`,
 
-    execute: async ({ connexion, message, arguments, nom_session }) => {
+    execute: async ({ connexion, message, args, nom_session }) => {
         const jid = message.key.remoteJid;
         const estGroupe = jid.endsWith('@g.us');
 
@@ -78,7 +78,7 @@ La commande a aussi un argument spécial :
         const trad = (cle, vars = {}) => traduire(nom_session, 'commandes', 'tag', { [cle]: vars })[cle];
 
         //gestion de la sous-commande "photo"
-        if (arguments[0]?.toLowerCase() === 'photo' && arguments.length === 1) {
+        if (args[0]?.toLowerCase() === 'photo' && args.length === 1) {
             //si ce n'est pas le bot, on envoie le message de refus et on s'arrête là (pas de tag)
             if (!message.key.fromMe) {
                 const msgPersmis = trad('msg.erreur_permis') || "⤫Tu peux pas l'executer⤫";

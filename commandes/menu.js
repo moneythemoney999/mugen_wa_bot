@@ -54,10 +54,10 @@ La commande a ausssi trois arguments:
         \`.menu commandes\` : *Pour affiche seulment les commandes sans ~les outils~*
         \`.menu outils\` : *Pour les outils sans ~les commandes~*
         \`.menu photo\` : *Pour changer la de fond de la commande.*`,
-    execute: async ({ connexion, message, arguments, nom_session }) => {
+    execute: async ({ connexion, message, args, nom_session }) => {
         const dossierCommandes = nom_dossier;
         const dossierOutils = path.join(nom_dossier, '..', 'outils');
-        const argument = arguments[0]?.toLowerCase();
+        const argument = args[0]?.toLowerCase();
 
         const dossierMenuMemo = path.join(nom_dossier, '..', 'memoires', 'memoires_commandes', 'menu', nom_session);
         const cheminPhotoConfig = path.join(dossierMenuMemo, 'photo.json');

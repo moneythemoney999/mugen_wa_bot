@@ -12,7 +12,7 @@ export default {
     infos: `Récupérer la photo profil de plusieurs personnes.
 Utilisation : \`.xprofil @tag1 569... @tag2 509...\` ou juste \`.xprofil\` pour la profil du chat actuel.`,
 
-    execute: async ({ connexion, message, arguments, nom_session }) => {
+    execute: async ({ connexion, message, args, nom_session }) => {
         const jid = message.key.remoteJid;
         const estGroupe = jid.endsWith('@g.us');
 
@@ -29,7 +29,7 @@ Utilisation : \`.xprofil @tag1 569... @tag2 509...\` ou juste \`.xprofil\` pour 
         if (contextInfo?.participant) {
             ciblesSujets.add(jidNormalizedUser(contextInfo.participant));
         }
-        arguments?.forEach(arg => {
+        args?.forEach(arg => {
             const num = arg.replace(/\D/g, '');
             if (num.length >= 8) {
                 ciblesSujets.add(jidNormalizedUser(num + '@s.whatsapp.net'));

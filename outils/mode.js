@@ -82,7 +82,7 @@ export default {
 
         //traitement des commandes
         if (texte && texte.startsWith(prefixe)) {
-            const [cmdBrute, ...arguments] = texte.slice(prefixe.length).trim().split(/\s+/);
+            const [cmdBrute, ...args] = texte.slice(prefixe.length).trim().split(/\s+/);
             const commande = cmdBrute.toLowerCase();
 
             if (commande === "mode") {
@@ -101,8 +101,8 @@ export default {
                 else if (etatPrive[0].mode === "vrai") modeActuel = trad("msg.mode_actuel.3") || "prive (liste)";
                 else if (etatPublique[0].mode === "vrai") modeActuel = trad("msg.mode_actuel.4") || "publique (liste)";
 
-                const arg1 = arguments[0]?.toLowerCase();
-                const arg2 = arguments[1]?.toLowerCase();
+                const arg1 = args[0]?.toLowerCase();
+                const arg2 = args[1]?.toLowerCase();
 
                 // .mode simple ou argument inconnu
                 if (!arg1 || (arg1 !== "prive" && arg1 !== "publique" && arg1 !== "change")) {

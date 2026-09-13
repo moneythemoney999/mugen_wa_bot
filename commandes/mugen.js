@@ -50,7 +50,7 @@ export default {
 La commande a aussi un argument :
     \`.mugen photo\` : *Pour changer la photo de fond de la commande.*`,
 
-    execute: async ({ connexion, message, arguments, nom_session }) => {
+    execute: async ({ connexion, message, args, nom_session }) => {
         const dossierMugenMemo = path.join(__dirname, '..', 'memoires', 'memoires_commandes', 'mugen', nom_session);
         const cheminPhotoConfig = path.join(dossierMugenMemo, 'photo.json');
 
@@ -58,7 +58,7 @@ La commande a aussi un argument :
         const trad = (cle, vars = {}) => traduire(nom_session, 'commandes', 'mugen', { [cle]: vars })[cle];
 
         // gestion de la sous-commande "photo"
-        if (arguments[0]?.toLowerCase() === 'photo') {
+        if (args[0]?.toLowerCase() === 'photo') {
             if (!message.key.fromMe) {
                 const msgPermis = trad('msg.erreur_permis') || "⤫Tu peux pas l'executer⤫";
                 return connexion.sendMessage(message.key.remoteJid, { text: msgPermis }, { quoted: message });
