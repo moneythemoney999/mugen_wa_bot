@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
-    "@whiskeysockets/baileys": "^7.0.0-rc.9",
+    "@whiskeysockets/baileys": "^7.0.0-rc14",
     "file-type": "^22.0.0",
     "node-fetch": "^3.3.2",
     "qrcode-terminal": "^0.12.0",
