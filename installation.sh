@@ -47,7 +47,7 @@ fi
 echo "Étape 4 : Application du correctif pour wa-sticker-formatter..."
 INTERNAL_SHARP="node_modules/wa-sticker-formatter/node_modules/sharp"
 
-if [ -d "node_modules/wa-sticker-formatter" ]; the
+if [ -d "node_modules/wa-sticker-formatter" ]; then
 	# On supprime la version interne si elle existe
 	rm -rf "$INTERNAL_SHARP"
 
