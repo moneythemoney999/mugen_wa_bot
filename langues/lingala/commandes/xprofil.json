@@ -1,0 +1,14 @@
+{
+ "metadonnees": {
+  "nom": "xprofil",
+  "description": "Piquer la photo profil des gens ou groupes.",
+  "categorie": "Groupes && Privé",
+  "infos": "Récupérer la photo profil de plusieurs personnes.\nUtilisation : `.xprofil @tag1 569... @tag2 509...` ou juste `.xprofil` pour la profil du chat actuel."
+ },
+ "messages": {
+  "cible_groupe": "du groupe",
+  "cible_utilisateur": "de @{utilisateur}",
+  "legende_reussis": "Voici la photo de profil {reussis}.",
+  "legende_non_reussis": "> Impossible de récupérer la photo de profil de @{echoues}. Il peut ne pas en avoir ou l'a protégée."
+ }
+}

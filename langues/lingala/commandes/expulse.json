@@ -1,0 +1,20 @@
+{
+ "metadonnees": {
+  "nom": "expulse",
+  "description": "Expulse un membre d'un groupe.",
+  "categorie": "Groupes",
+  "infos": "Utilisation : `.expulse @membre` ou `.expulse <numéro>` ou encore en répondant à un message de la personne avec ma commande.\n\nPour retirer quelqu'un du groupe il fait que tu sois admin du groupe."
+ },
+ "messages": {
+  "si_prive": "C'est pas utilisable en privé",
+  "moi_non_admin": "> T'es pas admin😂🤣",
+  "autre_non_admin": "Faut que tu sois admin",
+  "bot_non_admin": "Faut me donner les droits d'administration",
+  "pas_de_cible": "Qui dois-je expulser.\n*Mets son num ou tag la personne derrière la commande* ex: `.expulse 56931437983` `.expulse @la_personne`.",
+  "cible_moi": "```🫩🫩```",
+  "cible_est_admin": "~Fait le toi même, flemme🥱😪~",
+  "succes": "~@{expulse}~ a été viré d'ici",
+  "cible_non_membre": "> Membre introuvable.",
+  "msg_erreur": "Une erreur est survenue lors de l'expulsion."
+ }
+}
