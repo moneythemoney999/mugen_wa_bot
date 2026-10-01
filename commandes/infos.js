@@ -11,24 +11,24 @@ const nom_dossier = path.dirname(nom_fichier);
 const chemin_url = (chemin) => pathToFileURL(chemin).href;
 
 
-async function mettreAJourPhotoProfil(connexion, nom_session) {
-    const cheminDossierSession = path.join(nom_dossier, '..', 'memoires', 'memoires_sessions', nom_session);
-    const cheminProfil = path.join(cheminDossierSession, 'profil.jpg');
+async function actualiser_image_profil(connexion, nom_session) {
+	const chemin_dossier_session = path.join(nom_dossier, '..', 'memoires', 'memoires_sessions', nom_session);
+	const chemin_image = path.join(chemin_dossier_session, 'profil.jpg');
 
-    try {
-        const urlPhotoProfil = await connexion.profilePictureUrl(connexion.user.id, 'image');
-        const reponse = await fetch(urlPhotoProfil);
-        if (!reponse.ok) {
+	try {
+		const lien_profil = await connexion.profilePictureUrl(connexion.user.id, 'image');
+		const reponse = await fetch(lien_profil);
+		if (!reponse.ok) {
             throw new Error(`[(infos), "${nom_session}"]: Erreur dans la requête de récuperation du profil avec le statut : ${reponse.status}`);
         }
         const bufferImage = Buffer.from(await reponse.arrayBuffer());
-        await fs.mkdir(cheminDossierSession, { recursive: true });
-        await fs.writeFile(cheminProfil, bufferImage);
+        await fs.mkdir(chemin_dossier_session, { recursive: true });
+        await fs.writeFile(chemin_image, bufferImage);
     } catch (erreur) {
         console.error(erreur.message || erreur);
         try {
-            if (await fs.access(cheminProfil).then(() => true).catch(() => false)) {
-                await fs.unlink(cheminProfil);
+            if (await fs.access(chemin_image).then(() => true).catch(() => false)) {
+                await fs.unlink(chemin_image);
             }
         } catch (errSuppression) {
             console.error(`[(infos), "${nom_session}"]: Erreur lors de la supression de l'ancienne photo de profil pour (${nom_session}):`, errSuppression);
@@ -87,18 +87,18 @@ La commande a aussi un argument :
             }
 
             if (mon_profil === "vrai") {
-                const cheminProfil = path.join(nom_dossier, '..', 'memoires', 'memoires_sessions', nom_session, 'profil.jpg');
+                const chemin_image = path.join(nom_dossier, '..', 'memoires', 'memoires_sessions', nom_session, 'profil.jpg');
                 try {
-                    if (await fs.access(cheminProfil).then(() => true).catch(() => false)) {
-                        const buffer = await fs.readFile(cheminProfil);
+                    if (await fs.access(chemin_image).then(() => true).catch(() => false)) {
+                        const buffer = await fs.readFile(chemin_image);
                         await connexion.sendMessage(message.key.remoteJid, { image: buffer, caption: texte }, { quoted: message });
-                        mettreAJourPhotoProfil(connexion, nom_session);
+                        actualiser_image_profil(connexion, nom_session);
                     } else {
-                        const urlPhotoProfil = await connexion.profilePictureUrl(connexion.user.id, 'image');
-                        const reponse = await fetch(urlPhotoProfil);
+                        const lien_profil = await connexion.profilePictureUrl(connexion.user.id, 'image');
+                        const reponse = await fetch(lien_profil);
                         const bufferImage = Buffer.from(await reponse.arrayBuffer());
-                        await fs.mkdir(path.dirname(cheminProfil), { recursive: true });
-                        await fs.writeFile(cheminProfil, bufferImage);
+                        await fs.mkdir(path.dirname(chemin_image), { recursive: true });
+                        await fs.writeFile(chemin_image, bufferImage);
                         await connexion.sendMessage(message.key.remoteJid, { image: bufferImage, caption: texte }, { quoted: message });
                     }
                 } catch (e) {
@@ -106,8 +106,8 @@ La commande a aussi un argument :
                 }
             } else {
                 try {
-                    const urlPhotoProfil = await connexion.profilePictureUrl(message.key.remoteJid, 'image');
-                    const reponse = await fetch(urlPhotoProfil);
+                    const lien_profil = await connexion.profilePictureUrl(message.key.remoteJid, 'image');
+                    const reponse = await fetch(lien_profil);
                     const bufferImage = Buffer.from(await reponse.arrayBuffer());
                     await connexion.sendMessage(message.key.remoteJid, { image: bufferImage, caption: texte }, { quoted: message });
                 } catch (e) {

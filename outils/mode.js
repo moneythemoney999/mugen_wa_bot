@@ -57,7 +57,7 @@ export default {
     infos: `Peut être utilisé en groupes ou privé pour mettre ce groupe, contact ou le bot en mode privé/publique. Pour mettre tout le bot en mode privé/publique, il faut utiliser l'argument \`tous\` après le mode que tu veux mettre, ex : \`.mode prive tous\`. Après cette commande, un message de confirmation apparaîtra disant que les paramètres ont été enregistrés. Pour les appliquer, il faut utiliser l'argument change + le mode auquel tu veux passer, ex : \`.mode change tous\``,
 
     execute: async (nomEvenement, donnesEvenement, { connexion, nom_session, prefixe }) => {
-	const trad = (cle, vars = {}) => traduire(nom_session, 'outils', 'mode', { [cle]: vars })[cle];
+	const trad = (cle, variables = {}) => traduire(nom_session, 'outils', 'mode', { [cle]: variables })[cle];
 
         if (nomEvenement !== "messages.upsert") return;
 

@@ -6,20 +6,20 @@
   "infos": "Pour discuter avec l'IA, il faut d'abord taper `.ia ton message derrière`. Il peut être en réponse à un ancien message de type (image, texte) ou même directement en légende d'une image.\nAprès avoir tapé .ia, il n'est plus nécessaire de le faire dans un délai de 5 minutes ; il suffit de répondre au dernier message de l'IA.\n\nIl y a aussi une sous-commande pour réinitialiser la discussion avec l'IA si celle-ci part en vrille.\n\n> NB : *Il pourrait y avoir certaines données (noms de profils, numéro du compte) qui seront partagées avec l'IA pour son bon fonctionnement.*"
  },
  "messages": {
-  "cleAPI_introuvable": "> L'IA n'est pas prête.",
-  "textes_de_attente": [
+  "cle_api_introuvable": "> L'IA n'est pas prête.",
+  "textes_attente": [
    "◐♾",
    "♾◓",
    "◑♾",
    "♾◒",
    "♾️"
   ],
-  "nomAuteur": "Utilisateur",
+  "nom_auteur": "Utilisateur",
   "succes_supression": "Historique de la conversation effacé.",
   "pas_de_historique": "Info : Aucun historique trouvé pour cette discussion.",
   "pas_de_question": "Euh... C'est quoi la question ?",
   "instruction_systeme": {
-   "identite": "- Tu es Mugen♾️♾️ IA, une intelligence artificielle intégrée à WhatsApp.\n- Tu es accessible grâce à un bot WhatsApp nommé Mugen♾️♾️ Bot.",
+   "identiter": "- Tu es Mugen♾️♾️ IA, une intelligence artificielle intégrée à WhatsApp.\n- Tu es accessible grâce à un bot WhatsApp nommé Mugen♾️♾️ Bot.",
    "createur": "- Ton créateur est Money Mugen♾️♾️.\n- Si quelqu'un demande qui t'a créé, réponds toujours : \"Money Mugen♾️♾️\".",
    "proprietaire": "- Le compte WhatsApp numéro ({num_bot}) est ton propriétaire actuel.\n- Le propriétaire actuel n'est pas forcément ton créateur.\n- Ne confonds jamais le créateur et le propriétaire.",
    "reponse_au_question": {
@@ -36,7 +36,7 @@
    "plus_de_token": "> Plus de jus 😅",
    "autres": "> Une erreur est survenue."
   },
-  "structurePrompt": {
+  "structure_instruction": {
    "expediteur": "expediteur",
    "message": "message",
    "utilisateur": "Utilisateur",

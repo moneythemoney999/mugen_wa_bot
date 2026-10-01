@@ -12,7 +12,7 @@ export default {
 Mais il faut que tu sois admin aussi et tu ne peux pas rétrograder la personne qui a créé le groupe.`,
 	// Logique de la commande
 	execute: async ({ connexion, nom_session, message, args }) => {
-		const trad = (cle, vars = {}) => traduire (nom_session, 'commandes', 'degrade', { [cle] : vars}) [cle];
+		const trad = (cle, variables = {}) => traduire (nom_session, 'commandes', 'degrade', { [cle] : variables}) [cle];
 		const jid = message.key.remoteJid;
 		const est_groupe = jid.endsWith('@g.us');
 
@@ -81,7 +81,7 @@ Mais il faut que tu sois admin aussi et tu ne peux pas rétrograder la personne 
 
 			// Rétrogradation
 			const cibles_a_retrograder = [];
-			let cible_non_trouve = false;
+			let cible_non_trouver = false;
 
 			for (const cible_brut of cibles_initiales) {
 				let participant;
@@ -116,7 +116,7 @@ Mais il faut que tu sois admin aussi et tu ne peux pas rétrograder la personne 
 					}
 					cibles_a_retrograder.push(participant.id);
 				} else {
-					cible_non_trouve = true;
+					cible_non_trouver = true;
 				}
 			}
 			// Envoi des requêtes de rétrogradation à WhatsApp
@@ -124,10 +124,10 @@ Mais il faut que tu sois admin aussi et tu ne peux pas rétrograder la personne 
 				try {
 					await connexion.groupParticipantsUpdate(jid, cibles_a_retrograder, "demote");
 				} catch (e) {
-					const jidParent = metadonnees_groupe.linkedParent;
-					if (jidParent) {
+					const jid_parent = metadonnees_groupe.linkedParent;
+					if (jid_parent) {
 						try {
-							await connexion.groupParticipantsUpdate(jidParent, cibles_a_retrograder, "demote");
+							await connexion.groupParticipantsUpdate(jid_parent, cibles_a_retrograder, "demote");
 						} catch (e2) {
 							throw e2; // Relance pour le catch global
 						}
@@ -141,7 +141,7 @@ Mais il faut que tu sois admin aussi et tu ne peux pas rétrograder la personne 
 					await connexion.sendMessage(jid, { text: succes, mentions: [retrogrades] },
 						{ quoted: message });
 				}
-			} else if (cible_non_trouve) {
+			} else if (cible_non_trouver) {
 				// Si les requêtes n'ont pas abouti du fait qu'on n'a pas trouvé la personne dans la liste des participants
 				const cible_non_membre = trad('msg.cible_non_membre') || "~Cette personne n'est pas un membre du groupe~";
 				await connexion.sendMessage(jid, { text: cible_non_membre },

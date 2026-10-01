@@ -164,7 +164,7 @@ export default {
         if (commande.toLowerCase() !== 'langue') return;
 
         // Le "Raccourci" local, sans boucle infinie
-        const trad = async (cle, vars = {}) => (await traduire(nom_session, 'outils', 'langue', { [cle]: vars }))[cle];
+        const trad = async (cle, variables = {}) => (await traduire(nom_session, 'outils', 'langue', { [cle]: variables }))[cle];
 
         if (!message.key.fromMe) {
             const pas_moi = (await trad('msg.pas_moi')) || "⊙```T'as pas l'autorisation necéssaire```";

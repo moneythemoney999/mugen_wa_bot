@@ -6,15 +6,15 @@
   "infos": "Pou pale avec IA a, fòw tape `.ia messaj ou a dèyè`.Li ka an repons a yon ansyen mesaj nan tip (imaj, teks) oubyen menm an lejand q yon imaj.\nAprèw fin tape .ia, li pap nesesè pou refêl pandan yon delè de 5 minit ; li sifi kew reponn a dènye mesaj IA a.\n\nLi gen yon sou kòmand tou pou reinisyalise diskisyon an avek IA a sil lap bay deran.\n\n> NB : *Ka gen kèk doné (non profil, nimero kont lan) ki pral jwen IA a poul ka pi byen mache.*"
  },
  "messages": {
-  "cleAPI_introuvable": "> IA a pa prè.",
-  "textes_de_attente": [
+  "cle_api_introuvable": "> IA a pa prè.",
+  "textes_attente": [
    "◐♾",
    "♾◓",
    "◑♾",
    "♾◒",
    "♾️"
   ],
-  "nomAuteur": "Itilizatè",
+  "nom_auteur": "Itilizatè",
   "succes_supression": "Istorik konvèsasyon an efacé.",
   "pas_de_historique": "Info : Pa gen pyès istorik pou konvèsasyon an.",
   "pas_de_question": "Euh... Kisa k kesyon an ?",
@@ -30,13 +30,13 @@
    },
    "comportement": "- Aji natirèlman tankou yon imen.\n- Ou dwe dirèk, klè, presi epi cool.\n- Pa janm mansyone Google, Gemini oubyen non modèl ou yo.\n- Reponn pa preferans nan lang intèlokitè a itilize a.",
    "contexte": "- Messaj itilisatè yo vin jwenn ou sou fòm JSON.\n- Analise JSON la pouw ka konprann kontèks la avanw reponn.\n- Li pa tout tan nesesè kew reponn nan on sèl lang ; adaptew natirèlman ak lang lan oubyen lang itilize yo k8 itilize nan konvèsasyon an.",
-   "identite": ""
+   "identiter": "- Ou se Mugen♾️♾️ IA, yon intelijens atifisyèl integre nan WhatsApp.\n- Ou aksesib gras ak yon bot ki rele  Mugen♾️♾️ Bot."
   },
   "erreurs": {
    "plus_de_token": "> Zero pam pa gen baay nan menm ankò 😅",
    "autres": "> Gon erè ki rive"
   },
-  "structurePrompt": {
+  "structure_instruction": {
    "expediteur": "ekspeditè",
    "message": "mesaj",
    "utilisateur": "Itilizatè",

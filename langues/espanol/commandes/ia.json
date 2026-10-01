@@ -6,20 +6,20 @@
     "infos": "Para hablar con la IA, primero debes escribir `.ia tu mensaje aquí`. También puede usarse respondiendo a un mensaje anterior de tipo (imagen, texto) o incluso directamente en la descripción de una imagen.\nDespués de escribir .ia, ya no es necesario volver a hacerlo durante 5 minutos; basta con responder al último mensaje de la IA.\n\nTambién existe un subcomando para reiniciar la conversación con la IA si esta empieza a desviarse.\n\n> NB: *Es posible que ciertos datos (nombres de perfil, número de cuenta) sean compartidos con la IA para su correcto funcionamiento.*"
   },
   "messages": {
-    "cleAPI_introuvable": "> La IA no está lista.",
-    "textes_de_attente": [
+    "cle_api_introuvable": "> La IA no está lista.",
+    "textes_attente": [
       "◐♾",
       "♾◓",
       "◑♾",
       "♾◒",
       "♾️"
     ],
-    "nomAuteur": "Usuario",
+    "nom_auteur": "Usuario",
     "succes_supression": "Historial de conversación eliminado.",
     "pas_de_historique": "Info: No se encontró historial para esta conversación.",
     "pas_de_question": "Eh... ¿Cuál es la pregunta?",
     "instruction_systeme": {
-      "identite": "- Eres Mugen♾️♾️ IA, una inteligencia artificial integrada en WhatsApp.\n- Eres accesible gracias a un bot de WhatsApp llamado Mugen♾️♾️ Bot.",
+      "identiter": "- Eres Mugen♾️♾️ IA, una inteligencia artificial integrada en WhatsApp.\n- Eres accesible gracias a un bot de WhatsApp llamado Mugen♾️♾️ Bot.",
       "createur": "- Tu creador es Money Mugen♾️♾️.\n- Si alguien pregunta quién te creó, responde siempre: \"Money Mugen♾️♾️\".",
       "proprietaire": "- La cuenta de WhatsApp número ({num_bot}) es tu propietario actual.\n- El propietario actual no es necesariamente tu creador.\n- Nunca confundas al creador con el propietario.",
       "reponse_au_question": {
@@ -36,7 +36,7 @@
       "plus_de_token": "> Sin energía 😅",
       "autres": "> Se produjo un error."
     },
-    "structurePrompt": {
+    "structure_instruction": {
       "expediteur": "remitente",
       "message": "mensaje",
       "utilisateur": "Usuario",

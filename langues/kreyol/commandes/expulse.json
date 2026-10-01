@@ -6,15 +6,15 @@
   "infos": "Itilizasyon : `.expulse @manb` ou `.expulse <niméro>` oubyen réponn à yon nan mesaj li yo dèyè komand lan.\n\nPou retiré yon moun nan yon group oubdwe admin nan group la."
  },
  "messages": {
-  "msgSi_prive": "Li pa itilizab an privé.",
-  "msgMoi_non_admin": "> Ou pa admin😂🤣",
-  "msgAutre_non_admin": "Faut que tu sois admin",
-  "msgBot_non_admin": "Fow banm dwa administrasyon yo.",
-  "msgPas_de_cible": "Kiyès poum retire a?.\n*Mét niméro moun nan oubyen tag li dèyè komand lan* eg: `.expulse 56931437983` `.expulse @moun_lan`.",
-  "msgSi_cible_bot": "```🫩🫩```",
-  "msgSi_admin": "~Fèl ou menm, mw pa kapap🥱😪~",
-  "msgSucces": "~@{expulse}~ soti isit la.",
-  "msgCible_non_membre": "> Mw pa jwen manb sa.",
-  "msgErreur": "Gen yon erè ki rive pandan pwosésis la.."
+  "si_prive": "Li pa itilizab an privé.",
+  "moi_non_admin": "> Ou pa admin😂🤣",
+  "autre_non_admin": "Faut que tu sois admin",
+  "bot_non_admin": "Fow banm dwa administrasyon yo.",
+  "pas_de_cible": "Kiyès poum retire a?.\n*Mét niméro moun nan oubyen tag li dèyè komand lan* eg: `.expulse 56931437983` `.expulse @moun_lan`.",
+  "cible_moi": "```🫩🫩```",
+  "cible_est_admin": "~Fèl ou menm, mw pa kapap🥱😪~",
+  "succes": "~@{expulse}~ soti isit la.",
+  "cible_non_membre": "> Mw pa jwen manb sa.",
+  "msg_erreur": "Gen yon erè ki rive pandan pwosésis la.."
  }
 }
