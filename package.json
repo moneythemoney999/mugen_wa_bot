@@ -24,9 +24,16 @@
     "@google/generative-ai": "^0.24.1",
     "@whiskeysockets/baileys": "^7.0.0-rc14",
     "file-type": "^22.0.0",
+    "jimp": "^1.6.1",
+    "link-preview-js": "^3.2.0",
     "node-fetch": "^3.3.2",
     "qrcode-terminal": "^0.12.0",
     "sharp": "^0.34.5",
     "wa-sticker-formatter": "^4.4.4"
+  },
+  "overrides": {
+    "wa-sticker-formatter": {
+      "sharp": "0.34.5"
+    }
   }
 }
