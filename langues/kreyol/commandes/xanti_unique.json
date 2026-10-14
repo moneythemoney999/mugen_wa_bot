@@ -7,11 +7,11 @@
  },
  "messages": {
   "limite_atteint": "Ou rive nan limit itilizasyonw lan ({limite}).",
-  "msg_refus": "Ou paka egzekite kòmand sa.",
-  "msgPas_de_cible": "Ou dwe reponn a on mesaj en vi inik.",
-  "msgMedia_non_reconnu": "Mesaj sa pa on mesaj en vi inik.",
-  "msgReussi_groupe": "Mesaj {nom_auteur}(+{num_auteur}) debloke nan {nom_groupe} a {heure}.",
-  "msgReussi_prive": "Mesaj {nom_auteur}(+{num_auteur}) debloke a {heure}.",
-  "msgErreur": "Erè pandan deblokaj media a."
+  "message_refus": "Ou paka egzekite kòmand sa.",
+  "pas_de_cible": "Ou dwe reponn a on mesaj en vi inik.",
+  "media_non_reconnu": "Mesaj sa pa on mesaj en vi inik.",
+  "legende_reussite_groupe": "Mesaj {nom_auteur}(+{num_auteur}) debloke nan {nom_groupe} a {heure}.",
+  "legende_reussite_priver": "Mesaj {nom_auteur}(+{num_auteur}) debloke a {heure}.",
+  "message_erreur": "Erè pandan deblokaj media a."
  }
 }

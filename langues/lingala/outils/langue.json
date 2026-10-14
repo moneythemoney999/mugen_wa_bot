@@ -1,13 +1,41 @@
 {
- "metadonnees": {},
+ "metadonnees": {
+  "nom": "langue",
+  "description": "Changer la langue du bot",
+  "categorie": "Bot",
+  "infos": "Permet d'afficher et de changer la langue du bot."
+ },
  "messages": {
-  "succes": {
-   "change_langue": ""
+  "pas_moi": "⊙```T'as pas l'autorisation necéssaire```",
+  "reponse": {
+   "1": "> Voici les langues disponible :\n\n",
+   "2": "- {nom} (`{code}`)\n"
   },
   "variables": {
    "variables_langues": {
-    "ln": ""
+    "fr": {
+     "nom": "Français",
+     "code": "fr"
+    },
+    "es": {
+     "nom": "Espagnol",
+     "code": "es"
+    },
+    "ht": {
+     "nom": "Créole",
+     "code": "ht"
+    },
+    "ln": {
+     "nom": "Lingala",
+     "code": "ln"
+    }
    }
+  },
+  "erreur": {
+   "langue_non_trouver": "𒀰Langue indisponible ou inexistante𒀰"
+  },
+  "succes": {
+   "change_langue": "🗘Langue changé de {ancienne} ➜ {nouvelle}✓"
   }
  }
 }

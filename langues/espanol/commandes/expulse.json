@@ -15,6 +15,6 @@
   "cible_est_admin": "~Hazlo tu mismo, qué paja🥱😪~",
   "succes": "~@{expulse}~ fue expulsado de aquí.",
   "cible_non_membre": "> Miembro no encuentrado.",
-  "msg_erreur": "Se produjo un error durante la expulsión."
+  "erreur": "Se produjo un error durante la expulsión."
  }
 }

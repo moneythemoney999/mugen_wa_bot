@@ -7,274 +7,234 @@ import { fileURLToPath, pathToFileURL } from 'url';
 import { traduire } from '../outils/langue.js';
 
 //récupérer la version du bot depuis package.json
-const packageJsonPath = path.resolve('./package.json');
-const pkg = JSON.parse(await fs.readFile(packageJsonPath, 'utf8'));
+const chemin_package_json = path.resolve('./package.json');
+const pkg = JSON.parse(await fs.readFile(chemin_package_json, 'utf8'));
 
 //pour nom_dossier en ES modules
 const nom_fichier = fileURLToPath(import.meta.url);
 const nom_dossier = path.dirname(nom_fichier);
-const chemin_url = (chemin) => pathToFileURL(chemin).href;
+const lien_chemin = (chemin) => pathToFileURL(chemin).href;
 
-//fonction pour mettre à jour la photo de profil en arrière-plan
-async function mettreAJourPhotoProfil(connexion, nom_session) {
-    const cheminDossierSession = path.join(nom_dossier, '..', 'memoires', 'memoires_sessions', nom_session);
-    const cheminProfil = path.join(cheminDossierSession, 'profil.jpg');
-
-    try {
-        const urlPhotoProfil = await connexion.profilePictureUrl(connexion.user.id, 'image');
-        const reponse = await fetch(urlPhotoProfil);
-        if (!reponse.ok) {
-	    //s'il y'a eu un problème
-            throw new Error(`[(menu), "${nom_session}"]: La requête de recupération de la photo profil a échoué avec le statut : ${reponse.status}`);
-        }
-        const bufferImage = Buffer.from(await reponse.arrayBuffer());
-
-        await fs.mkdir(cheminDossierSession, { recursive: true });
-        await fs.writeFile(cheminProfil, bufferImage);
-    } catch (erreur) {
-        console.error(erreur.message || erreur);
-        try {
-            if (await fs.access(cheminProfil).then(() => true).catch(() => false)) {
-                await fs.unlink(cheminProfil);
-            }
-        } catch (errSuppression) {
-	    //si la supression echoue
-            console.error(`[(menu), "${nom_session}"]: Erreur lors de la suppression de l'ancienne photo de profil pour ${nom_session}:`, errSuppression);
-        }
-    }
+//fonction pour mettre à jour l'image  de profil en arrière-plan
+async function mettre_a_jour_image(connexion, nom_session) {
+	const chemin_dossier_session = path.join(nom_dossier, '..', 'memoires', 'memoires_sessions', nom_session);
+	const chemin_image = path.join(chemin_dossier_session, 'image_profil.jpg');
+	try {
+		const lien_image = await connexion.profilePictureUrl(connexion.user.id, 'image');
+		const reponse = await fetch(lien_image);
+		if (!reponse.ok) {
+			//s'il y'a eu un problème
+			throw new Error(`[(menu), "${nom_session}"]: La requête de recupération de l'image  profil a échoué avec le statut : ${reponse.status}`);
+		}
+		const tampon_image = Buffer.from(await reponse.arrayBuffer());
+		await fs.mkdir(chemin_dossier_session, { recursive: true });
+		await fs.writeFile(chemin_image, tampon_image);
+	} catch (erreur) {
+		console.error(erreur.message || erreur);
+		try {
+			if (await fs.access(chemin_image).then(() => true).catch(() => false)) {
+				await fs.unlink(chemin_image);
+			}
+		} catch (erreur_suppression) {
+			//si la supression echoue
+			console.error(`[(menu), "${nom_session}"]: Erreur lors de la suppression de l'ancienne image  de profil pour ${nom_session}:`, erreur_suppression);
+		}
+	}
 }
 
 //logique de la commande
 export default {
-    nom: 'menu',
-    description: "Affiche le menu du bot.",
-    categorie: 'Groupes && Privé',
-    infos: `*Pour connaître toutes les commandes/outils existantes de Mugen♾️♾️*.
+	nom: 'menu',
+	description: "Affiche le menu du bot.",
+	categorie: 'Groupes && Privé',
+	infos: `*Pour connaître toutes les commandes/outils existantes de Mugen♾️♾️*.
 La commande a ausssi trois arguments:
-        \`.menu commandes\` : *Pour affiche seulment les commandes sans ~les outils~*
-        \`.menu outils\` : *Pour les outils sans ~les commandes~*
-        \`.menu photo\` : *Pour changer la de fond de la commande.*`,
-    execute: async ({ connexion, message, args, nom_session }) => {
-        const dossierCommandes = nom_dossier;
-        const dossierOutils = path.join(nom_dossier, '..', 'outils');
-        const argument = args[0]?.toLowerCase();
+		\`.menu commandes\` : *Pour affiche seulment les commandes sans ~les outils~*
+		\`.menu outils\` : *Pour les outils sans ~les commandes~*
+		\`.menu image \` : *Pour changer l'image de fond de la commande.*`,
+	execute: async ({ connexion, message, args, nom_session }) => {
+		const dossier_commandes = nom_dossier;
+		const dossier_outils = path.join(nom_dossier, '..', 'outils');
+		const argument = args[0]?.toLowerCase();
+		const memoire_commande_menu = path.join(nom_dossier, '..', 'memoires', 'memoires_commandes', 'menu', nom_session);
+		const chemin_config_image = path.join(memoire_commande_menu, 'config_image.json');
+		//"Raccourci" de traduction importer depui le fichier outils/langue.js
+		const trad = async (cle, variables = {}) => (await traduire(nom_session, 'commandes', 'menu', { [cle]: variables }))[cle];
+		//pour traduire et bien faire en sorte que les commandes ou outils sans catégories aparraisse toujours à la fin
+		const categorie_autres = await trad('msg.categorie_autres') || 'Autres';
 
-        const dossierMenuMemo = path.join(nom_dossier, '..', 'memoires', 'memoires_commandes', 'menu', nom_session);
-        const cheminPhotoConfig = path.join(dossierMenuMemo, 'photo.json');
-
-	//"Raccourci" de traduction importer depui le fichier outils/langue.js
-	const trad = (cle, vars = {}) => traduire(nom_session, 'commandes', 'menu', { [cle]: vars })[cle];
-
-	//pour traduire et bien faire en sorte que les commandes ou outils sans catégories aparraisse toujours à la fin
-	const texteCatAutres = trad('msg.cat_autres');
-	const catAutres = texteCatAutres || 'Autres';
-
-        //gestion de la sous-commande "photo"
-        if (argument === 'photo') {
-            //vérification si l'expéditeur est le bot lui-même
-            if (!message.key.fromMe) {
-		const msgPermis = trad('msg.erreur_permis') || "⤫Tu peux pas l'executer⤫";
-                return connexion.sendMessage(message.key.remoteJid, { text: msgPermis },
-		    { quoted: message });
-            }
-
-            await fs.mkdir(dossierMenuMemo, { recursive: true });
-            let config = [{ "mon_profil": "vrai" }];
-
-            if (await fs.access(cheminPhotoConfig).then(() => true).catch(() => false)) {
-                try {
-                    config = JSON.parse(await fs.readFile(cheminPhotoConfig, 'utf8'));
-                } catch (e) {
-                    config = [{ "mon_profil": "vrai" }];
-                }
-            }
-
-            //basculement de la valeur
-            config[0].mon_profil = config[0].mon_profil === "vrai" ? "faux" : "vrai";
-            await fs.writeFile(cheminPhotoConfig, JSON.stringify(config, null, 1));
-
-	    const statut = config[0].mon_profil === "vrai" ? (trad('msg.statut_mon_profil') || "mon profil") : (trad('msg.statut_profil_chat') || "profil du chat");
-	    const msgSucces = trad('msg.photo_changee', {statut: statut }) || `𑁍Photo de fond changée en *${statut}*᪥.`
-            return connexion.sendMessage(message.key.remoteJid, { text: msgSucces },
+		//gestion de la sous-commande "image"
+		if (argument === 'image') {
+			//vérification si l'expéditeur est le bot lui-même
+			const est_moi = message.key.fromMe || message.key.remoteJid.endsWith("@newsletter");
+			if (!est_moi) {
+				const message_permis = await trad('msg.erreur_permis') || "⤫Tu peux pas l'executer⤫";
+				return connexion.sendMessage(message.key.remoteJid, { text: message_permis }, { quoted: message });
+			}
+			await fs.mkdir(memoire_commande_menu, { recursive: true });
+			let config = [{ "mon_profil": "vrai" }];
+			if (await fs.access(chemin_config_image).then(() => true).catch(() => false)) {
+				try {
+					config = JSON.parse(await fs.readFile(chemin_config_image, 'utf8'));
+				} catch (e) {
+					config = [{ "mon_profil": "vrai" }];
+				}
+			}
+			//basculement de la valeur
+			config[0].mon_profil = config[0].mon_profil === "vrai" ? "faux" : "vrai";
+			await fs.writeFile(chemin_config_image, JSON.stringify(config, null, 1));
+			const statut = config[0].mon_profil === "vrai" ? (await trad('msg.statut_mon_profil') || "mon profil") : (await trad('msg.statut_profil_chat') || "profil du chat")
+				const message_succes = await trad('msg.image_changer', {statut: statut }) || `𑁍Photo de fond changée en *${statut}*᪥.`
+					return connexion.sendMessage(message.key.remoteJid, { text: message_succes },
 		{ quoted: message });
-        }
-
-        const categoriesCommandes = {};
-        const categoriesOutils = {};
-
-        //charger les Commandes
-        const fichiersCommandes = (await fs.readdir(dossierCommandes)).filter(f => f.endsWith('.js'));
-
-        for (const fichier of fichiersCommandes) {
-            try {
-                const commandeModule = await import(chemin_url(path.join(dossierCommandes, fichier)));
-                let cmd = { ...commandeModule.default }; //on clone pour ne pas polluer l'original en cache
-                if (!cmd || !cmd.nom) continue;
-
-                //traduction des métadonnées de la commande
-                const tradsMeta = traduire(nom_session, 'commandes', cmd.nom, {
-                    'meta.nom': {},
-                    'meta.description': {},
-                    'meta.categorie': {}
-                });
-
-                if (tradsMeta['meta.nom']) cmd.nom = tradsMeta['meta.nom'];
-
-                if (tradsMeta['meta.description']) cmd.description = tradsMeta['meta.description'];
-
-                if (tradsMeta['meta.categorie']) cmd.categorie = tradsMeta['meta.categorie'];
-
-                const cat = cmd.categorie || catAutres;
-                if (!categoriesCommandes[cat]) categoriesCommandes[cat] = [];
-                categoriesCommandes[cat].push(cmd);
-            } catch (err) {
-                console.error(`[(menu, "${nom_session}")]: Erreur en chargeant la commande ${fichier}:`, err);
-            }
-        }
-
-        //charger les Outils
-        if (await fs.access(dossierOutils).then(() => true).catch(() => false)) {
-            const fichiersOutils = (await fs.readdir(dossierOutils)).filter(f => f.endsWith('.js'));
-
-            for (const fichier of fichiersOutils) {
-                try {
-                    const outilModule = await import(chemin_url(path.join(dossierOutils, fichier)));
-                    let outil = { ...outilModule.default };
-                    if (!outil || !outil.nom) continue;
-
-                    const vrai = "vrai";
-                    if (outil.affiche_menu !== vrai) continue;
-
-                    //traduction des métadonnées de l'outil
-                    const tradsMeta = traduire(nom_session, 'outils', outil.nom, {
-                        'meta.nom': {},
-                        'meta.description': {},
-                        'meta.categorie': {}
-                    });
-
-                    if (tradsMeta['meta.nom']) outil.nom = tradsMeta['meta.nom'];
-
-                    if (tradsMeta['meta.description']) outil.description = tradsMeta['meta.description'];
-
-                    if (tradsMeta['meta.categorie']) outil.categorie = tradsMeta['meta.categorie'];
-
-                    const cat = outil.categorie || catAutres;
-                    if (!categoriesOutils[cat]) categoriesOutils[cat] = [];
-                    categoriesOutils[cat].push(outil);
-                } catch (err) {
-                    console.error(`[(menu), "${nom_session}"]: Erreur en chargeant l'outil ${fichier}:`, err);
-                }
-            }
-        }
-
-	//construction du message à mettre en legende
-        let menuTexte = `┏╋━━━━━━━━━━━━━━◥◣◆◢◤━━━━━━━━━━━━━━╋┓
-
-> 𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭                    『 Mugen♾️♾️ Bot v${pkg.version} 』\n`;
-
-        //1- section Commandes
-        if (!argument || argument === "commandes" || argument === "commande") {
-            const texteTitreCmd = trad('msg.titre_commandes');
-            const titreCmd = texteTitreCmd || "『 📋VOILÀ LES COMMANDES📜 』";
-
-            menuTexte += `            ╔════════❀══◄••❀••►══❀════════╗
-               𓅓 ${titreCmd} 𓅓
-            ╚════════❀══◄••❀••►══❀════════╝
+		}
+		const categorie_commandes = {};
+		const categorie_outils = {};
+		//charger les Commandes
+		const fichiers_commandes = (await fs.readdir(dossier_commandes)).filter(f => f.endsWith('.js'));
+		for (const fichier of fichiers_commandes) {
+			try {
+				const module = await import(lien_chemin(path.join(dossier_commandes, fichier)));
+				let commande = { ...module.default }; //on clone pour ne pas polluer l'original en cache
+				if (!commande || !commande.nom) continue;
+				//traduction des métadonnées de la commande
+				const traduction = await traduire(nom_session, 'commandes', commande.nom, {
+					'meta.nom': {},
+					'meta.description': {},
+					'meta.categorie': {}
+				});
+				if (traduction['meta.nom']) commande.nom = traduction['meta.nom'];
+				if (traduction['meta.description']) commande.description = traduction['meta.description'];
+				if (traduction['meta.categorie']) commande.categorie = traduction['meta.categorie'];
+				const categorie = commande.categorie || categorie_autres;
+				if (!categorie_commandes[categorie]) categorie_commandes[categorie] = [];
+				categorie_commandes[categorie].push(commande);
+			} catch (err) {
+				console.error(`[(menu, "${nom_session}")]: Erreur en chargeant la commande ${fichier}:`, err);
+			}
+		}
+		//charger les Outils
+		if (await fs.access(dossier_outils).then(() => true).catch(() => false)) {
+			const fichiers_outils = (await fs.readdir(dossier_outils)).filter(f => f.endsWith('.js'));
+			for (const fichier of fichiers_outils) {
+				try {
+					const module = await import(lien_chemin(path.join(dossier_outils, fichier)));
+					let outil = { ...module.default };
+					if (!outil || !outil.nom) continue;
+					const vrai = "vrai";
+					if (outil.affiche_menu !== vrai) continue;
+					//traduction des métadonnées de l'outil
+					const traduction = await traduire(nom_session, 'outils', outil.nom, {
+						'meta.nom': {},
+						'meta.description': {},
+						'meta.categorie': {}
+					});
+					if (traduction['meta.nom']) outil.nom = traduction['meta.nom'];
+					if (traduction['meta.description']) outil.description = traduction['meta.description'];
+					if (traduction['meta.categorie']) outil.categorie = traduction['meta.categorie'];
+					const categorie = outil.categorie || categorie_autres;
+					if (!categorie_outils[categorie]) categorie_outils[categorie] = [];
+					categorie_outils[categorie].push(outil);
+				} catch (err) {
+					console.error(`[(menu), "${nom_session}"]: Erreur en chargeant l'outil ${fichier}:`, err);
+				}
+			}
+		}
+		//construction du message à mettre en legende
+			let texte_menu = `┏╋━━━━━━━━━━━━◥◣◆◢◤━━━━━━━━━━━━╋┓
+> 𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭𑲭					『 Mugen♾️♾️ Bot v${pkg.version} 』`;
+		//1- section Commandes
+		if (!argument || argument === "commandes" || argument === "commande") {
+			const titre_commandes = await trad('msg.titre_commandes') || "『 📋VOILÀ LES COMMANDES📜 』";
+			texte_menu += `\n\n   ╔════════❀═══◄••❀••►═══❀════════╗
+		𓅓 ${titre_commandes} 𓅓
+   ╚════════❀═══◄••❀••►═══❀════════╝
 ┏`;
-            let catsCmd = Object.keys(categoriesCommandes).filter(c => c !== catAutres).sort().concat(categoriesCommandes[catAutres] ? [catAutres] : []);
-            catsCmd.forEach((cat, catIndex) => {
-                menuTexte += `\n> ☰📁 ${cat}\n`;
-                const cmds = categoriesCommandes[cat];
-                cmds.forEach((cmd, i) => {
-                    menuTexte += `┣ .${cmd.nom}\n┃ ➪ ${cmd.description}\n`;
-                    if (i < cmds.length - 1) {
-                        menuTexte += `⥱\n⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋\n`;
-                    }
-                });
-                if (catIndex < catsCmd.length - 1) {
-                    menuTexte += `\n━━━━━━━━━━━━━━━ • ✧ • ⚝ • ✧ • ━━━━━━━━━━━━━\n`;
-                }
-            });
-        }
+			let categories_commande = Object.keys(categorie_commandes).filter(c => c !== categorie_autres).sort().concat(categorie_commandes[categorie_autres] ? [categorie_autres] : []);
+			categories_commande.forEach((categorie, debut_categorie) => {
+				texte_menu += `\n\n> ☰📁 ${categorie}`;
+				const commandes = categorie_commandes[categorie];
+				commandes.forEach((commande, i) => {
+					texte_menu += `\n┣ .${commande.nom}\n┃ ➪ ${commande.description}`;
+					if (i < commandes.length - 1) {
+						texte_menu += `\n⥱\n⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋`;
+					}
+				});
+				if (debut_categorie < categories_commande.length - 1) {
+					texte_menu += `\n━━━━━══━━━━━ • ✧ • ⚝ • ✧ • ━━━━━══━━━━━`;
+				}
+			});
+		}
+		//2- section Outils
+		let categories_outils = Object.keys(categorie_outils).filter(c => c !== categorie_autres).sort().concat(categorie_outils[categorie_autres] ? [categorie_autres] : []);
+		if (categories_outils.length > 0 && (!argument || argument === "outils" || argument === "outil")) {
+			//si on affiche les deux, on met le séparateur de section
+			if (!argument) {
+				texte_menu += `\n\n> ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀`;
+			}
+			const tritre_outils = await trad('msg.titre_outils') || "『 🛠️VOILÀ LES OUTILS⚙️ 』";
+			texte_menu += `\n\n   ╔════════❀═══◄••❀••►═══❀════════╗
+			𓅓 ${tritre_outils} 𓅓
+   ╚════════❀═══◄••❀••►═══❀════════╝`;
 
-        //2- section Outils
-        let catsOutil = Object.keys(categoriesOutils).filter(c => c !== catAutres).sort().concat(categoriesOutils[catAutres] ? [catAutres] : []);
-        if (catsOutil.length > 0 && (!argument || argument === "outils" || argument === "outil")) {
-            //si on affiche les deux, on met le séparateur de section
-            if (!argument) {
-                menuTexte += `\n\n▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀\n\n`;
-            }
-
-            const texteTitreOutil = trad('msg.titre_outils');
-            const titreOutil = texteTitreOutil || "『 🛠️VOILÀ LES OUTILS⚙️ 』";
-
-            menuTexte += `\n> 𑲭𑲭𑲭𑲭
-           ╔════════❀══◄••❀••►══❀════════╗
-                𓅓 ${titreOutil} 𓅓
-           ╚════════❀══◄══❀══╝`;
-
-            catsOutil.forEach((cat, catIndex) => {
-                menuTexte += `\n> ❏⚙️ ${cat}\n`;
-                const outils = categoriesOutils[cat];
-                outils.forEach((outil, i) => {
-                    menuTexte += `┣ .${outil.nom}\n┃ ➪ ${outil.description}\n`;
-                    if (i < outils.length - 1) {
-                        menuTexte += `⥱\n⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋\n`;
-                    }
-                });
-                if (catIndex < catsOutil.length - 1) {
-                    menuTexte += `\n━━━━━━━━━━━━━━━ • ✧ • ⚝ • ✧ • ━━━━━━━━━━━━━\n`;
-                }
-            });
-        }
-
-        menuTexte += `\n┗╋━━━━━━━━━━━━━━◥◣◆◢◤━━━━━━━━━━━━━━╋┛`;
-
-        //lecture de la configuration photo
-        let mon_profil = "vrai";
-        if (await fs.access(cheminPhotoConfig).then(() => true).catch(() => false)) {
-            try {
-                const config = JSON.parse(await fs.readFile(cheminPhotoConfig, 'utf8'));
-                mon_profil = config[0].mon_profil;
-            } catch (e) {
-                mon_profil = "vrai";
-            }
-        }
-
-        if (mon_profil === "vrai") {
-            const cheminProfil = path.join(nom_dossier, '..', 'memoires', 'memoires_sessions', nom_session, 'profil.jpg');
-            try {
-                if (await fs.access(cheminProfil).then(() => true).catch(() => false)) {
-                    const buffer = await fs.readFile(cheminProfil);
-                    await connexion.sendMessage(message.key.remoteJid, { image: buffer, caption: menuTexte }, { quoted: message });
-                    mettreAJourPhotoProfil(connexion, nom_session);
-                } else {
-                    const urlPhotoProfil = await connexion.profilePictureUrl(connexion.user.id, 'image');
-                    const reponse = await fetch(urlPhotoProfil);
-                    const bufferImage = Buffer.from(await reponse.arrayBuffer());
-                    await fs.mkdir(path.dirname(cheminProfil), { recursive: true });
-                    await fs.writeFile(cheminProfil, bufferImage);
-                    await connexion.sendMessage(message.key.remoteJid, { image: bufferImage, caption: menuTexte }, { quoted: message });
-                }
-            } catch (e) {
-                console.error(`[(menu, "${nom_session}")]: Erreur lors de l'envoi de l'image de profil :`, e.message);
-	        //envoi final du menu
-                await connexion.sendMessage(message.key.remoteJid, { text: menuTexte },
-		    { quoted: message });
-            }
-        } else {
-            //utiliser la photo de la discussion actuelle
-            try {
-                const urlPhotoProfil = await connexion.profilePictureUrl(message.key.remoteJid, 'image');
-                const reponse = await fetch(urlPhotoProfil);
-                if (!reponse.ok) throw new Error(`[(menu, "${nom_session}")]: Impossible de récupérer la photo`);
-                const bufferImage = Buffer.from(await reponse.arrayBuffer());
-                await connexion.sendMessage(message.key.remoteJid, { image: bufferImage, caption: menuTexte }, { quoted: message });
-            } catch (e) {
-                console.warn(`[(menu, "${nom_session}")]: Impossible de récupérer la photo de discussion. Envoi en texte seul.`);
-                //envoi en texte seul si pas de photo
-                await connexion.sendMessage(message.key.remoteJid, { text: menuTexte }, { quoted: message });
-            }
-        }
-    }
+			categories_outils.forEach((categorie, debut_categorie) => {
+				texte_menu += `\n> ❏⚙️ ${categorie}`;
+				const outils = categorie_outils[categorie];
+				outils.forEach((outil, i) => {
+					texte_menu += `\n┣ .${outil.nom}\n┃ ➪ ${outil.description}`;
+					if (i < outils.length - 1) {
+						texte_menu += `⥱\n⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋⚋`;
+					}
+				});
+				if (debut_categorie < categories_outils.length - 1) {
+					texte_menu += `\n━━━━━══━━━━━ • ✧ • ⚝ • ✧ • ━━━━━══━━━━━`;
+				}
+			});
+		}
+		texte_menu += `\n┗╋━━━━━━━━━━━━◥◣◆◢◤━━━━━━━━━━━━╋┛`;
+		//lecture de la configuration image
+		let mon_profil = "vrai";
+		if (await fs.access(chemin_config_image).then(() => true).catch(() => false)) {
+			try {
+				const config = JSON.parse(await fs.readFile(chemin_config_image, 'utf8'));
+				mon_profil = config[0].mon_profil;
+			} catch (e) {
+				mon_profil = "vrai";
+			}
+		}
+		if (mon_profil === "vrai") {
+			const chemin_image = path.join(nom_dossier, '..', 'memoires', 'memoires_sessions', nom_session, 'image_profil.jpg');
+			try {
+				if (await fs.access(chemin_image).then(() => true).catch(() => false)) {
+					const tampon = await fs.readFile(chemin_image);
+					await connexion.sendMessage(message.key.remoteJid, { image: tampon, caption: texte_menu }, { quoted: message });
+					mettre_a_jour_image(connexion, nom_session);
+				} else {
+					const lien_image = await connexion.profilePictureUrl(connexion.user.id, 'image');
+					const reponse = await fetch(lien_image);
+					const tampon_image = Buffer.from(await reponse.arrayBuffer());
+					await fs.mkdir(path.dirname(chemin_image), { recursive: true });
+					await fs.writeFile(chemin_image, tampon_image);
+					await connexion.sendMessage(message.key.remoteJid, { image: tampon_image, caption: texte_menu }, { quoted: message });
+				}
+			} catch (e) {
+				console.error(`[(menu, "${nom_session}")]: Erreur lors de l'envoi de l'image de profil :`, e.message);
+				//envoi final du menu
+				await connexion.sendMessage(message.key.remoteJid, { text: texte_menu }, { quoted: message });
+			}
+		} else {
+			//utiliser l'image  de la discussion actuelle
+			try {
+				const lien_image = await connexion.profilePictureUrl(message.key.remoteJid, 'image');
+				const reponse = await fetch(lien_image);
+				if (!reponse.ok) throw new Error(`[(menu, "${nom_session}")]: Impossible de récupérer l'image `);
+				const tampon_image = Buffer.from(await reponse.arrayBuffer());
+				await connexion.sendMessage(message.key.remoteJid, { image: tampon_image, caption: texte_menu }, { quoted: message });
+			} catch (e) {
+				console.warn(`[(menu, "${nom_session}")]: Impossible de récupérer l'image  de discussion. Envoi en texte seul.`);
+				//envoi en texte seul si pas d'image
+				await connexion.sendMessage(message.key.remoteJid, { text: texte_menu }, { quoted: message });
+			}
+		}
+	}
 };

@@ -3,40 +3,40 @@
     "nom": "mode",
     "description": "Gestión del modo del bot",
     "categorie": "Grupos && Privado",
-    "infos": "Puede usarse en grupos o en privado para poner este grupo, contacto o el bot en modo privado. Para poner todo el bot en modo privado, debes usar el argumento `tous` después del modo que quieras aplicar, ej : `.mode prive tous`. Después de este comando aparecerá un mensaje de confirmación diciendo que los parámetros han sido guardados. Para aplicarlos, debes usar el argumento `change` + el modo al que quires pasar, ej: `.mode change tous`"
+    "infos": "Puede usarse en grupos o en privado para poner este grupo, contacto o el bot en modo privado. Para poner todo el bot en modo privado, debes usar el argumento `tous` después del modo que quieras aplicar, ej : `.mode priver tous`. Después de este comando aparecerá un mensaje de confirmación diciendo que los parámetros han sido guardados. Para aplicarlos, debes usar el argumento `changer` + el modo al que quires pasar, ej: `.mode changer tous`"
   },
   "messages": {
     "est_pas_moi": "```No puedes usar este comando.```",
     "mode_actuel": {
-      "1": "público (tous)",
-      "2": "{etat} (tous)",
+      "1": "público (todos)",
+      "2": "{etat} (todos)",
       "3": "privado (lista)",
       "4": "público (lista)"
     },
-    "txt": {
+    "texte": {
       "1": "```Argumento(s) desconocido(s).```\n",
-      "2": "> Modo: *{mode}*\n\nArgumentos:\n-    `.modo prive` para poner la conversación actual en modo privado.\n-    `.modo publique` para el contrario.\n-    `.modo {prive/publique} tous` para poner todas las conversaciones en privado o público.\n-    `.modo change {publique/prive/tous}` para cambiar la configuración de los modos"
+      "2": "> Modo: *{mode}*\n\nArgumentos:\n-    `.modo priver` para poner la conversación actual en modo privado.\n-    `.modo publique` para el contrario.\n-    `.modo {priver/publique} tous` para poner todas las conversaciones en privado o público.\n-    `.modo changer {publique/priver/tous}` para cambiar la configuración de los modos"
     },
-    "nom_chat": {
+    "nom_discussion": {
       "1": "Este chat",
-      "2": "{nom_chat}",
-      "3": "@{nom_chat}"
+      "2": "{nom_discussion}",
+      "3": "@{nom_discussion}"
     },
     "reussite": {
       "parametre_enregistre": "_Configuración guardada_",
-      "chat_prive": "`{nom_chat}` *en modo privado*\n> Estos parámetros solo tendrán efecto si ejecutas el comando `.modo change prive`",
-      "chat_publique": "*{nom_chat} en modo público*\n> Estos parámetros solo tendrán efecto si ejecutas el comando `.modo change publique`",
-      "change": {
-        "change": "> Cambio de {ancien} a {nouveau}",
+      "discussion_prive": "`{nom_discussion}` *en modo privado*\n> Estos parámetros solo tendrán efecto si ejecutas el comando `.modo changer priver`",
+      "discussion_publique": "*{nom_discussion} en modo público*\n> Estos parámetros solo tendrán efecto si ejecutas el comando `.modo changer publique`",
+      "changer": {
+        "changer": "> Cambio de {ancien} a {nouveau}",
         "tous": {
-          "prive": "privado (tous)",
-          "publique": "público (tous)"
+          "priver": "privado (todos)",
+          "publique": "público (todos)"
         }
       }
     },
     "erreur": {
-      "change": {
-	"cible_invalide": "Objetivo de cambio inválido (prive/publique/tous)."
+      "changer": {
+        "cible_invalide": "Objetivo de cambio inválido (priver/publique/tous)."
       }
     }
   }

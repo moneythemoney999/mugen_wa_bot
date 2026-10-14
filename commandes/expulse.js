@@ -15,11 +15,11 @@ Pour retirer quelqu'un du groupe il fait que tu sois admin du groupe.`,
 	execute: async ({ connexion, message, args, nom_session }) => {
 		const jid = message.key.remoteJid;
 		const est_groupe = jid.endsWith('@g.us');
-		const trad = (cle, variables = {}) => traduire (nom_session, 'commandes', 'expulse', { [cle] : variables}) [cle];
+		const trad = async (cle, variables = {}) => (await traduire(nom_session, 'commandes', 'expulse', { [cle] : variables}))[cle];
 
 		if (!est_groupe) {
 			//si c'est utiliser en privé
-			const si_prive = trad('msg.si_prive') || "C'est pas utilisable en privé";
+			const si_prive = await trad('msg.si_prive') || "C'est pas utilisable en privé";
 			await connexion.sendMessage(jid, { text: si_prive }, { quoted: message });
 			return;
 		}
@@ -44,13 +44,13 @@ Pour retirer quelqu'un du groupe il fait que tu sois admin du groupe.`,
 			if (!auteur_est_admin) {
 				if (est_moi) {
 					//si c'est moi mais que chuis pas admin
-					const moi_non_admin = trad("msg.moi_non_admin") || "> T'es pas admin😂🤣";
+					const moi_non_admin = await trad("msg.moi_non_admin") || "> T'es pas admin😂🤣";
 					await connexion.sendMessage(jid,
 						{ text: moi_non_admin },
 						{ quoted: message });
 				} else {
 					//si quelqu'un d'autre et qu'il n'est pas admin
-					const autre_non_admin = trad('msg.autre_non_admin') || "Faut que tu sois admin";
+					const autre_non_admin = await trad('msg.autre_non_admin') || "Faut que tu sois admin";
 					await connexion.sendMessage(jid,
 						{ text: autre_non_admin },
 						{ quoted: message });
@@ -59,7 +59,7 @@ Pour retirer quelqu'un du groupe il fait que tu sois admin du groupe.`,
 			}
 
 			if (!bot_est_admin) {
-				const bot_non_admin = trad('msg.bot_non_admin') || "Faut me donner les droits d'administration";
+				const bot_non_admin = await trad('msg.bot_non_admin') || "Faut me donner les droits d'administration";
 				await connexion.sendMessage(jid,
 					//si un admin mais que le bot n'a pas les droits
 					{ text: bot_non_admin },
@@ -79,7 +79,7 @@ Pour retirer quelqu'un du groupe il fait que tu sois admin du groupe.`,
 			} else if (num_cible) {
 				cibles_initiales.push(`${num_cible}@s.whatsapp.net`);
 			} else {
-				const pas_de_cible = trad('msg.pas_de_cible') || `Qui dois-je expulser.
+				const pas_de_cible = await trad('msg.pas_de_cible') || `Qui dois-je expulser.
 *Mets son num ou tag la personne derrière la commande* ex: \`.expulse 56931437983\` \`.expulse @la_personne\`.`;
 				//si on ne detecte pas de cible
 				await connexion.sendMessage(jid, { text: pas_de_cible}, { quoted: message });
@@ -102,12 +102,12 @@ Pour retirer quelqu'un du groupe il fait que tu sois admin du groupe.`,
 				if (participant) {
 					// On compare avec l'ID normalisé du bot pour être sûr
 					if (jidNormalizedUser(participant.id) === lid_bot_normaliser) {
-						const cible_moi = trad('msg.cible_moi') || "```🫩🫩```";
+						const cible_moi = await trad('msg.cible_moi') || "```🫩🫩```";
 						await connexion.sendMessage(jid, { text: cible_moi}, { quoted: message });
 						continue;
 					}
 					if (participant.admin === 'admin' || participant.admin === 'superadmin') {
-						const cible_est_admin = trad('msg.cible_est_admin') || "~Fait le toi même, flemme🥱😪~";
+						const cible_est_admin = await trad('msg.cible_est_admin') || "~Fait le toi même, flemme🥱😪~";
 						await connexion.sendMessage(jid,
 							//si la cible est un administrateur on refuse
 							{ text: cible_est_admin },
@@ -125,18 +125,18 @@ Pour retirer quelqu'un du groupe il fait que tu sois admin du groupe.`,
 				await connexion.groupParticipantsUpdate(jid, cibles_a_retrograder, "remove");
 				for (const expulse of cibles_a_retrograder) {
 					//si on reussi on envoi ce message de confirmation
-					const succes = trad('msg.succes', {expulse: expulse.split('@')[0]}) || `~@${expulse.split('@')[0]}~ a été viré d'ici`
+					const succes = await trad('msg.succes', {expulse: expulse.split('@')[0]}) || `~@${expulse.split('@')[0]}~ a été viré d'ici`
 						await connexion.sendMessage(jid, { text: succes, mentions: [expulse] }, { quoted: message });
 				}
 			} else if (cible_non_trouver) {
 				//si on trouve pas la personne dans la liste des participant
-				const cible_non_membre = trad('msg.cible_non_membre') || "> Membre introuvable.";
+				const cible_non_membre = await trad('msg.cible_non_membre') || "> Membre introuvable.";
 				await connexion.sendMessage(jid, { text: cible_non_membre}, { quoted: message });
 			}
 		} catch (erreur) {
 			//s'il y'a une autre erreur on l'affiche au terminal et envoi un message d'erreur sur whatsapp
 			console.error(`[(expulse), "${nom_session}"]: Erreur dans la commande expulse :`, erreur);
-			const msg_erreur = trad('msg.erreur') ||  "Une erreur est survenue lors de l'expulsion.";
+			const msg_erreur = await trad('msg.erreur') ||  "Une erreur est survenue lors de l'expulsion.";
 			await connexion.sendMessage(jid, { text: msg_erreur}, { quoted: message });
 		}
 	}

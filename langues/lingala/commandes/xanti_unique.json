@@ -7,11 +7,11 @@
  },
  "messages": {
   "limite_atteint": "Tu as atteint ta limite d'utilisation ({limite}).",
-  "msg_refus": "Tu ne peux pas utiliser cette commande.",
-  "msgPas_de_cible": "Tu dois répondre à un média en vue unique.",
-  "msgMedia_non_reconnu": "Ce message n'est pas un média en vue unique reconnu.",
-  "msgReussi_groupe": "Message débloqué de {nom_auteur}(+{num_auteur}) dans {nom_groupe} à {heure}.",
-  "msgReussi_prive": "Message débloqué de {nom_auteur}(+{num_auteur}) à {heure}.",
-  "msgErreur": "Erreur lors du déblocage du média."
+  "message_refus": "Tu ne peux pas utiliser cette commande.",
+  "pas_de_cible": "Tu dois répondre à un média en vue unique.",
+  "media_non_reconnu": "Ce message n'est pas un média en vue unique reconnu.",
+  "legende_reussite_groupe": "Message débloqué de {nom_auteur}(+{num_auteur}) dans {nom_groupe} à {heure}.",
+  "legende_reussite_priver": "Message débloqué de {nom_auteur}(+{num_auteur}) à {heure}.",
+  "message_erreur": "Erreur lors du déblocage du média."
  }
 }

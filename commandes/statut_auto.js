@@ -9,83 +9,81 @@ import {traduire} from '../outils/langue.js';
 
 
 //fonctions utilitaires pour la gestion de la mémoire
-async function obtenirCheminsMemoire(nom_session) {
-    const nomFichier = fileURLToPath(import.meta.url);
-    const cheminDossier = path.dirname(nomFichier);
-    const nomCommande = "statut_auto";
-
-    const cheminDossierMemoire = path.join(cheminDossier, '..', 'memoires', 'memoires_commandes', nomCommande, nom_session);
-    await fs.mkdir(cheminDossierMemoire, { recursive: true });
-
-    return {
-        infosFichier: path.join(cheminDossierMemoire, `infos.json`),
-        lusFichier: path.join(cheminDossierMemoire, 'statuts_lus.json'),
-        exclusFichier: path.join(cheminDossierMemoire, 'personne_exclu.json')
-    };
+async function obtenir_chemin_memoire(nom_session) {
+	const nom_fichier = fileURLToPath(import.meta.url);
+	const chemin_dossier = path.dirname(nom_fichier);
+	const nom_commande = "statut_auto";
+	const chemin_memoire = path.join(chemin_dossier, '..', 'memoires', 'memoires_commandes', nom_commande, nom_session);
+	await fs.mkdir(chemin_memoire, { recursive: true });
+	return {
+		fichier_de_config: path.join(chemin_memoire, `config.json`),
+		fichier_statuts_lu: path.join(chemin_memoire, 'statuts_lus.json'),
+		fichier_personne_exclu: path.join(chemin_memoire, 'personne_exclu.json')
+	};
 }
 
-async function chargerInfos(cheminFichier) {
-    const infosParDefaut = {
-        etat: "desactive",
-        like: {
-            etat: "active",
-            emoji: "♾️"
-        }
-    };
+async function charger_config(chemin_fichier) {
+	const config_par_defaut = {
+		etat: "desactiver",
+		like: {
+			etat: "activer",
+			emoji: "♾️"
+		}
+	};
 
-    if (await fs.access(cheminFichier).then(() => true).catch(() => false)) {
-        try {
-            const contenu = JSON.parse(await fs.readFile(cheminFichier, 'utf-8'));
-            return { ...infosParDefaut, ...contenu, like: { ...infosParDefaut.like, ...(contenu.like || {}) } };
-        } catch (e) {
-            return infosParDefaut;
-        }
-    }
-    return infosParDefaut;
+	if (await fs.access(chemin_fichier).then(() => true).catch(() => false)) {
+		try {
+			const contenu = JSON.parse(await fs.readFile(chemin_fichier, 'utf-8'));
+			return { ...config_par_defaut, ...contenu, like: { ...config_par_defaut.like, ...(contenu.like || {}) } };
+		} catch (e) {
+			return config_par_defaut;
+		}
+	}
+	return config_par_defaut;
 }
 
-async function sauvegarderInfos(cheminFichier, nouvellesInfos, nom_session) {
-    try {
-        await fs.writeFile(cheminFichier, JSON.stringify(nouvellesInfos, null, 2));
-    } catch (e) { console.error(`[(statut_auto), "${nom_session}"]: Erreur d'écriture du fichier d'infos:`, e); }
+async function sauvegarder_config(chemin_fichier, nouvelles_config, nom_session) {
+	try {
+		await fs.writeFile(chemin_fichier, JSON.stringify(nouvelles_config, null, 2));
+	} catch (e) { console.error(`[(statut_auto), "${nom_session}"]: Erreur d'écriture du fichier d'infos:`, e); }
 }
 
-async function chargerStatutsLus(cheminFichier) {
-    if (await fs.access(cheminFichier).then(() => true).catch(() => false)) {
-        try { return JSON.parse(await fs.readFile(cheminFichier, 'utf-8')); } catch (e) { return []; }
+async function charger_statuts_lu(chemin_fichier) {
+    if (await fs.access(chemin_fichier).then(() => true).catch(() => false)) {
+        try { return JSON.parse(await fs.readFile(chemin_fichier, 'utf-8')); } catch (e) { return []; }
     }
     return [];
 }
 
-async function sauvegarderStatutsLus(cheminFichier, objets, nom_session) {
-    try {
-        await fs.writeFile(cheminFichier, JSON.stringify(objets, null, 2));
-    } catch (e) { console.error(`[(statut_auto), "${nom_session}"]: Erreur d'écriture du fichier des statuts lus:`, e); }
+async function sauvegarder_statuts_lu(chemin_fichier, objets, nom_session) {
+	try {
+		await fs.writeFile(chemin_fichier, JSON.stringify(objets, null, 2));
+	} catch (e) { console.error(`[(statut_auto), "${nom_session}"]: Erreur d'écriture du fichier des statuts lus:`, e); }
 }
 
-async function chargerPersonnesExclues(cheminFichier) {
-    if (await fs.access(cheminFichier).then(() => true).catch(() => false)) {
-        try { return JSON.parse(await fs.readFile(cheminFichier, 'utf-8')); } catch (e) { return []; }
-    }
-    return [];
+async function charger_personnes_exlu(chemin_fichier) {
+	if (await fs.access(chemin_fichier).then(() => true).catch(() => false)) {
+		try { return JSON.parse(await fs.readFile(chemin_fichier, 'utf-8')); } catch (e) { return []; }
+	}
+	return [];
 }
 
-async function sauvegarderPersonnesExclues(cheminFichier, jids, nom_session) {
-    try {
-        await fs.writeFile(cheminFichier, JSON.stringify(jids, null, 2));
-    } catch (e) { console.error(`[(statut_auto), "${nom_session}"]: Erreur d'écriture du fichier d'exclusion:`, e); }
+async function sauvegarder_personnes_exclu(chemin_fichier, jids, nom_session) {
+	try {
+		await fs.writeFile(chemin_fichier, JSON.stringify(jids, null, 2));
+	} catch (e) { console.error(`[(statut_auto), "${nom_session}"]: Erreur d'écriture du fichier d'exclusion:`, e); }
 }
 
 
 // export et logique la commande
 export default {
-    nom: "statut_auto",
-    description: "Lecture de statut automatique.",
-    categorie: "Statuts",
+	nom: "statut_auto",
+	description: "Lecture de statut automatique.",
+	categorie: "Statuts",
     infos: `Pour lire les statuts automatiquement c'est une commande flexible prenant plusieurs sous-commandes utilisables seulement par le bot lui même.
 > Voilà les sous-commandes et ce qu'il font.
-꧁\`.statut_auto active\`   ꙰Pour activé la commande et qu'il lit les statuts.꧂
-꧁\`.statut_auto desactive\`   ꙰Lui il fait le contraire de \`statut_auto active\`.꧂
+꧁\`.statut_auto activer\`   ꙰Pour activé la commande et qu'il lit les statuts.꧂
+꧁\`.statut_auto desactiver\`   ꙰Lui il fait le contraire de \`statut_auto activer\`.꧂
 ꧁\`.statut_auto exclu\`   ꙰Permet de de retirer quelques sous l'emprise de la commande c'est-à-dire que ses statuts ne seront plus lu.
 > En groupe on peut l'utiliser en taguant quelqu'un après la commande ou mettre son numéro tout coller et sans l'indicatif (+) ex: 56931437983.
 > Et la méthode avec le numéro (\`.statut_auto exclu 56931437983\` marche aussi en privé, mais principalement si oa commnde est faite ne privé et il n'ya pas de numéro derrière c'est la personne avec qui tu parle qui sera la cible.
@@ -95,267 +93,254 @@ export default {
 > Pour le désactiver il suffit de taper tout simplement \`.statut_auto like\` et c'est de même pour le désactiver.
 > Si c'est l'émoji que tu veux changer il suffit de taper la même chose mais cette fois avec l'émoji que tu veux à la toute fin ex: \`.statut_auto like 🫩\`.  NB : *Si la commande globale \`.statut_auto\` était à l'état désactiver les modifications de seront enregistrés mais appliquer qu'à l'activation de la commande globale.`,
 
-    execute: async ({ connexion, message, args, nom_session }) => {
-	const trad = (cle, vars = {}) => traduire(nom_session, 'commandes', 'statut_auto', { [cle]: vars })[cle];
-        if (!message.key.fromMe) {
-	    const si_pas_moi = trad('msg.si_pas_moi') || "> Tu ne peux pas utiliser cette commande";
-            await connexion.sendMessage(message.key.remoteJid,
-		//si c'est pas moi
-		{ text: si_pas_moi },
-		{ quoted: message });
-            return;
-        }
-	//gestion des sous-commnades
-        const chemins = await obtenirCheminsMemoire(nom_session);
-        const premierArgument = args[0]?.toLowerCase();
-        const infos = await chargerInfos(chemins.infosFichier);
+	execute: async ({ connexion, message, args, nom_session }) => {
+	const trad = async (cle, vars = {}) => (await traduire(nom_session, 'commandes', 'statut_auto', { [cle]: vars }))[cle];
+		const est_moi = message.key.fromMe || message.key.remoteJid.endsWith("@newsletter");
+		if (!est_moi) {
+			const si_pas_moi = await trad('msg.si_pas_moi') || "> Tu ne peux pas utiliser cette commande";
+			await connexion.sendMessage(message.key.remoteJid,
+				//si c'est pas moi
+				{ text: si_pas_moi },
+				{ quoted: message });
+			return;
+		}
+		//gestion des sous-commnades
+		const chemins = await obtenir_chemin_memoire(nom_session);
+		const premier_argument = args[0]?.toLowerCase();
+		const configuration = await charger_config(chemins.fichier_de_config);
 
-        switch (premierArgument) {
-	    //sous-commandes actve && desactive
-            case "active":
-            case "desactive": {
-		const etat_commande = trad(`msg.${premierArgument}`) || premierArgument;
-                if (infos.etat === premierArgument) {
-		    const deja_etat = trad('msg.deja_etat', {
-			etat: etat_commande
-			}) || `Statuts automatique ~était déjà~ \`${etat_commande}\``;
-
-		    await connexion.sendMessage(message.key.remoteJid,
-			{ text: deja_etat },
-			{ quoted: message });
-                } else {
-                    infos.etat = premierArgument;
-                    await sauvegarderInfos(chemins.infosFichier, infos, nom_session);
-		    const etat_change = trad('msg.etat_change',{
-			etat: etat_commande}) || `Statuts automatique ${etat_commande}`;
-                    await connexion.sendMessage(message.key.remoteJid,
-			{ text: etat_change },
-			{ quoted: message });
-                }
-                break;
-            }
-
-	     //sous-commandes like
-             case "like": {
-                const nouvelEmoji = args[1];
-                let texteConfirmation = "";
-
-                if (nouvelEmoji) {
-                    const ancienEmoji = infos.like.emoji;
-                    infos.like.emoji = nouvelEmoji;
-                    texteConfirmation = trad('msg.texteConfirmation1',{
-			ancien_emoji: ancienEmoji,
-			nouvel_emoji: nouvelEmoji,
-			infos_like_etat: trad(`msg.${infos.like.etat}`) || infos.like.etat
-			}) || `L'émoji a été changé de ${ancienEmoji} à ${nouvelEmoji}.\n> État: ${infos.like.etat}`;
-                } else {
-                    const ancienEtatLike = infos.like.etat;
-                    infos.like.etat = ancienEtatLike === 'active' ? 'desactive' : 'active';
-
-		    const traduction_ancien_etat = trad(`msg.${ancienEtatLike}`) || ancienEtatLike;
-		    const traduction_nouvel_etat = trad(`msg.${infos.like.etat}`) || infos.like.etat;
-                    texteConfirmation = trad('msg.texteConfirmation2',{
-			ancien_etat: traduction_ancien_etat,
-			nouvel_etat: traduction_nouvel_etat,
-			infos_like_emoji: infos.like.emoji
-			}) || `Passage de ${traduction_ancien_etat} à ${traduction_nouvel_etat}.\n> Émoji: ${infos.like.emoji}`;
-                }
-
-                await sauvegarderInfos(chemins.infosFichier, infos, nom_session);
-
-                const messageFinal = infos.etat === 'desactive'
-                    ? trad("msg.messageFinal") || "La commande globale `statut_auto` est ~désactivée~. *Les modifications seront appliquées à son activation*."
-                    : texteConfirmation;
-
-                await connexion.sendMessage(message.key.remoteJid, { text: messageFinal }, { quoted: message });
-                break;
-            }
-	    //sous-commandes exclu && inclu
-            case "exclu":
-            case "inclu": {
-                let jidsCibles = [];
-                const numeroFourni = args[1];
-                const estGroupe = message.key.remoteJid.endsWith('@g.us');
-
-                if (numeroFourni) {
-                    jidsCibles.push(numeroFourni.replace(/[^0-9]/g, '') + '@s.whatsapp.net');
-                } else if (estGroupe) {
-                    const mentions = message.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
-                    const auteurRepondu = message.message?.extendedTextMessage?.contextInfo?.participant;
-                    if (mentions.length > 0) jidsCibles.push(...mentions);
-                    else if (auteurRepondu) jidsCibles.push(auteurRepondu);
-                } else {
-                    jidsCibles.push(message.key.remoteJid);
-                }
-
-                let jidsResolus = [];
-                for (const jid of jidsCibles) {
-                    let idFinal = jid;
-                    if (jid.endsWith('@lid')) {
-                        try {
-                            const pn = await connexion.signalRepository.lidMapping.getPNForLID(jid);
-                            if (pn) idFinal = pn;
-                        } catch (e) {}
-                    }
-                    jidsResolus.push(jidNormalizedUser(idFinal));
-                }
-
-                if (jidsResolus.length > 0) {
-                    const exclusActuels = await chargerPersonnesExclues(chemins.exclusFichier);
-                    let affectes = [];
-                    let dejaDansEtat = [];
-
-                    if (premierArgument === "exclu") {
-                        jidsResolus.forEach(id => {
-                            if (!exclusActuels.includes(id)) {
-                                exclusActuels.push(id);
-                                affectes.push(id);
-                            } else {
-                                dejaDansEtat.push(id);
-                            }
-                        });
-                    } else {
-                        jidsResolus.forEach(id => {
-                            if (exclusActuels.includes(id)) {
-                                affectes.push(id);
-                            } else {
-                                dejaDansEtat.push(id);
-                            }
-                        });
-                        if (affectes.length > 0) {
-                            const nouvelleListe = exclusActuels.filter(id => !affectes.includes(id));
-                            exclusActuels.splice(0, exclusActuels.length, ...nouvelleListe);
-                        }
-                    }
-
-                    if (affectes.length > 0) {
-                        await sauvegarderPersonnesExclues(chemins.exclusFichier, exclusActuels, nom_session);
-                    }
-
-                    const verbe = trad(`msg.${premierArgument}`) || premierArgument;
-                    let messageResultat = [];
-
-                    if (affectes.length > 0) {
-                        const noms = affectes.map(id => id.split('@')[0]).join(', ');
-			const msgAffectes = trad('msg.msgAffectes', {
-			noms: noms,
-			verbe: verbe,
-			s: affectes.length > 1 ? 's' : ''
-			}) || `*+${noms} ${verbe}${affectes.length > 1 ? 's' : ''}*`;
-
-			messageResultat.push(msgAffectes);
+		switch (premier_argument) {
+				//sous-commandes activer/desactiver
+			case "activer":
+			case "desactiver": {
+				const etat_commande = await trad(`msg.${premier_argument}`) || premier_argument;
+				if (configuration.etat === premier_argument) {
+					const deja_etat = await trad('msg.deja_etat', {
+						etat: etat_commande
+					}) || `Statuts automatique ~était déjà~ \`${etat_commande}\``;
+					await connexion.sendMessage(message.key.remoteJid,
+						{ text: deja_etat },
+						{ quoted: message });
+				} else {
+					configuration.etat = premier_argument;
+					await sauvegarder_config(chemins.fichier_de_config, configuration, nom_session);
+					const etat_changer = await trad('msg.etat_changer',{ etat: etat_commande}) || `Statuts automatique ${etat_commande}`;
+					await connexion.sendMessage(message.key.remoteJid, { text: etat_changer }, { quoted: message });
+				}
+				break;
 			}
 
-                    if (dejaDansEtat.length > 0) {
-                        const noms = dejaDansEtat.map(id => id.split('@')[0]).join(', ');
-			const msgDejaEtat = trad('msg.msgDejaEtat', {
-			noms: noms,
-			verbe: verbe,
-			s: dejaDansEtat.length > 1 ? 's' : ''
-			}) || `> +${noms} déjà ${verbe}${dejaDansEtat.length > 1 ? 's' : ''}`;
+				//sous-commandes like
+			case "like": {
+				const nouveau_emoji = args[1];
+				let texte_confirmation = "";
 
-			messageResultat.push(msgDejaEtat);
+				if (nouveau_emoji) {
+					const ancien_emoji = configuration.like.emoji;
+					configuration.like.emoji = nouveau_emoji;
+					texte_confirmation = await trad('msg.texte_confirmation1',{
+						ancien_emoji: ancien_emoji,
+						nouveau_emoji: nouveau_emoji,
+						infos_like_etat: await trad(`msg.${configuration.like.etat}`) || configuration.like.etat
+					}) || `L'émoji a été changé de ${ancien_emoji} à ${nouveau_emoji}.\n> État: ${configuration.like.etat}`;
+				} else {
+					const ancien_etat_de_like = configuration.like.etat;
+					configuration.like.etat = ancien_etat_de_like === 'activer' ? 'desactiver' : 'activer';
+					const traduction_ancien_etat = await trad(`msg.${ancien_etat_de_like}`) || ancien_etat_de_like;
+					const traduction_nouvel_etat = await trad(`msg.${configuration.like.etat}`) || configuration.like.etat;
+					texte_confirmation = await trad('msg.texte_confirmation2',{
+						ancien_etat: traduction_ancien_etat,
+						nouvel_etat: traduction_nouvel_etat,
+						infos_like_emoji: configuration.like.emoji
+					}) || `Passage de ${traduction_ancien_etat} à ${traduction_nouvel_etat}.\n> Émoji: ${configuration.like.emoji}`;
+				}
+
+				await sauvegarder_config(chemins.fichier_de_config, configuration, nom_session);
+
+				const message_final = configuration.etat === 'desactiver'
+					? await trad("msg.message_final") || "La commande globale `statut_auto` est ~désactivée~. *Les modifications seront appliquées à son activation*."
+					: texte_confirmation;
+
+				await connexion.sendMessage(message.key.remoteJid, { text: message_final }, { quoted: message });
+				break;
+			}
+				//sous-commandes exclu/inclu
+			case "exclu":
+			case "inclu": {
+				let jids_cibles = [];
+				const num_fourni = args[1];
+				const est_groupe = message.key.remoteJid.endsWith('@g.us');
+
+				if (num_fourni) {
+					jids_cibles.push(num_fourni.replace(/[^0-9]/g, '') + '@s.whatsapp.net');
+				} else if (est_groupe) {
+					const mentions = message.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
+					const auteur_repondu = message.message?.extendedTextMessage?.contextInfo?.participant;
+					if (mentions.length > 0) jids_cibles.push(...mentions);
+					else if (auteur_repondu) jids_cibles.push(auteur_repondu);
+				} else {
+					jids_cibles.push(message.key.remoteJid);
+				}
+				let jids_resolus = [];
+				for (const jid of jids_cibles) {
+					let jid_final = jid;
+					if (jid.endsWith('@lid')) {
+						try {
+							const pn = await connexion.signalRepository.lidMapping.getPNForLID(jid);
+							if (pn) jid_final = pn;
+						} catch (e) {}
+					}
+					jids_resolus.push(jidNormalizedUser(jid_final));
+				}
+
+				if (jids_resolus.length > 0) {
+					const exclus_actuels = await charger_personnes_exlu(chemins.fichier_personne_exclu);
+					let affectes = [];
+						let deja_dans_etat = [];
+
+					if (premier_argument === "exclu") {
+						jids_resolus.forEach(id => {
+							if (!exclus_actuels.includes(id)) {
+								exclus_actuels.push(id);
+								affectes.push(id);
+							} else {
+								deja_dans_etat.push(id);
+							}
+						});
+					} else {
+						jids_resolus.forEach(id => {
+							if (exclus_actuels.includes(id)) {
+								affectes.push(id);
+							} else {
+								deja_dans_etat.push(id);
+							}
+						});
+						if (affectes.length > 0) {
+							const nouvelle_liste = exclus_actuels.filter(id => !affectes.includes(id));
+							exclus_actuels.splice(0, exclus_actuels.length, ...nouvelle_liste);
+						}
+					}
+					if (affectes.length > 0) {
+						await sauvegarder_personnes_exclu(chemins.fichier_personne_exclu, exclus_actuels, nom_session);
+					}
+
+					const verbe = await trad(`msg.${premier_argument}`) || premier_argument;
+					let message_resultat = [];
+					if (affectes.length > 0) {
+						const noms = affectes.map(id => id.split('@')[0]).join(', ');
+						const message_des_affectes = await trad('msg.message_des_affectes', {
+							noms: noms,
+							verbe: verbe,
+							s: affectes.length > 1 ? 's' : ''
+						}) || `*+${noms} ${verbe}${affectes.length > 1 ? 's' : ''}*`;
+						message_resultat.push(message_des_affectes);
+					}
+
+					if (deja_dans_etat.length > 0) {
+						const noms = deja_dans_etat.map(id => id.split('@')[0]).join(', ');
+						const message_deja_etat = await trad('msg.message_deja_etat', {
+							noms: noms,
+							verbe: verbe,
+							s: deja_dans_etat.length > 1 ? 's' : ''
+						}) || `> +${noms} déjà ${verbe}${deja_dans_etat.length > 1 ? 's' : ''}`;
+
+						message_resultat.push(message_deja_etat);
+					}
+
+					await connexion.sendMessage(message.key.remoteJid, { text: message_resultat.join('\n') }, { quoted: message });
+				}
+				break;
 			}
 
-                    await connexion.sendMessage(message.key.remoteJid, { text: messageResultat.join('\n') }, { quoted: message });
-                }
-                break;
-            }
-
-            default: {
-		//message pour montrer les sous-commandes
-                const messageAide = trad('msg.messageAide', {
-		infos_etat: trad(`msg.${infos.etat}`) || infos.etat,
-		}) || `État de la commande: ${infos.etat}
+			default: {
+				//message pour montrer les sous-commandes
+				const message_aide = await trad('msg.message_aide', {
+					infos_etat: await trad(`msg.${configuration.etat}`) || configuration.etat,
+				}) || `État de la commande: ${configuration.etat}
 ╭──Voici les arguments───────────────────────────
-├─➩ ".statut_auto active"
-├─➩ ".statut_auto desactive"
+├─➩ ".statut_auto activer"
+├─➩ ".statut_auto desactiver"
 ├─➩ ".statut_auto exclu <@utilisateur|numéro>"
 ├─➩ ".statut_auto inclu <@utilisateur|numéro>"
 ├─➩ ".statut_auto like < |emoji>"
 ╰──────────────────────────────────────────`;
-                await connexion.sendMessage(message.key.remoteJid, { text: messageAide }, { quoted: message });
-                break;
-            }
-        }
-    },
+				await connexion.sendMessage(message.key.remoteJid, { text: message_aide }, { quoted: message });
+				break;
+			}
+		}
+	},
 
-    //le handler qui reçoit vraiment les statuts et les lus
-    evenement_sans_prefixe: async ({ connexion, message, nom_session }) => {
-        if (message.key.remoteJid !== 'status@broadcast') {
-            return false;
-        }
+	//le handler qui reçoit vraiment les statuts et les lus
+	evenement_sans_prefixe: async ({ connexion, message, nom_session }) => {
+		if (message.key.remoteJid !== 'status@broadcast') {
+			return false;
+		}
+		//list ede statuts quon cosidere comme valides
+		const contenu = message.message;
+		const est_statut_valide = contenu && (contenu.imageMessage || contenu.videoMessage || contenu.extendedTextMessage || contenu.audioMessage);
+		if (!est_statut_valide) {
+			return false;
+		}
 
-	//list ede statuts quon cosidere comme valides
-        const contenu = message.message;
-        const estStatutValide = contenu && (contenu.imageMessage || contenu.videoMessage || contenu.extendedTextMessage || contenu.audioMessage);
-        if (!estStatutValide) {
-            return false;
-        }
+		//si ça vient de moi on ignore
+		let auteur = message.key.participant;
+		if (!auteur) {
+			return false;
+		}
 
-	//si ça vient de moi on ignore
-        let auteur = message.key.participant;
-        if (!auteur) {
-            return false;
-        }
-	//normalisation des IDs avnt de les utilliser
-        if (auteur.endsWith('@lid')) {
-            try {
-                const pn = await connexion.signalRepository.lidMapping.getPNForLID(auteur);
-                if (pn) auteur = pn;
-            } catch (e) {}
-        }
-        auteur = jidNormalizedUser(auteur);
+		//normalisation des identifiants avant de les utilliser
+		if (auteur.endsWith('@lid')) {
+			try {
+				const pn = await connexion.signalRepository.lidMapping.getPNForLID(auteur);
+				if (pn) auteur = pn;
+			} catch (e) {}
+		}
+		auteur = jidNormalizedUser(auteur);
+		if (auteur === jidNormalizedUser(connexion.user.id)) {
+			return false;
+		}
 
-        if (auteur === jidNormalizedUser(connexion.user.id)) {
-            return false;
-        }
+		//recherche et lecture des fichiers des personnes exclues
+		const chemins = await obtenir_chemin_memoire(nom_session);
+		const personnes_exclues = await charger_personnes_exlu(chemins.fichier_personne_exclu);
+		if (personnes_exclues.includes(auteur)) {
+			return false;
+		}
 
-	//recherche et lecture des fichiers des personnes exclues
-        const chemins = await obtenirCheminsMemoire(nom_session);
-        const personnesExclues = await chargerPersonnesExclues(chemins.exclusFichier);
+		const configuration = await charger_config(chemins.fichier_de_config);
+		if (configuration.etat !== "activer") {
+			return false;
+		}
+		//fonction pour l'auto-suppressio
+		const maintenant = Date.now();
+		const nettoyage_disque = 24 * 60 * 60 * 1000;
+		const identifiant_statut = message.key.id;
+		//verification de la liste des statuts lus
+		const statuts_lu = await charger_statuts_lu(chemins.fichier_statuts_lu);
+		const status_recent = statuts_lu.filter(statut => (maintenant - statut.dateLecture) < nettoyage_disque);
 
-        if (personnesExclues.includes(auteur)) {
-            return false;
-        }
-
-        const infos = await chargerInfos(chemins.infosFichier);
-        if (infos.etat !== "active") {
-            return false;
-        }
-	//fonction pour l'auto-suppressio
-        const maintenant = Date.now();
-        const vingtQuatreHeures = 24 * 60 * 60 * 1000;
-        const idStatut = message.key.id;
-
-	//verification de la liste des statuts lus
-        const statutsLus = await chargerStatutsLus(chemins.lusFichier);
-        const statutsRecents = statutsLus.filter(statut => (maintenant - statut.dateLecture) < vingtQuatreHeures);
-
-	//si le statut nettait pas dans la liste on continu si non on l'ignore
-        if (!statutsRecents.some(statut => statut.id === idStatut)) {
-            try {
-                await connexion.readMessages([message.key]);
-
-		//si l'aito j'aime est actif
-                if (infos.like.etat === "active") {
-		    //on charge la reaction qu'on a dans les fichiers si non on envoi l'emoi par defaut
-                    const emojiReaction = infos.like.emoji || "♾️";
-                    await connexion.sendMessage(
-                        'status@broadcast',
-                        { react: { text: emojiReaction, key: message.key } },
-                        { statusJidList: [auteur] }
-                    );
-                }
-
-		//apres on enregistre le nouveau statut qu'on vient de lire
-                statutsRecents.push({ id: idStatut, dateLecture: maintenant });
-                await sauvegarderStatutsLus(chemins.lusFichier, statutsRecents, nom_session);
-            } catch(e) {
-		//pour une erreur non identifie
-                console.error(`[(statut_auto), "${nom_session}"]: Erreur pendant le traitement:`, e);
-            }
-        }
-        return false;
-    }
+		//si le statut nettait pas dans la liste on continu si non on l'ignore
+		if (!status_recent.some(statut => statut.id === identifiant_statut)) {
+			try {
+				await connexion.readMessages([message.key]);
+				//si l'auto j'aime est actif
+				if (configuration.like.etat === "activer") {
+					//on charge la reaction qu'on a dans les fichiers si non on envoi l'emoi par defaut
+					const emoji_de_reaction = configuration.like.emoji || "Mugen♾️♾️";
+					await connexion.sendMessage(
+						'status@broadcast',
+						{ react: { text: emoji_de_reaction, key: message.key } },
+						{ statusJidList: [auteur] }
+					);
+				}
+				//apres on enregistre le nouveau statut qu'on vient de lire
+				status_recent.push({ id: identifiant_statut, dateLecture: maintenant });
+				await sauvegarder_statuts_lu(chemins.fichier_statuts_lu, status_recent, nom_session);
+			} catch(e) {
+				//pour une erreur non identifie
+				console.error(`[(statut_auto), "${nom_session}"]: Erreur pendant le traitement:`, e);
+			}
+		}
+		return false;
+	}
 };

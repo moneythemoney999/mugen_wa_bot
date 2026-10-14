@@ -7,7 +7,7 @@
   },
   "messages": {
     "pas_ma_profil": "Y ¿por qué mi perfil🫩🫩?",
-    "pas_de_media": "````No se encontró ningún medio.```",
+    "pas_de_media": "```No se encontró ningún medio.```",
     "erreur_creation": "_La creación del sticker falló. Ocurrió un error._"
   }
 }

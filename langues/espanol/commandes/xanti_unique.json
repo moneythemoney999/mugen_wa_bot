@@ -7,11 +7,11 @@
   },
   "messages": {
     "limite_atteint": "Has alcanzado tu límite de uso ({limite}).",
-    "msg_refus": "No puedes usar este comando.",
-    "msgPas_de_cible": "Debes responder a un medio de visualización única.",
-    "msgMedia_non_reconnu": "Este mensaje no es un medio de visualización única reconocido.",
-    "msgReussi_groupe": "Mensaje desbloqueado de {nom_auteur}(+{num_auteur}) en {nom_groupe} a las {heure}.",
-    "msgReussi_prive": "Mensaje desbloqueado de {nom_auteur}(+{num_auteur}) a las {heure}.",
-    "msgErreur": "Error al desbloquear el medio."
+    "message_refus": "No puedes usar este comando.",
+    "pas_de_cible": "Debes responder a un medio de visualización única.",
+    "media_non_reconnu": "Este mensaje no es un medio de visualización única reconocido.",
+    "legende_reussite_groupe": "Mensaje desbloqueado de {nom_auteur}(+{num_auteur}) en {nom_groupe} a las {heure}.",
+    "legende_reussite_priver": "Mensaje desbloqueado de {nom_auteur}(+{num_auteur}) a las {heure}.",
+    "message_erreur": "Error al desbloquear el medio."
   }
 }

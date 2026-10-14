@@ -18,8 +18,8 @@ const delai_convention = 5 * 60 * 1000;
 const delai_purge_historique = 3 * 24 * 60 * 60 * 1000;
 
 //definition des modeles qu'on va utiliser
-const modeles_proprietaire = ["gemini-3.1-flash-lite-preview"];
-const modeles_autres = ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.5-flash-lite"];
+const modeles_proprietaire = ["gemini-3.1-pro-preview", "gemini-3.8-flash", "gemini-2.5-pro", "gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite-preview"];
+const modeles_autres = ["gemini-3-flash-preview", "gemini-2.5-flash", "gemini-3.1-pro-preview-customtools", "gemini-2.5-flash-lite"];
 
 //instruction qu'on envoi a gemini pour lui donner son rôle il doit être le plus (claire,nette et precis) que possible
 const chemin_instructions = path.join(process.cwd(), "stockage", "commandes", "ia.json");
@@ -48,19 +48,19 @@ export async function obtenir_prompt(cle, variables = {}) {
 
 const obtenir_instructions_ia = async (num_bot, nom_session) => {
 	const instruction = async (cle, variables = {}) => await obtenir_prompt(cle, variables);
-	const trad = (cle, variables = {}) => traduire(nom_session, 'commandes', 'ia', { [cle]: variables })[cle];
+	const trad = async (cle, variables = {}) => (await traduire(nom_session, 'commandes', 'ia', { [cle]: variables }))[cle];
 	const instructions = [
-		trad("msg.instruction_systeme.identiter") || await instruction("instruction_systeme.identiter"),
-		trad("msg.instruction_systeme.createur") || await instruction("instruction_systeme.createur"),
-		trad("msg.instruction_systeme.proprietaire", {
+		await trad("msg.instruction_systeme.identiter") || await instruction("instruction_systeme.identiter"),
+		await trad("msg.instruction_systeme.createur") || await instruction("instruction_systeme.createur"),
+		await trad("msg.instruction_systeme.proprietaire", {
 			num_bot: num_bot }) || await instruction("instruction_systeme.proprietaire", {
 			num_bot: num_bot }),
-		trad("msg.instruction_systeme.reponse_au_question.1") || await instruction("instruction_systeme.reponse_au_question.1"),
-		trad("msg.instruction_systeme.reponse_au_question.2") || await instruction("instruction_systeme.reponse_au_question.2"),
-		trad("msg.instruction_systeme.reponse_au_question.3") || await instruction("instruction_systeme.reponse_au_question.3"),
-		trad("msg.instruction_systeme.reponse_au_question.4") || await instruction("instruction_systeme.reponse_au_question.4"),
-		trad("msg.instruction_systeme.comportement") || await instruction("instruction_systeme.comportement"),
-		trad("msg.instruction_systeme.contexte") || await instruction("instruction_systeme.contexte")
+		await trad("msg.instruction_systeme.reponse_au_question.1") || await instruction("instruction_systeme.reponse_au_question.1"),
+		await trad("msg.instruction_systeme.reponse_au_question.2") || await instruction("instruction_systeme.reponse_au_question.2"),
+		await trad("msg.instruction_systeme.reponse_au_question.3") || await instruction("instruction_systeme.reponse_au_question.3"),
+		await trad("msg.instruction_systeme.reponse_au_question.4") || await instruction("instruction_systeme.reponse_au_question.4"),
+		await trad("msg.instruction_systeme.comportement") || await instruction("instruction_systeme.comportement"),
+		await trad("msg.instruction_systeme.contexte") || await instruction("instruction_systeme.contexte")
 	];
 
 	const resultat = await Promise.all(instructions);
@@ -83,7 +83,7 @@ let cles_api_dispo = false;
 })();
 
 //fonctions utilitaires et resolutions des IDs
-async function resoudreJid(connexion, jid, nom_session) {
+async function resoudre_jid(connexion, jid, nom_session) {
 	if (jid && jid.endsWith('@lid')) {
 		try {
 			const pn = await connexion.signalRepository.lidMapping.getPNForLID(jid);
@@ -128,20 +128,20 @@ async function sauvegarder_historique(chemin_historique, historique) {
 
 //logique principale de l'IA
 async function executer_conversation({ connexion, message, nom_session, question, tampon_image }) {
-	const trad = (cle, variables = {}) => traduire(nom_session, 'commandes', 'ia', { [cle]: variables })[cle];
+	const trad = async (cle, variables = {}) => (await traduire(nom_session, 'commandes', 'ia', { [cle]: variables }))[cle];
 
 	if (!cles_api_dispo) {
 		console.error(`[(ia), "${nom_session}"]; Cle ia introuvable il faut aller creer une cle gemini sur (https://aistudio.google.com/apikey) et le stocker dans : "${chemin_cle_ia}".`);
-		const cle_api_introuvable = trad("msg.cle_api_introuvable") || "> L'IA n'est pas prête.";
+		const cle_api_introuvable = await trad("msg.cle_api_introuvable") || "> L'IA n'est pas prête.";
 		await connexion.sendMessage(message.key.remoteJid, { text: cle_api_introuvable }, { quoted: message });
 		return;
 	}
 
 	const jid_brut = message.key.remoteJid;
-	const jid_resolut = await resoudreJid(connexion, jid_brut, nom_session);
+	const jid_resolut = await resoudre_jid(connexion, jid_brut, nom_session);
 	let message_attente;
 	let appel_api_fini = false;
-	const textes_attente = trad("msg.textes_attente") || ["◐♾", "♾◓", "◑♾", "♾◒", "♾️"];
+	const textes_attente = await trad("msg.textes_attente") || ["◐♾", "♾◓", "◑♾", "♾◒", "♾️"];
 
 	try {
 		message_attente = await connexion.sendMessage(jid_brut, { text: textes_attente[0] }, { quoted: message });
@@ -160,7 +160,7 @@ async function executer_conversation({ connexion, message, nom_session, question
 	};
 	demarrer_attente();
 
-	const est_bot = message.key.fromMe;
+	const est_bot = message.key.fromMe || jid_brut.endsWith('@newsletter');
 	const modeles = est_bot ? [...modeles_proprietaire, ...modeles_autres] : modeles_autres;
 	let reponse_finale = null;
 	let erreur_finale = null;
@@ -207,7 +207,7 @@ async function executer_conversation({ connexion, message, nom_session, question
 		}
 		conversations_actives[jid_resolut] = { lastAiMessageId: message_attente.key.id, horodatage: Date.now() };
 	} else {
-		const message_erreur = (erreur_finale?.status === 429 || erreur_finale?.status === 503) ? trad("msg.erreurs.plus_de_token") || trad("msg.erreurs.autres") || "> Plus de jus 😅" : "_Erreur_";
+		const message_erreur = (erreur_finale?.status === 429 || erreur_finale?.status === 503) ? await trad("msg.erreurs.plus_de_token") || await trad("msg.erreurs.autres") || "> Plus de jus 😅" : "_Erreur_";
 		if (message_attente) {
 			await connexion.sendMessage(jid_brut, { text: message_erreur, edit: message_attente.key });
 		} else {
@@ -229,20 +229,20 @@ Il y a aussi une sous-commande pour réinitialiser la discussion avec l'IA si ce
 > NB : *Il pourrait y avoir certaines données (noms de profils, numéro du compte) qui seront partagées avec l'IA pour son bon fonctionnement.*`,
 
 	async execute({ connexion, message, args, nom_session }) {
-		const trad = (cle, variables = {}) => traduire(nom_session, 'commandes', 'ia', { [cle]: variables })[cle];
+		const trad = async (cle, variables = {}) => (await traduire(nom_session, 'commandes', 'ia', { [cle]: variables }))[cle];
 		const jid_brut = message.key.remoteJid;
-		const nom_auteur = message.pushName || trad('msg.nom_auteur') || "Utilisateur";
+		const nom_auteur = message.pushName || await trad('msg.nom_auteur') || "Utilisateur";
 		const premier_argument = args[0]?.toLowerCase();
 		if (premier_argument === "reinitialise") {
-			const jid_resolut = await resoudreJid(connexion, jid_brut, nom_session);
+			const jid_resolut = await resoudre_jid(connexion, jid_brut, nom_session);
 			const chemin_historique = await avoir_chemin_historique(connexion, nom_session, jid_resolut);
 			try {
 				await fs.unlink(chemin_historique);
 				delete conversations_actives[jid_resolut];
-				const succes_supression = trad("msg.succes_supression") || "Historique de la conversation effacé.";
+				const succes_supression = await trad("msg.succes_supression") || "Historique de la conversation effacé.";
 				return connexion.sendMessage(jid_brut, { text: succes_supression }, { quoted: message });
 			} catch (e) {
-				const pas_de_historique = trad("msg.pas_de_historique") || "Info : Aucun historique trouvé pour cette discussion.";
+				const pas_de_historique = await trad("msg.pas_de_historique") || "Info : Aucun historique trouvé pour cette discussion.";
 				return connexion.sendMessage(jid_brut, { text: pas_de_historique }, { quoted: message });
 			}
 		}
@@ -260,22 +260,22 @@ Il y a aussi une sous-commande pour réinitialiser la discussion avec l'IA si ce
 		const message_repondu = infos_contexte?.quotedMessage;
 		let tampon_image;
 		const structure_instruction = {
-			[trad("msg.structure_instruction.expediteur") || "expediteur"]: nom_auteur,
-			[trad("msg.structure_instruction.message") || "message"]: texte_utilisateur
+			[await trad("msg.structure_instruction.expediteur") || "expediteur"]: nom_auteur,
+			[await trad("msg.structure_instruction.message") || "message"]: texte_utilisateur
 		};
 
 		if (message_repondu) {
 			const jid_auteur_repondu = infos_contexte.participant || infos_contexte.remoteJid;
-			const jid_resolut_auteur_repondu = await resoudreJid(connexion, jid_auteur_repondu, nom_session);
+			const jid_resolut_auteur_repondu = await resoudre_jid(connexion, jid_auteur_repondu, nom_session);
 			const nom_auteur_repondu = jid_resolut_auteur_repondu.split('@')[0];
 			const texte_repondu = message_repondu.conversation || message_repondu.extendedTextMessage?.text;
 			const image_repondu = message_repondu.imageMessage;
-			structure_instruction[trad("msg.structure_instruction.reponse.reponse") || "reponse"] = {
-				[trad("msg.structure_instruction.reponse.a") || "à"]: nom_auteur_repondu,
-				[trad("msg.structure_instruction.reponse.details.details") || "details"]: {
-					[trad("msg.structure_instruction.reponse.details.type.type") || "type"]: texte_repondu ? (trad("msg.structure_instruction.reponse.details.type.texte") || "texte") : (image_repondu ? (trad("msg.structure_instruction.reponse.details.type.image") || "image") : (trad("msg.structure_instruction.reponse.details.type.autre") || "autre")),
-					[trad("msg.structure_instruction.reponse.details.contenu.contenu") || "contenu"]: texte_repondu || (image_repondu ? (trad("msg.structure_instruction.reponse.details.contenu.image") || "image") : (trad("msg.structure_instruction.reponse.details.contenu.autre") || "autre")),
-					[trad("msg.structure_instruction.reponse.details.legende") || "legende"]: image_repondu?.caption || null
+			structure_instruction[await trad("msg.structure_instruction.reponse.reponse") || "reponse"] = {
+				[await trad("msg.structure_instruction.reponse.a") || "à"]: nom_auteur_repondu,
+				[await trad("msg.structure_instruction.reponse.details.details") || "details"]: {
+					[await trad("msg.structure_instruction.reponse.details.type.type") || "type"]: texte_repondu ? (await trad("msg.structure_instruction.reponse.details.type.texte") || "texte") : (image_repondu ? (await trad("msg.structure_instruction.reponse.details.type.image") || "image") : (await trad("msg.structure_instruction.reponse.details.type.autre") || "autre")),
+					[await trad("msg.structure_instruction.reponse.details.contenu.contenu") || "contenu"]: texte_repondu || (image_repondu ? (await trad("msg.structure_instruction.reponse.details.contenu.image") || "image") : (await trad("msg.structure_instruction.reponse.details.contenu.autre") || "autre")),
+					[await trad("msg.structure_instruction.reponse.details.legende") || "legende"]: image_repondu?.caption || null
 				}
 			};
 
@@ -294,7 +294,7 @@ Il y a aussi une sous-commande pour réinitialiser la discussion avec l'IA si ce
 		}
 
 		if (!texte_utilisateur && !tampon_image && !message_repondu) {
-			const pas_de_question = trad("msg.pas_de_question") || "Euh... C'est quoi la question ?";
+			const pas_de_question = await trad("msg.pas_de_question") || "Euh... C'est quoi la question ?";
 			return connexion.sendMessage(jid_brut, { text: pas_de_question }, { quoted: message });
 		}
 
@@ -302,9 +302,9 @@ Il y a aussi une sous-commande pour réinitialiser la discussion avec l'IA si ce
 	},
 
 	async evenements_sans_prefixe({ connexion, message, nom_session }) {
-		const trad = (cle, variables = {}) => traduire(nom_session, 'commandes', 'ia', { [cle]: variables })[cle];
+		const trad = async (cle, variables = {}) => (await traduire(nom_session, 'commandes', 'ia', { [cle]: variables }))[cle];
 		const jid_brut = message.key.remoteJid;
-		const jid_resolut = await resoudreJid(connexion, jid_brut, nom_session);
+		const jid_resolut = await resoudre_jid(connexion, jid_brut, nom_session);
 		const conversation = conversations_actives[jid_resolut];
 		if (!conversation) return false;
 		const infos_contexte = message.message?.extendedTextMessage?.infos_contexte;
@@ -315,19 +315,19 @@ Il y a aussi une sous-commande pour réinitialiser la discussion avec l'IA si ce
 			const question = message.message?.conversation || message.message?.extendedTextMessage?.text || message.message?.imageMessage?.caption || message.message?.videoMessage?.caption;
 			if (question) {
 				const structure_instruction = {
-					[trad("msg.structure_instruction.expediteur") || "expediteur"]: message.pushName || (trad("msg.structure_instruction.utilisateur") || "Utilisateur"),
-					[trad("msg.structure_instruction.message") || "message"]: question
+					[await trad("msg.structure_instruction.expediteur") || "expediteur"]: message.pushName || (await trad("msg.structure_instruction.utilisateur") || "Utilisateur"),
+					[await trad("msg.structure_instruction.message") || "message"]: question
 				};
 
 				const message_repondu = infos_contexte?.quotedMessage;
 				if (message_repondu) {
 					const texte_repondu = message_repondu.conversation || message_repondu.extendedTextMessage?.text;
 					const num_bot = jidNormalizedUser(connexion.user.id).split('@')[0];
-					structure_instruction[trad("msg.structure_instruction.reponse.reponse") || "reponse"] = {
-						[trad("msg.structure_instruction.reponse.a") || "a"]: num_bot,
-						[trad("msg.structure_instruction.reponse.details.details") || "details"]: {
-							[trad("msg.structure_instruction.reponse.details.type") || "type"]: trad("msg.structure_instruction.reponse.details.type.texte") || "texte",
-							[trad("msg.structure_instruction.reponse.details.contenu") || "contenu"]: texte_repondu || (trad("msg.structure_instruction.reponse.details.contenu.msg_precedent") || "Message précédent")
+					structure_instruction[await trad("msg.structure_instruction.reponse.reponse") || "reponse"] = {
+						[await trad("msg.structure_instruction.reponse.a") || "a"]: num_bot,
+						[await trad("msg.structure_instruction.reponse.details.details") || "details"]: {
+							[await trad("msg.structure_instruction.reponse.details.type") || "type"]: await trad("msg.structure_instruction.reponse.details.type.texte") || "texte",
+							[await trad("msg.structure_instruction.reponse.details.contenu") || "contenu"]: texte_repondu || (await trad("msg.structure_instruction.reponse.details.contenu.msg_precedent") || "Message précédent")
 						}
 					};
 				}

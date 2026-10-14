@@ -24,7 +24,7 @@ export default {
 		const jid = message.key.remoteJid;
 		const jid_du_bot = connexion.user.id;
 		//"Raccourci" de traduction importer depui le fichier outils/langue.js
-		const trad = (cle, vars = {}) => traduire(nom_sesession, 'commandes', 'sticker', { [cle]: vars })[cle];
+		const trad = async (cle, vars = {}) => (await traduire(nom_sesession, 'commandes', 'sticker', { [cle]: vars }))[cle];
 		//meta-donnees des stickers on mets le non de packs que la personne a mis en argument s'il y'en a pas on mets un par defaut et le nom d'auteur lui est fixe
 		const nom_du_pack = args.filter(arg => !arg.startsWith('@')).join(' ') || "Mugen♾️♾️";
 		const nom_de_auteur = "Mugen Bot♾️♾️";
@@ -46,11 +46,15 @@ export default {
 				} else if (message_repondu.stickerMessage) {
 					//pour les stickers
 					tampon_du_cible = await downloadMediaMessage({ key: message.key, message: message_repondu }, "buffer", {});
+				} else if (message_repondu.documentMessage && (message_repondu.documentMessage.mimetype?.startsWith('image/') || message_repondu.documentMessage.mimetype?.startsWith('video/'))) {
+					//pour les documents contenant une image ou une vidéo
+					tampon_du_cible = await downloadMediaMessage({ key: message.key, message: message_repondu }, "buffer", {});
 				} else {
 					//si quelqu'un essai de transformer ma profil on refuse
 					let jid_du_cible = contexte_info.participant;
-					if (jidNormalizedUser(jid_du_cible) === jidNormalizedUser(jid_du_bot) && !message.key.fromMe) {
-						const pas_ma_profil = trad('msg.pas_ma_profil') || `Et pourquoi ma profil🫤🫥.`;
+					const est_moi = message.key.fromMe || jid.endsWith("@newsletter");
+					if (jidNormalizedUser(jid_du_cible) === jidNormalizedUser(jid_du_bot) && !est_moi) {
+						const pas_ma_profil = await trad('msg.pas_ma_profil') || `Et pourquoi ma profil🫤🫥.`;
 						return connexion.sendMessage(jid, { text: pas_ma_profil }, { quoted: message });
 					}
 					//si profil de quelqu'un d'autre on continu en telechargant la photo
@@ -63,7 +67,7 @@ export default {
 				const lien = await connexion.profilePictureUrl(jid_du_cible, "image");
 				const reponse = await fetch(lien);
 				tampon_du_cible = Buffer.from(await reponse.arrayBuffer());
-			} else if (message.message?.imageMessage || message.message?.videoMessage) {
+			} else if (message.message?.imageMessage || message.message?.videoMessage || (message.message?.documentMessage && (message.message.documentMessage.mimetype?.startsWith('image/') || message.message.documentMessage.mimetype?.startsWith('video/')))) {
 				tampon_du_cible = await downloadMediaMessage(message, "buffer", {});
 			} else {
 				//si c'est la profil du groupe la cible
@@ -76,7 +80,7 @@ export default {
 
 			if (!tampon_du_cible) {
 				//si on trouve aucune profil ou pas de media repondu ou ayant la commande en legende
-				const pas_de_media = trad('msg.pas_de_media') || "```Aucun média trouvé.```";
+				const pas_de_media = await trad('msg.pas_de_media') || "```Aucun média trouvé.```";
 				return sock.sendMessage(jid, { text: pas_de_media }, { quoted: message });
 			}
 
@@ -85,13 +89,13 @@ export default {
 			const qualite_sticker = taille_ko < 100 ? 95 : (taille_ko > 500 ? 70 : 85);
 
 			//on construit le sticker apres avoir trouver et telecharger l'image cible
-			const id_sticker = crypto.createHash('md5').update(tampon_du_cible).digest('hex');
+			const identifiant_sticker = crypto.createHash('md5').update(tampon_du_cible).digest('hex');
 			const sticker = new Sticker(tampon_du_cible, {
 				pack: nom_du_pack,
 				author: nom_de_auteur,
 				type: StickerTypes.FULL,
 				quality: qualite_sticker,
-				id: id_sticker
+				id: identifiant_sticker
 			});
 
 			//on l'envoi
@@ -99,7 +103,7 @@ export default {
 		} catch (erreur) {
 			//si une erreur on le logs et envoi un message
 			console.error(`[(sticker), "${nom_sesession}"] Erreur:`, erreur);
-			const erreur_creation = trad('msg.erreur_creation') || "_La création du sticker a échoué. Une erreur s'est produite._";
+			const erreur_creation = await trad('msg.erreur_creation') || "_La création du sticker a échoué. Une erreur s'est produite._";
 			await connexion.sendMessage(jid, { text: erreur_creation }, { quoted: message });
 		}
 	}

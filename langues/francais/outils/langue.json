@@ -26,13 +26,13 @@
      "code": "ht"
     },
     "ln": {
-     "nom": "",
-     "code": ""
+     "nom": "Lingala",
+     "code": "ln"
     }
    }
   },
   "erreur": {
-   "langue_pas_trouve": "𒀰Langue indisponible ou inexistante𒀰"
+   "langue_non_trouver": "𒀰Langue indisponible ou inexistante𒀰"
   },
   "succes": {
    "change_langue": "🗘Langue changé de {ancienne} ➜ {nouvelle}✓"

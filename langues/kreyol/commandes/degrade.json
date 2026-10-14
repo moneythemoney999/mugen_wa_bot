@@ -12,7 +12,7 @@
   "bot_non_admin": "Mw dwe gen dwa administrasyon yo.",
   "pas_de_cible": "> Kiyès poum dégradé a?\n*Reponn yonn nan messj li yo oubyen met nimerol la oubyen tag li dèyè komand lan* eg: `.degrade 56931437983` ou `.degrade @moun_lan`.",
   "cible_moi": "```Mw paka dégradém.```",
-  "msgCible_proprio": "~Inposib pou dégradé propriyétè group la.~",
+  "cible_proprio": "~Inposib pou dégradé propriyétè group la.~",
   "cible_pas_admin": "_@{cible} pat admin._",
   "succes": "✓@{cible} dégradé.",
   "cible_non_membre": "~Moun sa pa nan group la.~",

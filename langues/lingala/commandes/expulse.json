@@ -15,6 +15,6 @@
   "cible_est_admin": "~Fait le toi même, flemme🥱😪~",
   "succes": "~@{expulse}~ a été viré d'ici",
   "cible_non_membre": "> Membre introuvable.",
-  "msg_erreur": "Une erreur est survenue lors de l'expulsion."
+  "erreur": "Une erreur est survenue lors de l'expulsion."
  }
 }

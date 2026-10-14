@@ -3,7 +3,7 @@
   "nom": "langue",
   "description": "Cambiar el idioma del bot",
   "categorie": "Bot",
-  "infos": "Permite ver y cambiar el idioma del bot. Su uso es muy simple: ejecuta el comando seguido del nombre o código del idioma, ej: `.langue es`.\n*Nota: Hay algunos idiomasx que podrían no estar disponibles en el bot. En ese caso, se mostrará un mensaje de error indicando que el idioma no existe o no está disponible.*\n\n> Para ver los idiomas disponibles, simplemente ejecuta el comando sin argumentos: `.idioma`."
+  "infos": "Permite ver y cambiar el idioma del bot. Su uso es muy simple: ejecuta el comando seguido del nombre o código del idioma, ej: `.langue es`.\n*Nota: Hay algunos idiomas que podrían no estar disponibles en el bot. En ese caso, se mostrará un mensaje de error indicando que el idioma no existe o no está disponible.*\n\n> Para ver los idiomas disponibles, simplemente ejecuta el comando sin argumentos: `.idioma`."
  },
  "messages": {
   "pas_moi": "⊙```No tienes los permisos necesarios```",
@@ -24,11 +24,15 @@
     "ht": {
      "nom": "Criollo",
      "code": "ht"
+    },
+    "ln": {
+     "nom": "Lingala",
+     "code": "ln"
     }
    }
   },
   "erreur": {
-   "langue_pas_trouve": "𒀰Idioma no disponible o inexistente𒀰"
+   "langue_non_trouver": "𒀰Idioma no disponible o inexistente𒀰"
   },
   "succes": {
    "change_langue": "🗘Idioma cambiado de {ancienne} ➜ {nouvelle}✓"

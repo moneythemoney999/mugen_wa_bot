@@ -7,17 +7,17 @@
   },
   "messages": {
     "si_pas_moi": "> Tu ne peux pas utiliser cette commande",
-    "active": "activé",
-    "desactive": "désactivé",
+    "activer": "activé",
+    "desactiver": "désactivé",
     "deja_etat": "Statuts automatique ~était déjà~ `{etat}`",
-    "etat_change": "Statuts automatique {etat}",
-    "texteConfirmation1": "L'émoji a été changé de {ancien_emoji} à {nouvel_emoji}.\n> État: {infos_like_etat}",
-    "texteConfirmation2": "Passage de {ancien_etat} à {nouvel_etat}.\n> Émoji: {infos_like_emoji}",
-    "messageFinal": "La commande globale `statut_auto` est ~désactivée~. *Les modifications seront appliquées à son activation*.",
+    "etat_changer": "Statuts automatique {etat}",
+    "texte_confirmation1": "L'émoji a été changé de {ancien_emoji} à {nouvel_emoji}.\n> État: {infos_like_etat}",
+    "texte_confirmation2": "Passage de {ancien_etat} à {nouvel_etat}.\n> Émoji: {infos_like_emoji}",
+    "message_final": "La commande globale `statut_auto` est ~désactivée~. *Les modifications seront appliquées à son activation*.",
     "exclu": "exclu",
     "inclu": "inclu",
-    "msgAffectes": "*+{noms} {verbe}{s}*",
-    "msgDejaEtat": "> +{noms} déjà {verbe}{s}",
-    "messageAide": "État de la commande: {infos_etat}\n╭──Voici les arguments───────────────────────────\n├─➩ \".statut_auto active\"\n├─➩ \".statut_auto desactive\"\n├─➩ \".statut_auto exclu <@utilisateur|numéro>\"\n├─➩ \".statut_auto inclu <@utilisateur|numéro>\"\n├─➩ \".statut_auto like < |emoji>\"\n╰──────────────────────────────────────────"
+    "message_des_affectes": "*+{noms} {verbe}{s}*",
+    "message_deja_etat": "> +{noms} déjà {verbe}{s}",
+    "message_aide": "État de la commande: {infos_etat}\n╭──Voici les arguments───────────────────────────\n├─➩ \".statut_auto activer\"\n├─➩ \".statut_auto desactiver\"\n├─➩ \".statut_auto exclu <@utilisateur|numéro>\"\n├─➩ \".statut_auto inclu <@utilisateur|numéro>\"\n├─➩ \".statut_auto like < |emoji>\"\n╰──────────────────────────────────────────"
   }
 }

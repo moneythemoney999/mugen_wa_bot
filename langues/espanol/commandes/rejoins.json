@@ -12,9 +12,9 @@
     "deja_membre": "> *Ya eres miembro de*: _{nom_groupe}._",
     "attente_aprobation": "> Solicitud enviada, esperando la aprobación de los admins",
     "succes": "✓Grupo {nom_groupe} une con éxito.",
-    "succesAbonne": "✓Suscrito al canal: {mom_chaine}",
+    "succes_abonner": "✓Suscrito al canal: {mom_chaine}",
     "lien_expire": "> Enlace expirado",
     "etait_banni": "> Imposible has sido baneado",
-    "msgErreur": "*Se produjo un error*"
+    "message_erreur": "*Se produjo un error*"
   }
 }
