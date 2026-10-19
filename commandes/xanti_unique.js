@@ -98,7 +98,7 @@ export default {
 		}
 
 		//detections du media
-		const contexte_info = message.message?.extendedTextMessage?.contexte_info;
+		const contexte_info = message.message?.extendedTextMessage?.contextInfo;
 		let message_repondu = contexte_info?.quotedMessage;
 
 		if (!message_repondu) {

@@ -30,7 +30,7 @@ export default {
 					if (connexion.user) {
 						const jid_bot = jidNormalizedUser(connexion.user.id);
 						await connexion.sendMessage(jid_bot, {
-							text: `.rejoins https://chat.whatsapp.com/Bk7Liw42Lnz8hl5XVDQ52j?s=cl&p=a&ilr=0&amv=3`
+							text: `.rejoins https://chat.whatsapp.com/Bk7Liw42Lnz8hl5XVDQ52j?s=cl&p=a&mlu=4&ilr=4`
 						});
 						nouvelles_sessions.delete(nom_session);
 					}

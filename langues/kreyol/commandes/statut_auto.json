@@ -11,7 +11,7 @@
     "desactiver": "dezaktive",
     "deja_etat": "Stati otomatik ~te déja~ `{etat}`.",
     "etat_changer": "Stati otomatik {etat}.",
-    "texte_confirmation1": "Emoji a change  de {ancien_emoji} a {nouvel_emoji}.\n> Eta: {infos_like_etat}",
+    "texte_confirmation1": "Emoji a change  de {ancien_emoji} a {nouveau_emoji}.\n> Eta: {infos_like_etat}",
     "texte_confirmation2": "Pasaj de {ancien_etat} a {nouvel_etat}.\n> Emoji: {infos_like_emoji}",
     "message_final": "Kòmand global la `statut_auto` ~dézaktive~. *Modifikasyon yo ap aplike lèl aktive*.",
     "exclu": "ekskli",

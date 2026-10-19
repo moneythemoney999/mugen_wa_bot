@@ -13,9 +13,9 @@
     "erreur_recuperation": "Inposib pou rekipere media sa.",
     "lid_bot_brut_inconnu": "inkoni",
     "auteur_reaction_inconnu": "inkoni",
-    "format_legende": "\n> *{auteur} (+{numero}) a {heure}*",
-    "auto_statut_texte": "{texte}{pied_de_page}",
-    "legende": "{texte}{pied_de_page}",
+    "format_legende": "\n> *{jid_auteur} (+{numero}) a {heure}*",
+    "auto_statut_texte": "{texte}{format_legende}",
+    "legende": "{texte}{format_legende}",
     "legende_auto_image": "{legende}",
     "legende_auto_video": "{legende}",
     "legende_auto_audio": "{message}"

@@ -13,9 +13,9 @@
     "erreur_recuperation": "No se pudo recuperar este medio.",
     "lid_bot_brut_inconnu": "desconocido",
     "auteur_reaction_inconnu": "desconocido",
-    "format_legende": "\n> *De {auteur} (+{numero}) a las {heure}*",
-    "auto_statut_texte": "{texte}{pied_de_page}",
-    "legende": "{texte}{pied_de_page}",
+    "format_legende": "\n> *De {jid_auteur} (+{numero}) a las {heure}*",
+    "auto_statut_texte": "{texte}{format_legende}",
+    "legende": "{texte}{format_legende}",
     "legende_auto_image": "{legende}",
     "legende_auto_video": "{legende}",
     "legende_auto_audio": "{message}"

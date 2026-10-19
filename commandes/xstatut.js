@@ -80,7 +80,7 @@ Soit en _répondant au statut de la personne ou en aimant le statut_ *attention 
 
 		//partie manuelle: si pas de reponse à aucun message
 		if (!message_repondu) {
-			const pas_de_cible = await trad('message.pas_de_cible') || "Il est où le statut à recuper  ";
+			const pas_de_cible = await trad('messages.pas_de_cible') || "Il est où le statut à recuper  ";
 			return connexion.sendMessage(message.key.remoteJid,
 				{ text: pas_de_cible },
 				{ quoted: message });
@@ -89,7 +89,7 @@ Soit en _répondant au statut de la personne ou en aimant le statut_ *attention 
 		const est_un_statut = infos_contexte?.remoteJid === 'status@broadcast' || (infos_contexte?.participant && infos_contexte.participant.endsWith('status@broadcast'));
 		//partie manuelle: s'il y'a reponse mais que c'est pas à un statut
 		if (!est_un_statut) {
-			const cible_pas_statut = await trad('message.cible_pas_statut') || "_C'est pas un statut c'truc_";
+			const cible_pas_statut = await trad('messages.cible_pas_statut') || "_C'est pas un statut c'truc_";
 			return connexion.sendMessage(message.key.remoteJid,
 				{ text: cible_pas_statut },
 				{ quoted: message });
@@ -99,13 +99,13 @@ Soit en _répondant au statut de la personne ou en aimant le statut_ *attention 
 			const texte = message_repondu.conversation || message_repondu.extendedTextMessage?.text;
 			//partie manuelle: si reponse à un statut (texte)
 			if (texte) {
-				const manuel_statut_texte = await trad('message.manuel_statut_texte', {texte: texte}) || `> ${texte}`;
+				const manuel_statut_texte = await trad('messages.manuel_statut_texte', {texte: texte}) || `> ${texte}`;
 				await connexion.sendMessage(destination,
 					{ text: manuel_statut_texte }, { quoted: message });
 			} /*si c'est plutot une image/video*/ else if (message_repondu.imageMessage || message_repondu.videoMessage) {
 				const tampon = await downloadMediaMessage({ key: { id: infos_contexte.stanzaId }, message: message_repondu }, 'buffer', {});
 				const type = message_repondu.imageMessage ? 'image' : 'video';
-				const manuel_statut_media = await trad('message.manuel_statut_media', {legende: message_repondu[type + 'Message'].caption || ""}) || (message_repondu[type + 'Message'].caption || "");
+				const manuel_statut_media = await trad('messages.manuel_statut_media', {legende: message_repondu[type + 'Message'].caption || ""}) || (message_repondu[type + 'Message'].caption || "");
 				await connexion.sendMessage(destination, { [type]: tampon,
 					caption: manuel_statut_media },
 					{ quoted: message });
@@ -114,7 +114,7 @@ Soit en _répondant au statut de la personne ou en aimant le statut_ *attention 
 				await connexion.sendMessage(destination, { audio: tampon, mimetype: 'audio/mp4' }, { quoted: message });
 			}
 		} /*s'il est arrivé une erreur*/ catch (erreur) {
-			const erreur_recuperation = await trad('message.erreur_recuperation') || "Impossible de récupérer ce média.";
+			const erreur_recuperation = await trad('messages.erreur_recuperation') || "Impossible de récupérer ce média.";
 			await connexion.sendMessage(destination, { text: erreur_recuperation }, { quoted: message });
 		}
 	},
@@ -130,13 +130,13 @@ Soit en _répondant au statut de la personne ou en aimant le statut_ *attention 
 
 		if (!contenu_message) return;
 		const jid_bot = jidNormalizedUser(connexion.user.id);
-		const lid_bot_brut = connexion.user.lid || await trad('message.lid_bot_brut_inconnu') || 'inconnu';
+		const lid_bot_brut = connexion.user.lid || await trad('messages.lid_bot_brut_inconnu') || 'inconnu';
 		const lid_bot_nettoyer = lid_bot_brut.split(':')[0] + '@lid';
 
 		//1. gestion des reaction: definition des variable de reaction de, la personne a mis et si cette personne est moi
 		if (contenu_message.reactionMessage) {
 			const reaction = contenu_message.reactionMessage;
-			const auteur_reaction = message.key.participant || await trad('message.auteur_reaction_inconnu') || 'inconnu';
+			const auteur_reaction = message.key.participant || await trad('messages.auteur_reaction_inconnu') || 'inconnu';
 			const est_ma_reaction = message.key.fromMe || (auteur_reaction === jid_bot) || (auteur_reaction === lid_bot_nettoyer);
 			//si c'est pas de moi on ignore
 			if (!est_ma_reaction) return;
@@ -160,7 +160,7 @@ Soit en _répondant au statut de la personne ou en aimant le statut_ *attention 
 			const jid_auteur_nettoyer = jidNormalizedUser(jid_auteur_brut);
 			const numero = jid_auteur_nettoyer.split('@')[0];
 			//message qu'on mets lors de l'envoi de statut
-			const format_legende = await trad('message.format_legende', {
+			const format_legende = await trad('messages.format_legende', {
 				jid_auteur: element.nom_auteur || numero,
 				numero: numero,
 				heure: heure
@@ -169,7 +169,7 @@ Soit en _répondant au statut de la personne ou en aimant le statut_ *attention 
 			try {
 				//pour les textes on mets mets le messsage et le message (format_legende) en sautant de ligne
 				if (element.type === "texte") {
-					const auto_statut_texte = await trad('message.auto_statut_texte', {
+					const auto_statut_texte = await trad('messages.auto_statut_texte', {
 						texte: element.texte,
 						format_legende: format_legende
 					}) || `${element.texte}${format_legende}`;
@@ -180,25 +180,25 @@ Soit en _répondant au statut de la personne ou en aimant le statut_ *attention 
 					if (!(await fs.access(chemin_media).then(() => true).catch(() => false))) return;
 
 					const tampon = await fs.readFile(chemin_media);
-					const legende = element.texte ? await trad('message.legende', {
+					const legende = element.texte ? await trad('messages.legende', {
 						texte: element.texte,
 						format_legende: `\n${format_legende.trim()}`
 					}) || `${element.texte}${format_legende}` : format_legende.trim();
 
 					//si image on mets en legende
 					if (element.type === "image") {
-						const legende_auto_image = await trad('message.legende_auto_image', {legende: legende}) || `${legende}`;
+						const legende_auto_image = await trad('messages.legende_auto_image', {legende: legende}) || `${legende}`;
 						await connexion.sendMessage(jid_cible, { image: tampon, caption: legende_auto_image });
 					}
 					//de meme pour les videos
 					else if (element.type === "video") {
-						const legende_auto_video = await trad('message.legende_auto_video', {legende: legende}) || `${legende}`;
+						const legende_auto_video = await trad('messages.legende_auto_video', {legende: legende}) || `${legende}`;
 						await connexion.sendMessage(jid_cible, { video: tampon, caption: legende_auto_video });
 					}
 					//mais pou les audio comme on peut mettre ni legende ni apres saut à la ligne on envoi le message en reponse après l'audio
 					else if (element.type === "audio") {
 						const m = await connexion.sendMessage(jid_cible, { audio: tampon, mimetype: 'audio/mp4', ptt: true });
-						const legende_auto_audio = await trad('message.legende_auto_audio', {message: format_legende.trim()}) || `${format_legende.trim()}`;
+						const legende_auto_audio = await trad('messages.legende_auto_audio', {message: format_legende.trim()}) || `${format_legende.trim()}`;
 						await connexion.sendMessage(jid_cible, { text: legende_auto_audio }, { quoted: m });
 					}
 				}

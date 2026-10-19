@@ -11,7 +11,7 @@
     "desactiver": "désactivé",
     "deja_etat": "Statuts automatique ~était déjà~ `{etat}`",
     "etat_changer": "Statuts automatique {etat}",
-    "texte_confirmation1": "L'émoji a été changé de {ancien_emoji} à {nouvel_emoji}.\n> État: {infos_like_etat}",
+    "texte_confirmation1": "L'émoji a été changé de {ancien_emoji} à {nouveau_emoji}.\n> État: {infos_like_etat}",
     "texte_confirmation2": "Passage de {ancien_etat} à {nouvel_etat}.\n> Émoji: {infos_like_emoji}",
     "message_final": "La commande globale `statut_auto` est ~désactivée~. *Les modifications seront appliquées à son activation*.",
     "exclu": "exclu",
