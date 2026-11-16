@@ -210,43 +210,24 @@ async function demarrer_bot(nom_session = "mugen") {
 
 		const intercepter_envoi_messages = connexion.sendMessage.bind(connexion);
 		connexion.sendMessage = async (jid, contenu, options) => {
-			if (jid && typeof jid === 'string') {
-				// 1. vérification pour les groupes/communautés (@g.us)
-				if (jid.endsWith('@g.us')) {
-					try {
-						const metadonnees = await connexion.groupMetadata(jid);
-						if (metadonnees.announce) {
-							const jid_bot_normaliser = jidNormalizedUser(connexion.user.id);
-							const membre = metadonnees.participants.find(p => jidNormalizedUser(p.id) === jid_bot_normaliser || jidNormalizedUser(p.jid) === jid_bot_normaliser);
-							const est_admin = membre && (membre.admin === 'admin' || membre.admin === 'superadmin');
-							if (!est_admin) {
-								console.log(`le groupe ${jid} est en mode annonces (réservé aux admins) et le bot n'est pas admin.`);
-								return null;
-							}
+			if (jid && typeof jid === 'string' && jid.endsWith('@newsletter')) {
+				try {
+					if (typeof connexion.newsletterMetadata === 'function') {
+						const metadonnees = await connexion.newsletterMetadata(jid);
+						if (metadonnees && metadonnees.viewer_role && metadonnees.viewer_role !== 'ADMIN' && metadonnees.viewer_role !== 'OWNER') {
+							console.log(`Le bot n'est pas admin de la chaîne ${jid}.`);
+							return null;
 						}
-					} catch (e) {}
-				}
+					}
+				} catch (e) {}
 
-				// 2. Vérification pour les chaînes (@newsletter)
-				if (jid.endsWith('@newsletter')) {
-					try {
-						if (typeof connexion.newsletterMetadata === 'function') {
-							const metadonnees = await connexion.newsletterMetadata(jid);
-							if (metadonnees && metadonnees.viewer_role && metadonnees.viewer_role !== 'ADMIN' && metadonnees.viewer_role !== 'OWNER') {
-								console.log(`Le bot n'est pas admin de la chaîne ${jid}.`);
-								return null;
-							}
-						}
-					} catch (e) {}
-
-					// Gestion des médias dans les chaînes
-					const contiensMedia = contenu && (contenu.image || contenu.video || contenu.audio || contenu.document || contenu.sticker);
-					if (contiensMedia) {
-						if (contenu.caption) {
-							return await intercepter_envoi_messages(jid, { text: contenu.caption }, options);
-						} else {
-							return await intercepter_envoi_messages(jid, { text: "> Désolé les médias le media n'a pas pu être envoyé" }, options);
-						}
+				// Gestion des médias dans les chaînes
+				const contiensMedia = contenu && (contenu.image || contenu.video || contenu.audio || contenu.document || contenu.sticker);
+				if (contiensMedia) {
+					if (contenu.caption) {
+						return await intercepter_envoi_messages(jid, { text: contenu.caption }, options);
+					} else {
+						return await intercepter_envoi_messages(jid, { text: "> Désolé les médias le media n'a pas pu être envoyé" }, options);
 					}
 				}
 			}
@@ -294,83 +275,84 @@ async function demarrer_bot(nom_session = "mugen") {
 		connexion.ev.on("messages.upsert", async (donnees) => {
 			if (await distribuer_evenement("messages.upsert", donnees, connexion, nom_session) === 'ARRET') return;
 
+			const { messages } = donnees;
+			if (!messages || !Array.isArray(messages)) return;
 
-			const { messages, type } = donnees;
-			const message = messages[0];
+			for (const message of messages) {
+				if (!message || !message.message) continue;
 
-			if (!message || !message.message) return;
+				const texte = message.message.conversation || message.message.extendedTextMessage?.text || message.message.imageMessage?.caption || message.message.videoMessage?.caption;
+				// : si dans la fouille des evenements on trouve des messages avec le prefixe on le capture
+				if (texte && texte.startsWith(prefixe)) {
+					const corps_message = texte.slice(prefixe.length).trim();
+					const infos = await obtenir_infos_expediteur(connexion, message);
 
-			const texte = message.message.conversation || message.message.extendedTextMessage?.text || message.message.imageMessage?.caption || message.message.videoMessage?.caption;
-			// : si dans la fouille des evenements on trouve des messages avec le prefixe on le capture
-			if (texte && texte.startsWith(prefixe)) {
-				const corps_message = texte.slice(prefixe.length).trim();
-				const infos = await obtenir_infos_expediteur(connexion, message);
+					// appelle au commandes : analyse des evenements qui contiennent le prefixe et appelle a la commande en question
+					const [nom_commande, ...args] = corps_message.split(/\s+/);
+					const module_commande = await charger_commande(nom_commande);
+					const trad = async (cle, vars = {}) => (await traduire(nom_session, '', 'mugen_wa_bot', { [cle]: vars }))[cle];
+					// : en attente que la commande repond on envoie une réaction
+					if (module_commande?.default?.execute) {
+						try {
+							const emoji_reaction_execution = (await trad("msg.emoji_reaction.execution")) || "♾️";
+							await envoyer_reaction(connexion, message.key.remoteJid, message, emoji_reaction_execution);
+							let log = `Commande/outil ${nom_commande} demandé depuis ${nom_session} par ${infos.nom_utilisateur} (${infos.numero})`;
+							if (infos.nom_groupe) {
+								log += ` dans le groupe "${infos.nom_groupe}"`;
+							}
+							console.log(log);
 
-				// appelle au commandes : analyse des evenements qui contiennent le prefixe et appelle a la commande en question
-				const [nom_commande, ...args] = corps_message.split(/\s+/);
-				const module_commande = await charger_commande(nom_commande);
-				const trad = async (cle, vars = {}) => (await traduire(nom_session, '', 'mugen_wa_bot', { [cle]: vars }))[cle];
-				// : en attente que la commande repond on envoie une réaction
-				if (module_commande?.default?.execute) {
-					try {
-						const emoji_reaction_execution = (await trad("msg.emoji_reaction.execution")) || "♾️";
-						await envoyer_reaction(connexion, message.key.remoteJid, message, emoji_reaction_execution);
-						let log = `Commande/outil ${nom_commande} demandé depuis ${nom_session} par ${infos.nom_utilisateur} (${infos.numero})`;
-						if (infos.nom_groupe) {
-							log += ` dans le groupe "${infos.nom_groupe}"`;
+							// : si la commande nous revois NO_REACTION on envoi pas de reaction apres la commande
+							const resultat = await module_commande.default.execute({ connexion, message, args, nom_session });
+							if (resultat !== 'NO_REACTION') {
+								// : mais si non on envoie la reaction
+								const emoji_reaction_reussite = (await trad(`msg.emoji_reaction.reussite`)) || "✅";
+								await envoyer_reaction(connexion, message.key.remoteJid, message, emoji_reaction_reussite);
+								let log_succes = `Commande/outils ${nom_commande} éxecuté depuis ${nom_session} par ${infos.nom_utilisateur} (${infos.numero})`;
+								if (infos.nom_groupe) log_succes += ` dans le groupe "${infos.nom_groupe}"`;
+								console.log(log_succes);
+							}
+						} catch (erreur) {
+							console.error(`Erreur lors de l'exécution de la commande "${nom_commande}":`, erreur);
+							// : mais si la commande a eu un problème dans son execution on envoie cette rection et de même que l'autre il est soumis à NO_REACTION
+							const emoji_reaction_erreur = (await trad(`msg.emoji_reaction.erreur`)) || "❌";
+							await envoyer_reaction(connexion, message.key.remoteJid, message, emoji_reaction_erreur);
+							let log_erreur = `Commande/outil ${nom_commande} échoué depuis ${nom_session} par ${infos.nom_utilisateur} (${infos.numero})`;
+							if (infos.nom_groupe) log_erreur += ` dans le groupe "${infos.nom_groupe}"`;
+							console.error(log_erreur);
 						}
-						console.log(log);
+					}
+					else {
+						// si au moment ou on essaie de joindre la commande on le trouve pas : on envoie cette reaction
+						const emoji_reaction_inconnu = (await trad(`msg.emoji_reaction.inconnu`)) || "❓";
+						await envoyer_reaction(connexion, message.key.remoteJid, message, emoji_reaction_inconnu);
+						let log_inconnu = `Commande/outil ${nom_commande} inconnu depuis ${nom_session} par ${infos.nom_utilisateur} (${infos.numero})`;
+						if (infos.nom_groupe) log_inconnu += ` dans le groupe "${infos.nom_groupe}"`;
+						console.error(log_inconnu);
 
-						// : si la commande nous revois NO_REACTION on envoi pas de reaction apres la commande
-						const resultat = await module_commande.default.execute({ connexion, message, args, nom_session });
-						if (resultat !== 'NO_REACTION') {
-							// : mais si non on envoie la reaction
-							const emoji_reaction_reussite = (await trad(`msg.emoji_reaction.reussite`)) || "✅";
-							await envoyer_reaction(connexion, message.key.remoteJid, message, emoji_reaction_reussite);
-							let log_succes = `Commande/outils ${nom_commande} éxecuté depuis ${nom_session} par ${infos.nom_utilisateur} (${infos.numero})`;
-							if (infos.nom_groupe) log_succes += ` dans le groupe "${infos.nom_groupe}"`;
-							console.log(log_succes);
-						}
-					} catch (erreur) {
-						console.error(`Erreur lors de l'exécution de la commande "${nom_commande}":`, erreur);
-						// : mais si la commande a eu un problème dans son execution on envoie cette rection et de même que l'autre il est soumis à NO_REACTION
-						const emoji_reaction_erreur = (await trad(`msg.emoji_reaction.erreur`)) || "❌";
-						await envoyer_reaction(connexion, message.key.remoteJid, message, emoji_reaction_erreur);
-						let log_erreur = `Commande/outil ${nom_commande} échoué depuis ${nom_session} par ${infos.nom_utilisateur} (${infos.numero})`;
-						if (infos.nom_groupe) log_erreur += ` dans le groupe "${infos.nom_groupe}"`;
-						console.error(log_erreur);
+						if (corps_message){
+							// : et ce message d'erreur
+							const fonctionalite_inconnu = (await trad(`msg.fonctionalite_inconnu`, {
+								nom: nom_commande
+							})) || `𒁂Commande ou outil inconnue ".${nom_commande}"𒁂`;
+							await connexion.sendMessage(message.key.remoteJid, { text: fonctionalite_inconnu }, { quoted: message });						}
 					}
 				}
 				else {
-					// si au moment ou on essaie de joindre la commande on le trouve pas : on envoie cette reaction
-					const emoji_reaction_inconnu = (await trad(`msg.emoji_reaction.inconnu`)) || "❓";
-					await envoyer_reaction(connexion, message.key.remoteJid, message, emoji_reaction_inconnu);
-					let log_inconnu = `Commande/outil ${nom_commande} inconnu depuis ${nom_session} par ${infos.nom_utilisateur} (${infos.numero})`;
-					if (infos.nom_groupe) log_inconnu += ` dans le groupe "${infos.nom_groupe}"`;
-					console.error(log_inconnu);
+					// fonction et appelle des commandes sans besoin du evenement aillant le prefixe il est à la disposition de tous les commandes
+					const chemin_commandes = path.join(nom_dossier, "commandes");
+					const fichiers_commandes = (await fs.readdir(chemin_commandes)).filter(f => f.endsWith('.js') && !f.endsWith('_db.js'));
 
-					if (corps_message){
-						// : et ce message d'erreur
-						const fonctionalite_inconnu = (await trad(`msg.fonctionalite_inconnu`, {
-							nom: nom_commande
-						})) || `𒁂Commande ou outil inconnue ".${nom_commande}"𒁂`;
-						await connexion.sendMessage(message.key.remoteJid, { text: fonctionalite_inconnu }, { quoted: message });						}
-				}
-			}
-			else {
-				// fonction et appelle des commandes sans besoin du evenement aillant le prefixe il est à la disposition de tous les commandes
-				const chemin_commandes = path.join(nom_dossier, "commandes");
-				const fichiers_commandes = (await fs.readdir(chemin_commandes)).filter(f => f.endsWith('.js') && !f.endsWith('_db.js'));
-
-				for (const fichier of fichiers_commandes) {
-					const nom_commande = path.parse(fichier).name;
-					const module_commande = await charger_commande(nom_commande);
-					if (module_commande?.default?.evenements_sans_prefixe) {
-						try {
-							const getion_message = await module_commande.default.evenements_sans_prefixe({ connexion, message, nom_session });
-							if (getion_message) break;
-						} catch (erreur) {
-							console.error(`Erreur dans evenements_sans_prefixe pour ${nom_commande}:`, erreur);
+					for (const fichier of fichiers_commandes) {
+						const nom_commande = path.parse(fichier).name;
+						const module_commande = await charger_commande(nom_commande);
+						if (module_commande?.default?.evenements_sans_prefixe) {
+							try {
+								const getion_message = await module_commande.default.evenements_sans_prefixe({ connexion, message, nom_session });
+								if (getion_message) break;
+							} catch (erreur) {
+								console.error(`Erreur dans evenements_sans_prefixe pour ${nom_commande}:`, erreur);
+							}
 						}
 					}
 				}

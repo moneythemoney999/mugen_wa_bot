@@ -270,25 +270,30 @@ export default {
 		}
 	},
 
-	//le handler qui reçoit vraiment les statuts et les lus
-	evenement_sans_prefixe: async ({ connexion, message, nom_session }) => {
+	//le gestionnaire qui recoit reellement les statuts et les lit
+	evenements_sans_prefixe: async ({ connexion, message, nom_session }) => {
 		if (message.key.remoteJid !== 'status@broadcast') {
 			return false;
 		}
-		//list ede statuts quon cosidere comme valides
+
+		//si le statut vient du bot lui-meme on ignore
+		if (message.key.fromMe) {
+			return false;
+		}
+
+		//liste des statuts que l'on considere comme valides
 		const contenu = message.message;
 		const est_statut_valide = contenu && (contenu.imageMessage || contenu.videoMessage || contenu.extendedTextMessage || contenu.audioMessage);
 		if (!est_statut_valide) {
 			return false;
 		}
 
-		//si ça vient de moi on ignore
 		let auteur = message.key.participant;
 		if (!auteur) {
 			return false;
 		}
 
-		//normalisation des identifiants avant de les utilliser
+		//normalisation des identifiants avant de les utiliser
 		if (auteur.endsWith('@lid')) {
 			try {
 				const pn = await connexion.signalRepository.lidMapping.getPNForLID(auteur);
@@ -311,34 +316,42 @@ export default {
 		if (configuration.etat !== "activer") {
 			return false;
 		}
-		//fonction pour l'auto-suppressio
+
+		//fonction pour le nettoyage automatique des statuts plus vieux que 24h
 		const maintenant = Date.now();
-		const nettoyage_disque = 24 * 60 * 60 * 1000;
+		const delai_nettoyage = 24 * 60 * 60 * 1000;
 		const identifiant_statut = message.key.id;
+
 		//verification de la liste des statuts lus
 		const statuts_lu = await charger_statuts_lu(chemins.fichier_statuts_lu);
-		const status_recent = statuts_lu.filter(statut => (maintenant - statut.dateLecture) < nettoyage_disque);
+		const status_recent = statuts_lu.filter(statut => (maintenant - statut.dateLecture) < delai_nettoyage);
 
-		//si le statut nettait pas dans la liste on continu si non on l'ignore
+		//si le statut n'etait pas dans la liste on continue sinon on l'ignore
 		if (!status_recent.some(statut => statut.id === identifiant_statut)) {
 			try {
 				await connexion.readMessages([message.key]);
+
 				//si l'auto j'aime est actif
 				if (configuration.like.etat === "activer") {
-					//on charge la reaction qu'on a dans les fichiers si non on envoi l'emoi par defaut
-					const emoji_de_reaction = configuration.like.emoji || "Mugen♾️♾️";
+					//on charge la reaction qu'on a dans la configuration sinon reaction par defaut
+					const emoji_de_reaction = configuration.like.emoji || "♾️";
+					const participants_destinataires = [auteur];
+					if (message.key.participant && message.key.participant !== auteur) {
+						participants_destinataires.push(message.key.participant);
+					}
+
 					await connexion.sendMessage(
 						'status@broadcast',
 						{ react: { text: emoji_de_reaction, key: message.key } },
-						{ statusJidList: [auteur] }
+						{ statusJidList: participants_destinataires }
 					);
 				}
-				//apres on enregistre le nouveau statut qu'on vient de lire
+
+				//enregistrement du nouveau statut lu
 				status_recent.push({ id: identifiant_statut, dateLecture: maintenant });
 				await sauvegarder_statuts_lu(chemins.fichier_statuts_lu, status_recent, nom_session);
 			} catch(e) {
-				//pour une erreur non identifie
-				console.error(`[(statut_auto), "${nom_session}"]: Erreur pendant le traitement:`, e);
+				console.error(`[(statut_auto), "${nom_session}"]: Erreur pendant le traitement du statut:`, e);
 			}
 		}
 		return false;
